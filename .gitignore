@@ -1,0 +1,11 @@
+Skillz-2018.csproj
+.vscode/launch.json
+.vscode/tasks.json
+obj/project.assets.json
+obj/Skillz-2018.csproj.nuget.cache
+obj/Skillz-2018.csproj.nuget.g.props
+obj/Skillz-2018.csproj.nuget.g.targets
+obj/Debug/netcoreapp2.0/Skillz-2018.AssemblyInfo.cs
+obj/Debug/netcoreapp2.0/Skillz-2018.AssemblyInfoInputs.cache
+obj/Debug/netcoreapp2.0/Skillz-2018.csproj.CoreCompileInputs.cache
+Program.cs
