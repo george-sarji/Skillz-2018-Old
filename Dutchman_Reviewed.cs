@@ -3,7 +3,7 @@ using System.Text;
 using System.Linq;
 using Pirates;
 
-namespace DutchmanBotReviewed
+namespace MyBot
 {
     class Bot3 : IPirateBot
     {
@@ -43,36 +43,30 @@ namespace DutchmanBotReviewed
         // ------------------------------------------
 
         private PirateGame game;
-        private const bool Debug = true;
+        private const bool Debug = false;
         private List<Pirate> myPirates;
 
-        private Dictionary<Pirate, Location> loggedLocations;
-        private Dictionary<int, Location> loggedIDLocations;
+        private List<Capsule> myCapsules;
+        
+        private List<Mothership> myMotherships;
+
+        private bool defense = false;
 
         // ------------------------------------------
         // Initiating functions
         // ------------------------------------------
         public void DoTurn(PirateGame game)
         {
-            if(game.Turn==1 || loggedLocations==null)
-            {
-                loggedLocations = new Dictionary<Pirate, Location>();
-                loggedIDLocations = new Dictionary<int, Location>();
-            }
-            
             Initialize(game);
-            PrintLogs();
-            PrintIDLogs();
-            IsThereABunker();
             MovePirates();
-            LogLocations();
-            LogLocationsID();
         }
 
         public void Initialize(PirateGame game)
         {
             this.game = game;
             this.myPirates = game.GetMyLivingPirates().ToList();  // This gets overridden in MovePirates().
+            this.myCapsules = game.GetMyCapsules().ToList();
+            this.myMotherships = game.GetMyMotherships().ToList();
         }
 
 
@@ -82,50 +76,94 @@ namespace DutchmanBotReviewed
 
         private void MovePirates()
         {
-            // This function will move our pirates.
-            // The closest pirate to the capsule will go towards it. The second pirate will cover the spawn, the rest will attack the enemy pirates.
-            // Addition 1: A number of pirates (NumPushesForCapsuleLoss) will camp the enemy mothership inbetween the capsule and the mothership
-            myPirates = myPirates.OrderBy(pirate => pirate.Distance(game.GetMyCapsule().InitialLocation)).ToList();
-            // if(myPirates.Any(pirate => pirate.HasCapsule()))
-            // {
-            //     // There is a pirate with a capsule. Make him go to the mothership
-            //     var capsuleHolder = myPirates.First(pirate => pirate.HasCapsule());
-            //     capsuleHolder.Sail(game.GetMyMothership());
-            //     Print("Pirate "+ capsuleHolder + " sails to "+ game.GetMyMothership());
-            //     myPirates.Remove(capsuleHolder);
-            // }
-            myPirates = ManageCapsulePirates();
-            if (myPirates.Any())
+            // Check if there is no mothership / capsule of ours to start playing defensive
+            if(game.GetMyMotherships().Count()==0 || game.GetMyCapsules().Count()==0)
             {
-                var currentPirate = myPirates.First();
-                currentPirate.Sail(GetCapsulePickupLocation());
-                Print("Pirate "+ currentPirate + " sails to capsule at " + GetCapsulePickupLocation());
-                myPirates.Remove(currentPirate);
-            }
-            myPirates = InterceptCapsule();
-            // Pirates will remain unused below, only if there are no enemies. So you can simplify things a bit:
-            if (game.GetEnemyLivingPirates().Any())
-            {
-                foreach (var pirate in myPirates)
-                {
-                    // Sort the enemies per their distance then their capsule possession.
-                    var enemies = game.GetEnemyLivingPirates()
-                        .OrderBy(enemy => enemy.Distance(pirate))
-                        .OrderByDescending(enemy => enemy.HasCapsule());
-
-                    if (!TryPush(pirate, enemies.First()))
-                    {
-                        // Sail to the pirate
-                        pirate.Sail(enemies.First());
-                        Print("Pirate "+ pirate + " sails to "+ enemies.First());
-                    }
-                }
+                defense = true;
+                HandleDefence();
             }
             else
             {
-                foreach (var left in myPirates)
+                // This function will move our pirates.
+                // The closest pirate to the capsule will go towards it. The second pirate will cover the spawn, the rest will attack the enemy pirates.
+                // Addition 1: A number of pirates (NumPushesForCapsuleLoss) will camp the enemy mothership inbetween the capsule and the mothership
+                myPirates = myPirates.OrderBy(pirate => pirate.Distance(myCapsules.OrderBy(capsule => capsule.Distance(pirate)).FirstOrDefault())).ToList();
+                // if(myPirates.Any(pirate => pirate.HasCapsule()))
+                // {
+                //     // There is a pirate with a capsule. Make him go to the mothership
+                //     var capsuleHolder = myPirates.First(pirate => pirate.HasCapsule());
+                //     capsuleHolder.Sail(game.GetMyMothership());
+                //     Print("Pirate "+ capsuleHolder + " sails to "+ game.GetMyMothership());
+                //     myPirates.Remove(capsuleHolder);
+                // }
+                myPirates = ManageCapsulePirates();
+                if (myPirates.Any())
                 {
-                    Print("All enemy pirates are dead. Unused pirate: " + left);
+                    var currentPirate = myPirates.First();
+                    currentPirate.Sail(GetCapsulePickupLocation());
+                    Print("Pirate "+ currentPirate + " sails to capsule at " + GetCapsulePickupLocation());
+                    myPirates.Remove(currentPirate);
+                }
+                myPirates = InterceptCapsule();
+                // Pirates will remain unused below, only if there are no enemies. So you can simplify things a bit:
+                if (game.GetEnemyLivingPirates().Any())
+                {
+                    foreach (var pirate in myPirates)
+                    {
+                        // Sort the enemies per their distance then their capsule possession.
+                        var enemies = game.GetEnemyLivingPirates()
+                            .OrderBy(enemy => enemy.Distance(pirate))
+                            .OrderByDescending(enemy => enemy.HasCapsule());
+
+                        if (!TryPush(pirate, enemies.First()))
+                        {
+                            // Sail to the pirate
+                            pirate.Sail(enemies.First());
+                            Print("Pirate "+ pirate + " sails to "+ enemies.First());
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var left in myPirates)
+                    {
+                        Print("All enemy pirates are dead. Unused pirate: " + left);
+                    }
+                }
+            }
+        }
+
+
+
+        private void HandleDefence()
+        {
+            if(defense)
+            {
+                // Go to the enemy mothership and keep trying to push.
+                foreach(var pirate in game.GetMyLivingPirates())
+                {
+                    // Get the enemy's closest capsule to the pirate.
+                    var closestCapsule = game.GetEnemyCapsules().OrderBy(capsule => capsule.Distance(pirate)).FirstOrDefault();
+                    if(closestCapsule!=null)
+                    {
+                        var closestCapsulePirate = game.GetEnemyLivingPirates().Where(enemy => enemy.HasCapsule() && enemy.Capsule.Equals(closestCapsule)).FirstOrDefault();
+                        var closestMothership = game.GetEnemyMotherships().OrderBy(mothership => mothership.Distance(pirate)).FirstOrDefault();
+                        if(closestMothership!=null )
+                        {
+                            if(closestCapsulePirate!=null)
+                            {
+                                if(!TryPush(pirate, closestCapsulePirate))
+                                {
+                                    pirate.Sail(closestMothership.Location.Towards(closestCapsulePirate, (int)(game.MothershipUnloadRange*0.5)));
+                                }
+                            }
+                            else
+                            {
+                                pirate.Sail(closestMothership.Location.Towards(closestCapsule, (int)(game.MothershipUnloadRange*0.5)));
+                            }
+                        }
+                    }
+                    
                 }
             }
         }
@@ -135,13 +173,17 @@ namespace DutchmanBotReviewed
         {
             // Use camelCase for variable names (enemies, myMothership, capsulePirates, capsuleHolder, closeEnemy, etc.)
             var Enemies = game.GetEnemyLivingPirates();
-            var MyMothership = game.GetMyMothership();
+            
 
             // Take the closest 2 pirates to the capsule.
-            var CapsulePirates = myPirates.OrderBy(pirate => pirate.Distance(game.GetMyCapsule())).Take(2);
+            var CapsulePirates = myPirates.OrderBy(pirate => pirate.Distance(myCapsules.OrderBy(capsule => capsule.Distance(pirate)).FirstOrDefault())).Take(2);
             // Seperate them to holder and pusher.
             var CapsuleHolder = CapsulePirates.Where(pirate => pirate.HasCapsule()).FirstOrDefault();
-
+            var MyMothership = myMotherships.FirstOrDefault();
+            if(CapsuleHolder!=null)
+            {
+                MyMothership = myMotherships.OrderBy(mothership => mothership.Distance(CapsuleHolder)).FirstOrDefault();
+            } 
             // Too many if's and else's in this function...
             // Seems like if (capsuleHolder != null), then you're always sending him to the Mothership,
             // so CapsuleHolder.Sail(MyMothership); can be outside some if/else combos.
@@ -187,7 +229,7 @@ namespace DutchmanBotReviewed
         private List<Pirate> InterceptCapsule()
         {
             // The destination is from the mothership towards the capsule
-            var destination = game.GetEnemyMothership().Location.Towards(game.GetEnemyCapsule().InitialLocation, game.PushRange * 2);
+            var destination = game.GetEnemyMotherships().First().Location.Towards(game.GetEnemyCapsules().First().InitialLocation, game.PushRange * 2);
             // Sort the pirates by their distance to the destination
             var pushers = myPirates.OrderBy(pirate => pirate.Distance(destination)).Take(game.NumPushesForCapsuleLoss);
             foreach (var pirate in pushers)
@@ -195,7 +237,7 @@ namespace DutchmanBotReviewed
                 // Check if the pirate is in the destination
                 if (pirate.Location.Equals(destination))
                 {
-                    var capsuleHolder = game.GetEnemyCapsule().Holder;
+                    var capsuleHolder = game.GetEnemyCapsules().First().Holder;
                     if (capsuleHolder != null)
                     {
                         // Keep trying to push
@@ -214,7 +256,7 @@ namespace DutchmanBotReviewed
                 {
                     // Sail towards the destination
                     pirate.Sail(destination);
-                    Print("Pirate "+ pirate + " sails to " + destination + " to intercept "+ game.GetEnemyCapsule());
+                    Print("Pirate "+ pirate + " sails to " + destination + " to intercept "+ game.GetEnemyCapsules().First());
                 }
             }
             return myPirates.Except(pushers).ToList();
@@ -227,14 +269,14 @@ namespace DutchmanBotReviewed
                 if (enemy.HasCapsule())
                 {
                     // Push the capsule to the initial location
-                    pirate.Push(enemy, game.GetEnemyCapsule().InitialLocation);
-                    Print("Pirate "+ pirate + " pushes "+ enemy + " (capsule holder) to "+ game.GetEnemyCapsule().InitialLocation);
+                    pirate.Push(enemy, GetClosestToBorder(enemy.Location));
+                    Print("Pirate "+ pirate + " pushes "+ enemy + " (capsule holder) to "+ GetClosestToBorder(enemy.Location));
                 }
                 else
                 {
                     // Push the enemy to the border
-                    pirate.Push(enemy, GetOutsideBorder(enemy.Location));
-                    Print("Pirate "+ pirate + " pushes "+ enemy + " towards "+ GetOutsideBorder(enemy.Location));
+                    pirate.Push(enemy, GetClosestToBorder(enemy.Location));
+                    Print("Pirate "+ pirate + " pushes "+ enemy + " towards "+ GetClosestToBorder(enemy.Location));
                 }
                 return true;
             }
@@ -253,7 +295,7 @@ namespace DutchmanBotReviewed
         }
 
         private Location GetCapsulePickupLocation() {
-            return game.GetMyCapsule().InitialLocation.Towards(game.GetMyMothership(), game.CapsulePickupRange-1);
+            return myCapsules.First().InitialLocation.Towards(myMotherships.First(), game.CapsulePickupRange-1);
         }
 
         private Location GetClosestToBorder(Location location)
@@ -281,89 +323,6 @@ namespace DutchmanBotReviewed
         {
             return new Location((a.GetLocation().Row + b.GetLocation().Row) / 2,
                                 (a.GetLocation().Col + b.GetLocation().Col) / 2);
-        }
-
-
-        private void PushInTheBestWay(Pirate p1, Pirate p2)
-        {
-            if(p1.CanPush(p2))
-            {
-                if(p2.HasCapsule())
-                {
-                    p1.Push(p2, game.GetEnemyMothership().Location.Towards(p2, game.PushRange*2));
-                }
-                else
-                {
-                    p1.Push(p2, GetOutsideBorder(p2.Location));
-                }
-            }
-        }
-
-        private void LogLocations()
-        {
-            foreach(var enemy in game.GetEnemyLivingPirates())
-            {
-                if(loggedLocations.ContainsKey(enemy))
-                {
-                    loggedLocations[enemy] = enemy.Location;
-                }
-                else
-                {
-                    loggedLocations.Add(enemy, enemy.Location);
-                }
-            }
-        }
-
-        private void LogLocationsID()
-        {
-            foreach(var enemy in game.GetEnemyLivingPirates())
-            {
-                if(loggedIDLocations.ContainsKey(enemy.UniqueId))
-                {
-                    loggedIDLocations[enemy.UniqueId] = enemy.Location;
-                }
-                else
-                {
-                    loggedIDLocations.Add(enemy.UniqueId, enemy.Location);
-                }
-            }
-        }
-
-        private void PrintIDLogs()
-        {
-            foreach(var map in loggedIDLocations)
-            {
-                Print("Log for ID "+ map.Key + " is @ "+ map.Value);
-                var enemyID = game.GetAllEnemyPirates().Where(pirate => pirate.UniqueId == map.Key).FirstOrDefault();
-                if(enemyID==null)
-                    Print("Enemy is null.");
-                else
-                    Print("Current location for pirate: "+ enemyID.Location);
-            }
-        }
-
-        private void PrintLogs()
-        {
-            foreach(var map in loggedLocations)
-            {
-                Print("Log for "+ map.Key.toString()+" is @ "+ map.Value+". Current location: "+map.Key.Location);
-            }
-        }
-
-        private bool IsThereABunker()
-        {
-            var bunker = false;
-            foreach(var map in loggedLocations)
-            {
-                var pirate = map.Key;
-                var location = map.Value;
-                if(pirate.InRange(game.GetMyMothership(), game.PushRange*2) && location.Equals(pirate.Location))
-                {
-                    Print("Possible bunker by "+ pirate.toString());
-                    bunker = true;
-                }
-            }
-            return bunker;
         }
 
         // Unused.
