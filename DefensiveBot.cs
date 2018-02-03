@@ -9,8 +9,6 @@ namespace Bot
     {
         public static void PerformBunker()
         {
-            var pirates = myPirates;
-
             // Get the amount of pirates needed for the bunker
             foreach(var mothership in enemyMotherships)
             {
@@ -37,8 +35,12 @@ namespace Bot
                                 // Send the pirates towards the unload range * 0.5
                                 var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*0.5));
                                 // Add to the destination.
-                                pirateDestinations.Add(pirate, destination);
-                                usedPirates.Add(pirate);
+                                if(!pirateDestinations.ContainsKey(pirate))
+                                {
+                                    pirateDestinations.Add(pirate, destination);
+                                    usedPirates.Add(pirate);
+                                }
+                                
                             }
                             
                         }
@@ -58,8 +60,12 @@ namespace Bot
                                 // Send the pirates towards the unload range * 0.5
                                 var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*0.5));
                                 // Add to the destination.
-                                pirateDestinations.Add(pirate, destination);
-                                usedPirates.Add(pirate);
+                                if(!pirateDestinations.ContainsKey(pirate))
+                                {
+                                    pirateDestinations.Add(pirate, destination);
+                                    usedPirates.Add(pirate);
+                                }
+                                
                             }
                         }
                     }
