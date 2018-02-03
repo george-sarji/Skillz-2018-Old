@@ -17,10 +17,7 @@ namespace Bot
                 
             }
         }
-        public void SaryAndRamiAreKings()
-        {
-            
-        }
+        
     }
 
 }
