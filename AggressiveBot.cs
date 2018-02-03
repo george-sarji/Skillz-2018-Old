@@ -74,7 +74,7 @@ namespace Bot
             }
         }
 
-        public static void PushAsteroids()
+        public static void PushAsteroidsNearby()
         {
             var usedPirates = new List<Pirate>();
             foreach(var pirate in myPirates)
