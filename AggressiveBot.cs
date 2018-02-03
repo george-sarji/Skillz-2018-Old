@@ -33,8 +33,13 @@ namespace Bot
                     if(bestMothership!=null)
                     {
                         // Sail towards the city.
-                        pirateDestinations.Add(capsuleHolder, bestMothership.Location);
+                        pirateDestinations.Add(capsuleHolder, SmartSailing.SmartSail(capsuleHolder,bestMothership));
                         usedPirates.Add(pirateSailer);
+                        if(pirateDestinations[capsuleHolder]==capsuleHolder.Location)
+                        {
+                            var closestPirate=usedPirates.OrderBy(pirate => pirate.Distance(capsuleHolder)).FirstOrDefault();
+                            pirateDestinations[closestPirate]=capsuleHolder.Location;
+                        }
                     }
                     myPirates = myPirates.Except(usedPirates).ToList();
                 }
