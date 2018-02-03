@@ -33,14 +33,18 @@ namespace Bot
                     if(bestMothership!=null)
                     {
                         // Sail towards the city.
-                        pirateDestinations.Add(capsuleHolder, SmartSailing.SmartSail(capsuleHolder,bestMothership));
+                        // pirateDestinations.Add(capsuleHolder, SmartSailing.SmartSail(capsuleHolder,bestMothership));
+                        if(pirateDestinations.ContainsKey(capsuleHolder))
+                            pirateDestinations[capsuleHolder] = bestMothership.Location;
+                        else
+                            pirateDestinations.Add(capsuleHolder, bestMothership.Location);
                         usedPirates.Add(pirateSailer);
-                        if(pirateDestinations[capsuleHolder]==capsuleHolder.Location)
-                        {
-                            var closestPirate=usedPirates.OrderBy(pirate => pirate.Distance(capsuleHolder)).FirstOrDefault();
-                            pirateDestinations[closestPirate]=capsuleHolder.Location;
-                            usedPirates.Add(closestPirate);
-                        }
+                        // if(pirateDestinations[capsuleHolder]==capsuleHolder.Location)
+                        // {
+                        //     var closestPirate=usedPirates.OrderBy(pirate => pirate.Distance(capsuleHolder)).FirstOrDefault();
+                        //     pirateDestinations[closestPirate]=capsuleHolder.Location;
+                        //     usedPirates.Add(closestPirate);
+                        // }
                     }
                     myPirates = myPirates.Except(usedPirates).ToList();
                 }
@@ -48,7 +52,12 @@ namespace Bot
                 {
                     // Send the closest pirate to capture the capsule.
                     var sailingPirate = myPirates.First();
-                    pirateDestinations.Add(sailingPirate, capsule.InitialLocation);
+                    if(pirateDestinations.ContainsKey(sailingPirate))
+                    {
+                        pirateDestinations[sailingPirate] = capsule.InitialLocation;
+                    }
+                    else
+                        pirateDestinations.Add(sailingPirate, capsule.InitialLocation);
                     myPirates = myPirates.Where(pirate => !pirate.Equals(sailingPirate)).ToList();
                 }
             }

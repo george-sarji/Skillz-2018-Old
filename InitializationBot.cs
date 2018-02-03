@@ -8,7 +8,7 @@ namespace Bot
     class InitializationBot : IPirateBot
     {
         public  static PirateGame game;
-        public const bool Debug = false;
+        public const bool Debug = true;
         protected static List<Pirate> myPirates;
 
         protected static List<Capsule> myCapsules;
@@ -57,12 +57,10 @@ namespace Bot
             {
                 var pirate = map.Key;
                 var destination = map.Value;
-                string message = "Pirate "+ pirate.ToString() + " sails towards "+ destination.ToString();
+                string message = "";
+                pirate.Sail(destination);
+                message = "Pirate "+ pirate.ToString() + " sails towards "+destination.ToString();
                 message.Print();
-                if(!pirate.HasCapsule())
-                    pirate.Sail(SmartSailing.SmartSail(pirate,destination));
-                else
-                    pirate.Sail(destination);
             }
         }
 
