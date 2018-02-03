@@ -30,12 +30,13 @@ namespace Bot
         {
             Initialize(game);
             AggressiveBot.CaptureCapsules();
+            DefensiveBot.PerformBunker();
             MovePiratesToDestinations();
         }
 
-        private void Initialize(PirateGame game)
+        private void Initialize(PirateGame pirateGame)
         {
-            game=game;
+            game=pirateGame;
             myPirates = game.GetMyLivingPirates().ToList();
             myCapsules = game.GetMyCapsules().ToList();
             myMotherships = game.GetMyMotherships().ToList();
@@ -62,12 +63,12 @@ namespace Bot
             }
         }
 
-        protected Location Closest(Location location, params Location[] locations)
+        protected static Location Closest(Location location, params Location[] locations)
         {
             return locations.OrderBy(l => l.Distance(location)).First();
         }
 
-        protected Location GetClosestToBorder(Location location)
+        protected static Location GetClosestToBorder(Location location)
         {
             var up = new Location(0, location.Col);
             var down = new Location(game.Rows - 1, location.Col);
