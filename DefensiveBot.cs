@@ -10,9 +10,12 @@ namespace Bot
         public static void PerformBunker()
         {
             var pirates = Bot5.myPirates;
-            
+
             // Get the amount of pirates needed for the bunker
-            
+            foreach(var mothership in Bot5.enemyMotherships)
+            {
+                
+            }
         }
     }
 
