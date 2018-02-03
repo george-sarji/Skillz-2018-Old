@@ -33,6 +33,7 @@ namespace Bot
             AggressiveBot.MoveCapsuleHolders();
             AggressiveBot.CaptureCapsules();
             DefensiveBot.PerformBunker();
+            AggressiveBot.PushAsteroids();
             MovePiratesToDestinations();
         }
 
