@@ -35,12 +35,6 @@ namespace Bot
                         // Sail towards the city.
                         pirateDestinations.Add(capsuleHolder, SmartSailing.SmartSail(capsuleHolder,bestMothership));
                         usedPirates.Add(pirateSailer);
-                        if(pirateDestinations[capsuleHolder]==capsuleHolder.Location)
-                        {
-                            var closestPirate=usedPirates.OrderBy(pirate => pirate.Distance(capsuleHolder)).FirstOrDefault();
-                            pirateDestinations[closestPirate]=capsuleHolder.Location;
-                            usedPirates.Add(closestPirate);
-                        }
                     }
                     myPirates = myPirates.Except(usedPirates).ToList();
                 }
@@ -53,7 +47,17 @@ namespace Bot
                 }
             }
         }
-
+    public static void GoHelpAllyWithCapsule()
+    {
+        foreach(Capsule capsule in game.GetMyCapsules())
+        {
+            if(pirateDestinations[capsule.Holder]==capsule.Holder.Location)
+            {
+                var pirate=myPirates.OrderBy(available => available.Distance(capsule.Holder)).FirstOrDefault();
+                pirateDestinations[pirate]=SmartSailing.SmartSail(pirate,capsule.Holder);
+            }
+        }
+    }
 
     }
 
