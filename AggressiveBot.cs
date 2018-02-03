@@ -9,44 +9,46 @@ namespace Bot
     {
         public static void CaptureCapsules()
         {
+            myCapsules = myCapsules.OrderBy(capsule => capsule.Value).ToList();
             // Go over the capsules
             foreach(var capsule in myCapsules)
             {
+                var usedPirates = new List<Pirate>();
                 // Sort the pirates per the distance
                 myPirates = myPirates.OrderBy(pirate => pirate.Distance(capsule.InitialLocation)).ToList();
                 // Check if the capsule was taken.
                 if(capsule.Holder!=null && myPirates.Any())
                 {
                     // Send the pirate to the capsule spawn
-                    var pirateSailer = myPirates.First();
-                    pirateSailer.Sail(capsule.InitialLocation);
-                    string message = "Pirate "+ pirateSailer.ToString() + " sails towards "+ capsule.InitialLocation;
-                    message.Print();
-                    myPirates = myPirates.Where(pirate => !pirate.Equals(pirateSailer)).ToList();
+                    var pirateSailer = myPirates.FirstOrDefault(pirate => !pirate.HasCapsule());
+                    if(pirateSailer!=null)
+                    {
+                        pirateDestinations.Add(pirateSailer, capsule.InitialLocation);
+                        usedPirates.Add(pirateSailer);
+                    }
                     // Get the pirate that has the capsule
                     var capsuleHolder = capsule.Holder;
                     // Send him to the closest city orderd by distance and value
-                    var bestMothership = myMotherships.OrderBy(mothership => mothership.Distance(capsuleHolder)).OrderBy(mothership => mothership.ValueMultiplier).FirstOrDefault();
+                    var bestMothership = myMotherships.OrderBy(mothership => mothership.Distance(capsuleHolder) / mothership.ValueMultiplier).FirstOrDefault();
                     if(bestMothership!=null)
                     {
                         // Sail towards the city.
-                        capsuleHolder.Sail(bestMothership);
-                        message = "Pirate " + capsuleHolder.ToString() + " sails towards " + bestMothership.ToString();
-                        message.Print(); 
-                         myPirates = myPirates.Where(pirate => !pirate.Equals(capsuleHolder)).ToList();
+                        pirateDestinations.Add(capsuleHolder, capsule.InitialLocation);
+                        usedPirates.Add(pirateSailer);
                     }
+                    myPirates = myPirates.Except(usedPirates).ToList();
                 }
                 else if(myPirates.Any())
                 {
                     // Send the closest pirate to capture the capsule.
                     var sailingPirate = myPirates.First();
-                    sailingPirate.Sail(capsule.InitialLocation);
-                    string message = "Pirate "+ sailingPirate.ToString() + " sails towards "+ capsule.InitialLocation;
-                    message.Print();
-                     myPirates = myPirates.Where(pirate => !pirate.Equals(sailingPirate)).ToList();
+                    pirateDestinations.Add(sailingPirate, capsule.InitialLocation);
+                    myPirates = myPirates.Where(pirate => !pirate.Equals(sailingPirate)).ToList();
                 }
             }
         }
+
+
     }
 
 }

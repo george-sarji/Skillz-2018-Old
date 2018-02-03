@@ -22,11 +22,17 @@ namespace Bot
 
         protected static Dictionary<Asteroid, bool> asteroids;
 
+        protected static Dictionary<Pirate, Location> pirateDestinations;
+
         protected static bool defence = false;
 
         public void DoTurn(PirateGame game)
         {
             Initialize(game);
+            AggressiveBot.CaptureCapsules();
+
+
+            MovePiratesToDestinations();
         }
 
         private void Initialize(PirateGame game)
@@ -38,10 +44,23 @@ namespace Bot
             enemyMotherships = game.GetEnemyMotherships().ToList();
             enemyPirates = game.GetEnemyLivingPirates().ToList();
             enemyCapsules = game.GetEnemyCapsules().ToList();
+            pirateDestinations = new Dictionary<Pirate, Location>();
             asteroids = new Dictionary<Asteroid, bool>();
             foreach(var asteroid in game.GetLivingAsteroids())
             {
                 asteroids.Add(asteroid, false);
+            }
+        }
+
+        private void MovePiratesToDestinations()
+        {
+            foreach(var map in pirateDestinations)
+            {
+                var pirate = map.Key;
+                var destination = map.Value;
+                string message = "Pirate "+ pirate.ToString() + " sails towards "+ destination.ToString();
+                message.Print();
+                pirate.Sail(destination);
             }
         }
     }
