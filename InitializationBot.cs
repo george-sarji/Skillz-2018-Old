@@ -59,7 +59,7 @@ namespace Bot
                 var destination = map.Value;
                 string message = "Pirate "+ pirate.ToString() + " sails towards "+ destination.ToString();
                 message.Print();
-                SmartSailing.SmartSail(pirate,destination);
+                pirate.Sail(SmartSailing.SmartSail(pirate,destination));
             }
         }
 
