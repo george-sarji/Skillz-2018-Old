@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using Pirates;
 
-namespace MyBot
+namespace Bot
 {
     public static class GameExtension
     {
@@ -39,6 +39,12 @@ namespace MyBot
         public static double Power(this int num, int power)
         {
             return System.Math.Pow(num, power);
+        }
+
+        public static void Print(this string s)
+        {
+            if(InitializationBot.Debug)
+                InitializationBot.game.Debug(s);
         }
     }
 

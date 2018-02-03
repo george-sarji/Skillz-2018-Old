@@ -7,8 +7,8 @@ namespace Bot
 {
     class InitializationBot : IPirateBot
     {
-        public  PirateGame game;
-        protected const bool Debug = false;
+        public  static PirateGame game;
+        public const bool Debug = false;
         protected static List<Pirate> myPirates;
 
         protected static List<Capsule> myCapsules;
