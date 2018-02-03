@@ -5,14 +5,14 @@ using Pirates;
 
 namespace Bot 
 {
-    class DefensiveBot
+    class DefensiveBot : InitializationBot
     {
-        public static void PerformBunker()
+        public void PerformBunker()
         {
-            var pirates = Bot5.myPirates;
+            var pirates = myPirates;
 
             // Get the amount of pirates needed for the bunker
-            foreach(var mothership in Bot5.enemyMotherships)
+            foreach(var mothership in enemyMotherships)
             {
                 
             }
