@@ -17,7 +17,7 @@ namespace Bot
                 
             }
         }
-        public void mahmoudisaking()
+        public void SaryAndRamiAreKings()
         {
             
         }
