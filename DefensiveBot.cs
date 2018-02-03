@@ -7,7 +7,13 @@ namespace Bot
 {
     class DefensiveBot
     {
-        
+        public static void PerformBunker()
+        {
+            var pirates = Bot5.myPirates;
+            
+            // Get the amount of pirates needed for the bunker
+            
+        }
     }
 
 }
