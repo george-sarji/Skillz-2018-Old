@@ -39,6 +39,7 @@ namespace Bot
                         {
                             var closestPirate=usedPirates.OrderBy(pirate => pirate.Distance(capsuleHolder)).FirstOrDefault();
                             pirateDestinations[closestPirate]=capsuleHolder.Location;
+                            usedPirates.Add(closestPirate);
                         }
                     }
                     myPirates = myPirates.Except(usedPirates).ToList();
