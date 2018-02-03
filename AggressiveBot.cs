@@ -33,7 +33,7 @@ namespace Bot
                     if(bestMothership!=null)
                     {
                         // Sail towards the city.
-                        pirateDestinations.Add(capsuleHolder, capsule.InitialLocation);
+                        pirateDestinations.Add(capsuleHolder, bestMothership.Location);
                         usedPirates.Add(pirateSailer);
                     }
                     myPirates = myPirates.Except(usedPirates).ToList();
