@@ -30,8 +30,6 @@ namespace Bot
         {
             Initialize(game);
             AggressiveBot.CaptureCapsules();
-
-
             MovePiratesToDestinations();
         }
 
