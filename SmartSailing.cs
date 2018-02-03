@@ -18,7 +18,7 @@ namespace Bot
                     continue;
                 if (current.Distance(destination) < pirate.Distance(destination) && current.Distance(destination) >= pirate.Distance(destination) - pirate.MaxSpeed && !IsInRange(current) && !IsHittingAsteroid(current))
                 {
-                    if ((best != destination && best.Distance(destination) > current.Distance(destination)) || (best == destination))
+                    if ((best != pirate.Location && best.Distance(destination) > current.Distance(destination)) || (best == pirate.Location))
                         best = current;
                 }
             }
