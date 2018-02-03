@@ -63,5 +63,20 @@ namespace Bot
                 pirate.Sail(destination);
             }
         }
+
+        protected Location Closest(Location location, params Location[] locations)
+        {
+            return locations.OrderBy(l => l.Distance(location)).First();
+        }
+
+        protected Location GetClosestToBorder(Location location)
+        {
+            var up = new Location(0, location.Col);
+            var down = new Location(game.Rows - 1, location.Col);
+            var left = new Location(location.Row, 0);
+            var right = new Location(location.Row, game.Cols - 1);
+
+            return Closest(location, up, down, left, right);
+        }
     }
 }
