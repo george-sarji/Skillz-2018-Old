@@ -29,6 +29,8 @@ namespace Bot
         public void DoTurn(PirateGame game)
         {
             Initialize(game);
+            AggressiveBot.PushAsteroids();
+            AggressiveBot.MoveCapsuleHolders();
             AggressiveBot.CaptureCapsules();
             DefensiveBot.PerformBunker();
             MovePiratesToDestinations();

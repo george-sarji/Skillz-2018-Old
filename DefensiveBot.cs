@@ -34,8 +34,13 @@ namespace Bot
                             {
                                 // Send the pirates towards the unload range * 0.5
                                 var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*0.5));
+                                if(closestCapsule.Holder!=null && TryPush.TryPushEnemyCapsule(pirate, closestCapsule.Holder))
+                                {
+                                    usedPirates.Add(pirate);
+                                    continue;
+                                }
                                 // Add to the destination.
-                                if(!pirateDestinations.ContainsKey(pirate))
+                                else if(!pirateDestinations.ContainsKey(pirate))
                                 {
                                     pirateDestinations.Add(pirate, destination);
                                     usedPirates.Add(pirate);
@@ -59,8 +64,13 @@ namespace Bot
                             {
                                 // Send the pirates towards the unload range * 0.5
                                 var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*0.5));
+                                if(closestCapsule.Holder!=null && TryPush.TryPushEnemyCapsule(pirate, closestCapsule.Holder))
+                                {
+                                    usedPirates.Add(pirate);
+                                    continue;
+                                }
                                 // Add to the destination.
-                                if(!pirateDestinations.ContainsKey(pirate))
+                                else if(!pirateDestinations.ContainsKey(pirate))
                                 {
                                     pirateDestinations.Add(pirate, destination);
                                     usedPirates.Add(pirate);
@@ -73,5 +83,6 @@ namespace Bot
                 myPirates = myPirates.Except(usedPirates).ToList();
             }
         } 
+        
     }
 }
