@@ -7,6 +7,5 @@ namespace Bot
 {
     class SmartSailing : InitializationBot
     {
-        
     }
 }
