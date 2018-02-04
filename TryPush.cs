@@ -47,8 +47,12 @@ namespace Bot
                 {
                     // Push the pirate towards the border!
                     pirate.Push(capsuleHolder,GetClosestToBorder(capsuleHolder.Location));
+<<<<<<< HEAD
                     ("Pirate "+ pirate.ToString() + " pushes Enemy Capsule Holder "+ enemy.ToString() + " towards border").Print();
                     usedPirates.Add(pirate);
+=======
+                    
+>>>>>>> fa151a1974eaeb532ee2ceffdd4ecf1422b37415
                     return true;
                 }
             }
