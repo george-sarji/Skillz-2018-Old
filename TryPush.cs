@@ -47,7 +47,7 @@ namespace Bot
                 {
                     // Push the pirate towards the border!
                     pirate.Push(capsuleHolder,GetClosestToBorder(capsuleHolder.Location));
-
+                    
                     return true;
                 }
             }
