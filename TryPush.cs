@@ -47,28 +47,106 @@ namespace Bot
                 {
                     // Push the pirate towards the border!
                     pirate.Push(capsuleHolder,GetClosestToBorder(capsuleHolder.Location));
-
+                    ("Pirate "+ pirate.ToString() + " pushes Enemy Capsule Holder "+ enemy.ToString() + " towards border").Print();
+                    usedPirates.Add(pirate);
                     return true;
                 }
             }
             return false;
         }
-
+        public static bool TryPushEnemyPirate(Pirate pirate, Pirate enemy)
+        {
+            var numOfPushers = NumOfPushesAvailable(enemy);
+            var pushesToBorder = (enemy.Distance(GetClosestToBorder(enemy.Location))-pirate.MaxSpeed)/pirate.PushRange;
+            //First, it tries to push the enemy out of the border
+            if(numOfPushers > pushesToBorder)
+            {
+                pirate.Push(enemy, GetClosestToBorder(enemy.Location));
+                ("Pirate "+ pirate.ToString() + " pushes Enemy Pirate "+ enemy.ToString() + " towards border").Print();
+                usedPirates.Add(pirate);
+                return true;
+            }
+            //Second, it tries to push the enemy away from his best capsule if a capsule is alive
+            if(game.GetEnemyCapsules().Where(capsule => capsule.IsAlive()).Any())
+            {
+                var bestCapsule = game.GetEnemyCapsules().Where(capsule => capsule.IsAlive()).OrderBy(capsule => capsule.Distance(enemy)).FirstOrDefault();
+                if(bestMothership != null)
+                {
+                    var negativeDistance = pirate.PushRange * -1;
+                    pirate.Push(enemy, enemy.Location.Towards(bestMothership, negativeDistance));
+                    ("Pirate "+ pirate.ToString() + " pushes Enemy Pirate "+ enemy.ToString() + " away from mothership").Print();
+                    usedPirates.Add(pirate);
+                    return true;
+                }
+            }
+            //Third, it tries to push the enemy to an asteroid if it's in range of one
+            var closestAsteroid = game.GetLivingAsteroids().Where(asteroid => asteroid.Distance(enemy) <= (pirate.PushRange - enemy.MaxSpeed)).FirstOrDefault();
+            if(closestAsteroid != null)
+            {
+                pirate.Push(enemy, closestAsteroid);
+                ("Pirate "+ pirate.ToString() + " pushes Enemy Pirate "+ enemy.ToString() + " towards closest asteroid").Print();
+                usedPirates.Add(pirate);
+                return true;
+            }
+            //Fourth, it checks if the enemy is heading to a capsule of ours, if so it pushes it in the other direction
+            //Fifth, it ignores it
+            return false;
+        }
         public static bool TryPushAsteroid(Pirate pirate, Asteroid asteroid)
         {
-            if(pirate.CanPush(asteroid))
+            //Need to decide whether to send to closest enemy capsule if all else fails, or not
+            var usedPirates = new List<Pirate>();
+            //First priority is defending our mothership from a bunker by the enemy
+            foreach(mothership is myMotherships)
             {
-                var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).FirstOrDefault();
-                if(closestEnemy!=null)
+                if(IsBunkered(mothership))
                 {
-                    // Push the asteroid towards it.
-                    pirate.Push(asteroid, closestEnemy);
-                    ("Pirate "+ pirate.ToString() + " pushes asteroid "+ asteroid.ToString() + " towards "+ closestEnemy.ToString()).Print();
+                    pirate.Push(asteroid,mothership);
+                    usedPirates.Add(pirate);
+                    ("Pirate "+ pirate.ToString() + " pushes Asteroid "+ asteroid.ToString() + " towards "+ mothership.ToString()).Print();
+                    return true;
+                }
+            }
+            //Second priority is killing the enemy capsule holder, we need an interception method for varying speed objects.
+            //Third priority is sending it towards the enemy mothership, if we are not surrounding it.
+            foreach(mothership in enemyMotherships)
+            {
+                if(!IsBunkeredEnemy(mothership))
+                {
+                    pirate.Push(asteroid, mothership);
+                    usedPirates.Add(pirate);
+                    ("Pirate "+ pirate.ToString() + " pushes Asteroid "+ asteroid.ToString() + " towards "+ mothership.ToString()).Print();
                     return true;
                 }
             }
             return false;
+        } 
+        public static bool IsBunkered(Mothership mothership)
+        {
+            //Checks if a mothership is surrounded by enemies
+            return game.GetEnemyLivingPirates().Where(pirate => pirate.Distance(mothership) <= pirate.PushRange).Count() >= game.NumPushesForCapsuleLoss();
         }
+        public static bool IsBunkeredEnemy(Mothership mothership)
+        {
+            //Checks if we are surrounding the enemy mothership with more than 1 pirate
+            return game.GetMyLivingPirates().Where(pirate => pirate.Distance(mothership) <= pirate.PushRange).Count() >= 2;
+        }
+
+        // public static bool TryPushAsteroid(Pirate pirate, Asteroid asteroid)
+        // {
+        //     if(pirate.CanPush(asteroid))
+        //     {
+        //         var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).FirstOrDefault();
+        //         if(closestEnemy!=null)
+        //         {
+        //             // Push the asteroid towards it.
+        //             pirate.Push(asteroid, closestEnemy);
+        //             ("Pirate "+ pirate.ToString() + " pushes asteroid "+ asteroid.ToString() + " towards "+ closestEnemy.ToString()).Print();
+        //             return true;
+        //         }
+        //     }
+        //     return false;
+        // }
         
         public static bool TryPushMyCapsuleHolder(Pirate pirate, Pirate capsuleHolder)
         {
