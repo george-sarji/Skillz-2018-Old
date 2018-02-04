@@ -71,6 +71,7 @@ namespace Bot
 
         public static bool IsSafeToPushAsteroid(Location pirateLoc,Location asteroidLoc,Location destination, Asteroid asteroid)
         {
+            //checks if the asteroid is going to kill the pirate pushing it.
             int Xa = pirateLoc.Col, Ya = pirateLoc.Row,
             Xb = asteroidLoc.Col, Yb = asteroidLoc.Row,
             Xc = destination.Col, Yc = destination.Row;
