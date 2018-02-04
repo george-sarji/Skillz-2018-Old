@@ -31,10 +31,12 @@ namespace Bot
             Initialize(game);
             AggressiveBot.PushAsteroidsNearby();
             AggressiveBot.MoveCapsuleHolders();
+            AggressiveBot.GoHelpAllyWithCapsule();
             AggressiveBot.CaptureCapsules();
             DefensiveBot.PerformBunker();
             AggressiveBot.PushAsteroids();
             MovePiratesToDestinations();
+            PrintDictionary(pirateDestinations);
         }
 
         private void Initialize(PirateGame pirateGame)
@@ -53,7 +55,15 @@ namespace Bot
                 asteroids.Add(asteroid, false);
             }
         }
-
+        private void PrintDictionary(Dictionary<Pirate,Location> dictionary)
+        {
+            string str="{";
+            foreach(var key in dictionary.Keys)
+            {
+                str+=key.Id+":"+"("+dictionary[key].Col+","+dictionary[key].Row+")"+",";
+            }
+            game.Debug(str+"}");
+        }
         private void MovePiratesToDestinations()
         {
             foreach(var map in pirateDestinations)
