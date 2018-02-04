@@ -68,5 +68,18 @@ namespace Bot
             }
             return false;
         }
+
+        public static bool IsSafeToPushAsteroid(Location pirateLoc,Location asteroidLoc,Location destination, Asteroid asteroid)
+        {
+            int Xa = pirateLoc.Col, Ya = pirateLoc.Row,
+            Xb = asteroidLoc.Col, Yb = asteroidLoc.Row,
+            Xc = destination.Col, Yc = destination.Row;
+            double numerator = (Xa + ((Xc-Xb)*Ya/(Yb-Yc)) + (Yc*(Xb-Xc)/(Yb-Yc)) - Xc);
+            double denominator = (((Xc-Xb)/(Yb-Yc)/1.0).Power(2) + 1).Sqrt();
+            int distance = (int)(numerator/denominator);
+            if(asteroid.Size<distance)
+                return true;
+            return false;
+        }
     }
 }
