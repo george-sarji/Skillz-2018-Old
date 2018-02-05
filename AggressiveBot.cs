@@ -64,12 +64,13 @@ namespace Bot
         }
         public static void GoHelpAllyWithCapsule()
         {
-            foreach(Capsule capsule in game.GetMyCapsules())
+            foreach(Pirate pirate in game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()))
             {
-                if(pirateDestinations[capsule.Holder]==capsule.Holder.Location)
+                if(pirateDestinations.ContainsKey(pirate)&&pirateDestinations[pirate]==pirate.Location)
                 {
-                    var pirate=myPirates.OrderBy(available => available.Distance(capsule.Holder)).FirstOrDefault();
-                    pirateDestinations[pirate]=SmartSailing.SmartSail(pirate,capsule.Holder);
+                    var Closesetpirate=myPirates.OrderBy(available => available.Distance(pirate)).FirstOrDefault();
+                    pirateDestinations[pirate]=SmartSailing.SmartSail(Closesetpirate,pirate);
+                    myPirates.Remove(pirate);
                 }
             }
         }
@@ -104,10 +105,11 @@ namespace Bot
                 {
                     // Sail towards the city.
                     // pirateDestinations.Add(capsuleHolder, SmartSailing.SmartSail(capsuleHolder,bestMothership));
+                    game.Debug("Reached");
                     if(pirateDestinations.ContainsKey(capsuleHolder))
-                        pirateDestinations[capsuleHolder] = bestMothership.Location;
+                        pirateDestinations[capsuleHolder] = SmartSailing.SmartSail(capsuleHolder,bestMothership.Location);
                     else
-                        pirateDestinations.Add(capsuleHolder, bestMothership.Location);
+                        pirateDestinations.Add(capsuleHolder, SmartSailing.SmartSail(capsuleHolder,bestMothership.Location));
                     usedPirates.Add(capsuleHolder);
                     // if(pirateDestinations[capsuleHolder]==capsuleHolder.Location)
                     // {
@@ -141,8 +143,41 @@ namespace Bot
                             myPirates = myPirates.Where(p => !p.Equals(pirate)).ToList();
                         }
                     }
+                    else
+                    {
+                        myPirates.Remove(pirate);
+                    }
                 }
             }
+        }
+        public static void AttackEnemies()
+        {
+            var usedPirates = new List<Pirate>();
+            foreach(var pirate in myPirates)
+            {
+                var orderedEnemies = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).OrderByDescending(enemy => enemy.HasCapsule());
+                if(orderedEnemies.Any(enemy => enemy.Distance(pirate)/enemy.MaxSpeed>pirate.PushReloadTurns))
+                {
+                    var toAttack = orderedEnemies.Where(enemy => enemy.Distance(pirate)/enemy.MaxSpeed>pirate.PushReloadTurns).First();
+                    if(!TryPush.TryPushEnemy(pirate, toAttack))
+                    {
+                        // Sail towards that pirate.
+                        pirateDestinations.Add(pirate, toAttack.Location);
+                        usedPirates.Add(pirate);
+                    }
+                }
+                else if(orderedEnemies.Any())
+                {
+                    // Attack first pirate.
+                    if(!TryPush.TryPushEnemy(pirate, orderedEnemies.First()))
+                    {
+                        // Sail towards that pirate.
+                        pirateDestinations.Add(pirate, orderedEnemies.FirstOrDefault().Location);
+                        usedPirates.Add(pirate);
+                    }
+                }
+            }
+            myPirates = myPirates.Except(usedPirates).ToList();
         }
     }
 }
