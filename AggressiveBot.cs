@@ -140,56 +140,93 @@ namespace Bot
                 var bestMothership = myMotherships.OrderBy(mothership => mothership.Distance(firstHolder)/mothership.ValueMultiplier).FirstOrDefault();
                 if(bestMothership!=null)
                 {
-                    // Get the intersection point
-                    var intersectionPoint = GameExtension.Interception(firstHolder.Location, bestMothership.Location, secondHolder.Location);
-                    var secondIntersection = GameExtension.Interception(secondHolder.Location, bestMothership.Location, firstHolder.Location);
-                    Location bestIntersection = null;
-                    if(intersectionPoint!=null && secondIntersection!=null)
+                    bool first=false, second=false;
+                    if(firstHolder.InRange(bestMothership, bestMothership.UnloadRange*3) && GameExtension.NumberOfAvailableEnemyPushers(firstHolder)<firstHolder.NumPushesForCapsuleLoss)
                     {
-                        // Get the closest.
-                        if(bestMothership.Distance(intersectionPoint)>bestMothership.Distance(secondIntersection))
-                        {
-                            bestIntersection = secondIntersection;
-                        }
+                        if(pirateDestinations.ContainsKey(firstHolder))
+                            pirateDestinations[firstHolder] = bestMothership.Location;
                         else
+                            pirateDestinations.Add(firstHolder, bestMothership.Location);
+                        first=true;
+
+                    }
+                    if(secondHolder.InRange(bestMothership, bestMothership.UnloadRange*3) && GameExtension.NumberOfAvailableEnemyPushers(secondHolder)<firstHolder.NumPushesForCapsuleLoss)
+                    {
+                        if(pirateDestinations.ContainsKey(secondHolder))
+                            pirateDestinations[secondHolder] = bestMothership.Location;
+                        else
+                            pirateDestinations.Add(secondHolder, bestMothership.Location);
+                        second=true;
+
+                    }
+                    if(!first && !second)
+                    {
+                        // Get the intersection point
+                        var intersectionPoint = GameExtension.Interception(firstHolder.Location, bestMothership.Location, secondHolder.Location);
+                        var secondIntersection = GameExtension.Interception(secondHolder.Location, bestMothership.Location, firstHolder.Location);
+                        Location bestIntersection = null;
+                        if(intersectionPoint!=null && secondIntersection!=null)
+                        {
+                            // Get the closest.
+                            if(bestMothership.Distance(intersectionPoint)>bestMothership.Distance(secondIntersection))
+                            {
+                                bestIntersection = secondIntersection;
+                            }
+                            else
+                                bestIntersection = intersectionPoint;
+                        }
+                        else if(intersectionPoint!=null)
                             bestIntersection = intersectionPoint;
-                    }
-                    else if(intersectionPoint!=null)
-                        bestIntersection = intersectionPoint;
-                    else
-                        bestIntersection = secondIntersection;
-                    if(bestIntersection!=null)
-                    {
-                        // Send the pirates to the intersection if they're not in each other's push range.
-                        if(!firstHolder.InPushRange(secondHolder))
-                        {
-                            if(pirateDestinations.ContainsKey(firstHolder))
-                                pirateDestinations[firstHolder] = bestIntersection;
-                            else
-                                pirateDestinations.Add(firstHolder, bestIntersection);
-                            if(pirateDestinations.ContainsKey(secondHolder))
-                                pirateDestinations[secondHolder] = bestIntersection;
-                            else
-                                pirateDestinations.Add(secondHolder, bestIntersection);
-                        }
                         else
+                            bestIntersection = secondIntersection;
+                        if(bestIntersection!=null)
                         {
-                            // Send them towards the mothership
-                            if(pirateDestinations.ContainsKey(firstHolder))
-                                pirateDestinations[firstHolder] = bestMothership.Location;
+                            // Send the pirates to the intersection if they're not in each other's push range.
+                            if(!firstHolder.InPushRange(secondHolder))
+                            {
+                                if(pirateDestinations.ContainsKey(firstHolder))
+                                    pirateDestinations[firstHolder] = bestIntersection;
+                                else
+                                    pirateDestinations.Add(firstHolder, bestIntersection);
+                                if(pirateDestinations.ContainsKey(secondHolder))
+                                    pirateDestinations[secondHolder] = bestIntersection;
+                                else
+                                    pirateDestinations.Add(secondHolder, bestIntersection);
+                            }
                             else
-                                pirateDestinations.Add(firstHolder, bestMothership.Location);
-                            if(pirateDestinations.ContainsKey(secondHolder))
-                                pirateDestinations[secondHolder] = bestMothership.Location;
-                            else
-                                pirateDestinations.Add(secondHolder, bestMothership.Location);
+                            {
+                                // Send them towards the mothership
+                                if(pirateDestinations.ContainsKey(firstHolder))
+                                
+                                    pirateDestinations[firstHolder] = SmartSailing.SmartSail(firstHolder, bestMothership);
+                                else
+                                    pirateDestinations.Add(firstHolder, SmartSailing.SmartSail(firstHolder, bestMothership));
+                                if(pirateDestinations.ContainsKey(secondHolder))
+                                    pirateDestinations[secondHolder] = SmartSailing.SmartSail(secondHolder, bestMothership);
+                                else
+                                    pirateDestinations.Add(secondHolder, SmartSailing.SmartSail(secondHolder, bestMothership));
+                            }
                         }
                     }
+                    else if(second)
+                    {
+                        if(pirateDestinations.ContainsKey(secondHolder))
+                            pirateDestinations[secondHolder] = bestMothership.Location;
+                        else
+                            pirateDestinations.Add(secondHolder, bestMothership.Location);
+                    }
+                    else if(first)
+                    {
+                        if(pirateDestinations.ContainsKey(firstHolder))
+                            pirateDestinations[firstHolder] = bestMothership.Location;
+                        else
+                            pirateDestinations.Add(firstHolder, bestMothership.Location);
+                    }
+                    capsuleHolders.Remove(firstHolder);
+                    capsuleHolders.Remove(secondHolder);
+                    myPirates.Remove(firstHolder);
+                    myPirates.Remove(secondHolder);
                 }
-                capsuleHolders.Remove(firstHolder);
-                capsuleHolders.Remove(secondHolder);
-                myPirates.Remove(firstHolder);
-                myPirates.Remove(secondHolder);
             }
             if(capsuleHolders.Count()==1)
             {
