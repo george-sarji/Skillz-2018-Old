@@ -21,7 +21,7 @@ namespace Bot
             return num;
         }
 
-        public static double Sqrt(this int num)
+        public static double Sqrt(this double num)
         {
             return System.Math.Sqrt(num);
         }
@@ -36,9 +36,9 @@ namespace Bot
             return numbers.OrderBy(num => num).First();
         }
 
-        public static double Power(this int num, int power)
+        public static int Power(this int num, int power)
         {
-            return System.Math.Pow(num, power);
+            return (int)System.Math.Pow(num, power);
         }
 
         public static void Print(this string s)
