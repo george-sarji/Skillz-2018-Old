@@ -42,11 +42,8 @@ namespace Bot
             AggressiveBot.PushAsteroids();
             AggressiveBot.AttackEnemies();
             MovePiratesToDestinations();
-<<<<<<< HEAD
             Priorities.GenerateGeneralPriority();
-=======
             PrintDictionary(pirateDestinations);
->>>>>>> 6a99af28a90b3b4f859cd0ad303e7013df567455
         }
 
         private void Initialize(PirateGame pirateGame)
