@@ -69,6 +69,8 @@ namespace Bot
                 if(pirateDestinations.ContainsKey(pirate)&&pirateDestinations[pirate]==pirate.Location)
                 {
                     var Closesetpirate=myPirates.OrderBy(available => available.Distance(pirate)).FirstOrDefault();
+                    if(Closesetpirate==null)
+                        break;
                     pirateDestinations[pirate]=SmartSailing.SmartSail(Closesetpirate,pirate);
                     myPirates.Remove(pirate);
                 }

@@ -11,15 +11,15 @@ namespace Bot
         // ----------------------------------------
         // Bot stats:
         // ----------------------------------------
-        // GeorgePushSenior - Win 8-2 - 97 turns
-        // LargeRocks - Win 8-3 - 177 turns
+        // GeorgePushSenior - Win 8-0 - 96 turns
+        // LargeRocks - Win 8-4 - 236 turns
         // OneManArmy - Win 1-0 - 400 turns
-        // Meteorite - Win 8-2  - 151 turns
-        // Steroids - Win 8-2 - 212 turns
-        // Lepton - Win 8-5 - 626 turns
-        // Voyager1 - Win 8-4 - 182 turns
+        // Meteorite - Win 8-2  - 163 turns
+        // Steroids - Win 8-1 - 274 turns
+        // Lepton - Win 8-4 - 617 turns
+        // Voyager1 - Win 8-1 - 221 turns
         // YouShallNotPass - Loss 7-1 - 400 turns - We dont avoid the asteroids
-        // Pullpullon - Loss 8-0 - 212 turns - We dont have a pirate help our capsule get pushed into our mothership upon bunker.
+        // Pullpullon - Win 8-7 - 325 turns - We dont have a pirate help our capsule get pushed into our mothership upon bunker.
         // ---------------------------------------- 
         public  static PirateGame game;
         public const bool Debug = true;
