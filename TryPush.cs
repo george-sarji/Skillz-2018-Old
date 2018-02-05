@@ -173,7 +173,7 @@ namespace Bot
                 var PiratesWhoCanPush = myPiratesWithCapsule
                 .Where(pirate => pirate.CanPush(pirateWithCapsule)
                 && pirateWithCapsule != pirate
-                && pirate.Distance(heading) < pirate.PushDistance).ToList();
+                && pirate.Distance(heading)-((Mothership)heading).UnloadRange < pirate.PushDistance).ToList();
                 if (PiratesWhoCanPush.Count == 0)
                 {
                     continue;
