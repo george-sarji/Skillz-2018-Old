@@ -41,6 +41,11 @@ namespace Bot
             return (int)System.Math.Pow(num, power);
         }
 
+        public static double Power(this double num, int power)
+        {
+            return System.Math.Pow(num, power);
+        }
+
         public static void Print(this string s)
         {
             if(InitializationBot.Debug)
