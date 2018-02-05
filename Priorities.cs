@@ -23,7 +23,7 @@ namespace Bot
 
         public static int StepsScaled(int steps)
         {
-            double scale = (double)(game.Cols.Power(2)+game.Rows.Power(2)).Sqrt();
+            double scale = ((double)(game.Cols.Power(2)+game.Rows.Power(2))).Sqrt();
             return (int)(steps*scale*9.0);
         }
 
