@@ -24,7 +24,7 @@ namespace Bot
         public  static PirateGame game;
         public const bool Debug = true;
         protected static List<Pirate> myPirates;
-
+        protected static List<Pirate> myPiratesWithCapsule;
         protected static List<Capsule> myCapsules;
         
         protected static List<Mothership> myMotherships;
@@ -56,6 +56,7 @@ namespace Bot
             AggressiveBot.PushAsteroids();
             AggressiveBot.AttackEnemies();
             MovePiratesToDestinations();
+            myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
             Priorities.GenerateGeneralPriority();
             PrintDictionary(pirateDestinations);
         }

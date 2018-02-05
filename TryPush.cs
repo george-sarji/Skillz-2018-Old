@@ -87,5 +87,82 @@ namespace Bot
         {
             return game.GetEnemyLivingPirates().Where(p => p.InRange(pirate, game.PushRange*2)).Count();
         }
+
+        public void TryPushMyCapsule()
+        { // Get all my pirates with capsule
+            foreach (Pirate myPirateWithCapsule in myPiratesWithCapsule)
+            {
+                PushAlliesToEnemy(myPirateWithCapsule);
+                int count = game.GetMyLivingPirates().Where(pirate => pirate.CanPush(myPirateWithCapsule)).Count();  // Number of my living pirate who can push enemy pirates
+                int numberOfPushesNeeded = myPirateWithCapsule.NumPushesForCapsuleLoss;
+                int numberOfEnemiesAroundMyCapsule = game.GetEnemyLivingPirates().Where(enemy => enemy.CanPush(myPirateWithCapsule)).Count();
+                foreach (Pirate mypirate in game.GetMyLivingPirates().Where(pirate => pirate.CanPush(myPirateWithCapsule)))  // We push until we drop it
+                {
+                    if (numberOfPushesNeeded - numberOfEnemiesAroundMyCapsule == 1 || !myPirates.Contains(mypirate))
+                        break;
+                    mypirate.Push(
+                        myPirateWithCapsule,
+                        myMotherships.OrderBy(mothership => mothership.Distance(myPirateWithCapsule))
+                            .FirstOrDefault());
+                    myPirates.Remove(mypirate);
+                    numberOfPushesNeeded--;
+                }
+            }
+        }
+
+        // public void TryPushEnemyCapsule()
+        // {
+        //     foreach (Pirate enemyWithCapsule in EnemyPiratesWithCapsule)
+        //     {
+        //         PushAlliesToEnemy(enemyWithCapsule);
+        //         int count = game.GetMyLivingPirates().Where(pirate => pirate.CanPush(enemyWithCapsule) && !FinishedTurn[pirate]).Count();  // Number of my living pirate who can push enemy pirates
+        //         if (count >= enemyWithCapsule.NumPushesForCapsuleLoss)  // If we can drop the capsule
+        //         {
+        //             foreach (Pirate mypirate in game.GetMyLivingPirates().Where(pirate => pirate.CanPush(enemyWithCapsule) && !FinishedTurn[pirate]))  // We push until we drop it
+        //             {
+        //                 if (!enemyWithCapsule.HasCapsule())  // I think all the operations happen simultaneously at the end of the turn, so this will never be the case.
+        //                     break;
+        //                 mypirate.Push(enemyWithCapsule, enemyWithCapsule.InitialLocation);
+        //                 FinishedTurn[mypirate] = true;
+        //             }
+        //         }
+        //     }
+        // }
+        public bool PushAlliesToEnemy(Pirate target)
+        {
+            int count = game.GetMyLivingPirates().Where(pirate => pirate.CanPush(target)).Except(myPiratesWithCapsule).Count();
+            if (!(count >= target.NumPushesForCapsuleLoss))
+            {
+                var MyPiratesNotInRange = game.GetMyLivingPirates().Where(pirate => !pirate.CanPush(target)).Except(myPiratesWithCapsule.ToList());
+                Dictionary<Pirate, int> PiratesPush = new Dictionary<Pirate, int>();
+                foreach (Pirate pirate in MyPiratesNotInRange)
+                {
+                    int PiratesCanPush = MyPiratesNotInRange.Where(mypirate => pirate != mypirate && pirate.CanPush(mypirate)).Count();
+                    int PushesNeeded = pirate.Distance(target) / game.PushDistance;
+                    if (PiratesCanPush >= PushesNeeded)
+                    {
+                        PiratesPush[pirate] = pirate.Distance(target) / game.PushDistance;
+                    }
+                }
+                var PushingPirate = PiratesPush.OrderBy(x => x.Value).ToDictionary(pair => pair.Key, pair => pair.Value).FirstOrDefault();
+                int PushesLeft = PushingPirate.Value;
+                if (PushingPirate.Key != null)
+                {
+                    foreach (Pirate pirate in MyPiratesNotInRange)
+                    {
+                        if (pirate.CanPush(PushingPirate.Key) && pirate != PushingPirate.Key && PushesLeft > 0)
+                        {
+                            pirate.Push(PushingPirate.Key, target);
+                            myPirates.Remove(pirate);
+                            PushesLeft--;
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+            return true;
+
+        }
     }
 }
