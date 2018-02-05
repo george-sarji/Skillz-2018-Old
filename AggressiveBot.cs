@@ -182,7 +182,7 @@ namespace Bot
                         if(bestIntersection!=null)
                         {
                             // Send the pirates to the intersection if they're not in each other's push range.
-                            if(!firstHolder.InPushRange(secondHolder))
+                            if(!firstHolder.Location.Equals(secondHolder.Location))
                             {
                                 if(pirateDestinations.ContainsKey(firstHolder))
                                     pirateDestinations[firstHolder] = bestIntersection;
