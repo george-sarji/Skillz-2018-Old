@@ -50,14 +50,14 @@ namespace Bot
             Initialize(game);
             AggressiveBot.PushAsteroidsNearby();
             AggressiveBot.MoveCapsuleHolders();
-            AggressiveBot.GoHelpAllyWithCapsule();
-            AggressiveBot.CaptureCapsules();
             DefensiveBot.PerformBunker();
+            AggressiveBot.GoHelpAllyWithCapsule();
+            TryPush.TryPushMyCapsule();
+            AggressiveBot.CaptureCapsules();
             AggressiveBot.PushAsteroids();
             AggressiveBot.AttackEnemies();
             MovePiratesToDestinations();
-            myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
-            Priorities.GenerateGeneralPriority();
+            // Priorities.GenerateGeneralPriority();
             PrintDictionary(pirateDestinations);
         }
 
@@ -70,6 +70,7 @@ namespace Bot
             enemyMotherships = game.GetEnemyMotherships().ToList();
             enemyPirates = game.GetEnemyLivingPirates().ToList();
             enemyCapsules = game.GetEnemyCapsules().ToList();
+            myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
             pirateDestinations = new Dictionary<Pirate, Location>();
             asteroids = new Dictionary<Asteroid, bool>();
             foreach(var asteroid in game.GetLivingAsteroids())

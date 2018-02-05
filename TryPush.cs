@@ -88,7 +88,7 @@ namespace Bot
             return game.GetEnemyLivingPirates().Where(p => p.InRange(pirate, game.PushRange*2)).Count();
         }
 
-        public void TryPushMyCapsule()
+        public static void TryPushMyCapsule()
         { // Get all my pirates with capsule
             foreach (Pirate myPirateWithCapsule in myPiratesWithCapsule)
             {
@@ -128,7 +128,7 @@ namespace Bot
         //         }
         //     }
         // }
-        public bool PushAlliesToEnemy(Pirate target)
+        public static bool PushAlliesToEnemy(Pirate target)
         {
             int count = game.GetMyLivingPirates().Where(pirate => pirate.CanPush(target)).Except(myPiratesWithCapsule).Count();
             if (!(count >= target.NumPushesForCapsuleLoss))

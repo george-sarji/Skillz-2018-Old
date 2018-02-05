@@ -33,7 +33,7 @@ namespace Bot
                             if(closestCapsule!=null)
                             {
                                 // Send the pirates towards the unload range * 0.5
-                                var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*0.5));
+                                var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*1.1));
                                 if(closestCapsule.Holder!=null && TryPush.TryPushEnemyCapsule(pirate, closestCapsule.Holder))
                                 {
                                     usedPirates.Add(pirate);
@@ -63,7 +63,7 @@ namespace Bot
                             if(closestCapsule!=null)
                             {
                                 // Send the pirates towards the unload range * 0.5
-                                var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*0.5));
+                                var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*0.8));
                                 if(closestCapsule.Holder!=null && TryPush.TryPushEnemyCapsule(pirate, closestCapsule.Holder))
                                 {
                                     usedPirates.Add(pirate);
