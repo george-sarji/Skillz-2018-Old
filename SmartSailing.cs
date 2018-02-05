@@ -59,7 +59,7 @@ namespace Bot
             int count = 0;
             foreach (Pirate pirate in game.GetEnemyLivingPirates())
             {
-                if (pirate.InRange(loc, pirate.PushRange + pirate.MaxSpeed))
+                if (pirate.InRange(loc, pirate.PushRange + pirate.MaxSpeed)&& pirate.PushReloadTurns<GameExtension.Steps(pirate,loc))
                 {
                     count++;
                 }
