@@ -68,6 +68,38 @@ namespace Bot
                 return new Location((int)(Ya+T2*(Yb-Ya)),(int)(Xa+T2*(Xb-Xa)));
             return null;
         }
+
+        // Given an enemy pirate's location a, and destination b, and a friendly pirate's location c,
+        // calculates and returns the optimal point d for the friendly pirate to intercept the path of the enemy pirate.
+        public static Location Interception(Location a, Location b, Location c) 
+        {
+            var game = InitializationBot.game;
+            int numerator = (c.Row - a.Row).Power(2) + (c.Col - a.Col).Power(2);
+            int denominator = 2 * ((b.Row - a.Row) * (c.Row - a.Row) + (b.Col - a.Col) * (c.Col - a.Col));
+            double s = denominator == 0 ? 0 : (double) numerator / denominator;
+            var d = new Location(a.Row + (int) (s * (b.Row - a.Row)), a.Col + (int) (s * (b.Col - a.Col)));
+            if (IsOnTheWay(a, b, c, game.PushRange) || c.Distance(d) < game.PirateMaxSpeed) {
+                return a.Towards(b, game.PirateMaxSpeed);
+            }
+            return d;
+        }
+            // Returns true if the point c is within buffer distance to the line from a and b.
+        private static bool IsOnTheWay(Location a, Location b, Location c, int buffer)
+        {
+            return b.Distance(c) <= a.Distance(c) && DistanceLP(a, b, c) <= buffer;
+        }
+
+        private static int DistanceLP(Location a, Location b, Location c) {
+           int numerator = System.Math.Abs((b.Col - a.Col) * c.Row - (b.Row - a.Row) * c.Col + b.Row * a.Col - b.Col * a.Row);
+           double denominator = a.Distance(b);
+           return denominator == 0 ? 0 : (int) System.Math.Round(numerator / denominator);
+       }
+
+       public static int NumberOfAvailableEnemyPushers(Pirate pirate)
+       {
+           return InitializationBot.game.GetEnemyLivingPirates().Where(enemy => enemy.CanPush(pirate)).Count();
+       }
+
     }
 
 }

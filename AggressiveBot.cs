@@ -124,6 +124,89 @@ namespace Bot
             myPirates = myPirates.Except(usedPirates).ToList();
         }
 
+
+        public static void MoveCapsuleHoldersToIntersection()
+        {
+            var usedPirates = new List<Pirate>();
+            // Get the capsule holders
+            var capsuleHolders = myPirates.Where(pirate => pirate.HasCapsule()).ToList();
+            // We have the best mothership. Make sure it's not null.
+            while(capsuleHolders.Count()>1)
+            {
+                // Take the first pair
+                var firstHolder = capsuleHolders.First();
+                var secondHolder = capsuleHolders.ElementAt(1);
+                // Get the best mothership for the first holder.
+                var bestMothership = myMotherships.OrderBy(mothership => mothership.Distance(firstHolder)/mothership.ValueMultiplier).FirstOrDefault();
+                if(bestMothership!=null)
+                {
+                    // Get the intersection point
+                    var intersectionPoint = GameExtension.Interception(firstHolder.Location, bestMothership.Location, secondHolder.Location);
+                    var secondIntersection = GameExtension.Interception(secondHolder.Location, bestMothership.Location, firstHolder.Location);
+                    Location bestIntersection = null;
+                    if(intersectionPoint!=null && secondIntersection!=null)
+                    {
+                        // Get the closest.
+                        if(bestMothership.Distance(intersectionPoint)>bestMothership.Distance(secondIntersection))
+                        {
+                            bestIntersection = secondIntersection;
+                        }
+                        else
+                            bestIntersection = intersectionPoint;
+                    }
+                    else if(intersectionPoint!=null)
+                        bestIntersection = intersectionPoint;
+                    else
+                        bestIntersection = secondIntersection;
+                    if(bestIntersection!=null)
+                    {
+                        // Send the pirates to the intersection if they're not in each other's push range.
+                        if(!firstHolder.InPushRange(secondHolder))
+                        {
+                            if(pirateDestinations.ContainsKey(firstHolder))
+                                pirateDestinations[firstHolder] = bestIntersection;
+                            else
+                                pirateDestinations.Add(firstHolder, bestIntersection);
+                            if(pirateDestinations.ContainsKey(secondHolder))
+                                pirateDestinations[secondHolder] = bestIntersection;
+                            else
+                                pirateDestinations.Add(secondHolder, bestIntersection);
+                        }
+                        else
+                        {
+                            // Send them towards the mothership
+                            if(pirateDestinations.ContainsKey(firstHolder))
+                                pirateDestinations[firstHolder] = bestMothership.Location;
+                            else
+                                pirateDestinations.Add(firstHolder, bestMothership.Location);
+                            if(pirateDestinations.ContainsKey(secondHolder))
+                                pirateDestinations[secondHolder] = bestMothership.Location;
+                            else
+                                pirateDestinations.Add(secondHolder, bestMothership.Location);
+                        }
+                    }
+                }
+                capsuleHolders.Remove(firstHolder);
+                capsuleHolders.Remove(secondHolder);
+                myPirates.Remove(firstHolder);
+                myPirates.Remove(secondHolder);
+            }
+            if(capsuleHolders.Count()==1)
+            {
+                // Send this pirate to his own best mothership.
+                var leftOutPirate = capsuleHolders.First();
+                var bestMothership = myMotherships.OrderBy(mothership => mothership.Distance(leftOutPirate)/mothership.ValueMultiplier).FirstOrDefault();
+                if(pirateDestinations.ContainsKey(leftOutPirate))
+                    pirateDestinations[leftOutPirate] = bestMothership.Location;
+                else
+                    pirateDestinations.Add(leftOutPirate, bestMothership.Location);
+                // Get the closest pirate to this one
+                capsuleHolders.Remove(leftOutPirate);
+                myPirates.Remove(leftOutPirate);
+            }
+
+        }
+
         public static void PushAsteroids()
         {
             var usedPirates = new List<Pirate>();
