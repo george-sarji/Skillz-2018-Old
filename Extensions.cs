@@ -51,6 +51,23 @@ namespace Bot
             if(InitializationBot.Debug)
                 InitializationBot.game.Debug(s);
         }
+
+        public static Location IntersectionPoint(Location enemyLoc, Location myLoc, Location destLoc, int S1, int S2)
+        {
+            int Xa = enemyLoc.Col, Ya = enemyLoc.Row,
+            Xb = destLoc.Col, Yb = destLoc.Row,
+            Xc = myLoc.Col, Yc = myLoc.Row;
+            double a = ((Xb-Xa).Power(2)+(Yb-Ya).Power(2))/S2.Power(2)-(((Xb-Xa).Power(2)+(Yb-Ya).Power(2))/S1.Power(2));
+            double b = 2*((Xb-Xa)*(Xa-Xc)+(Yb-Ya)*(Ya-Yc))/S2.Power(2);
+            double c = ((Xa-Xc).Power(2)+(Ya-Yc).Power(2))/S2.Power(2);
+            double T1 = -b+(b.Power(2)-4*a*c).Sqrt();
+            double T2 = -b-(b.Power(2)-4*a*c).Sqrt();
+            if(T1<=1&&T1>=0)
+                return new Location((int)(Ya+T1*(Yb-Ya)),(int)(Xa+T1*(Xb-Xa)));
+            else if(T2<=1&&T2>=0)
+                return new Location((int)(Ya+T2*(Yb-Ya)),(int)(Xa+T2*(Xb-Xa)));
+            return null;
+        }
     }
 
 }
