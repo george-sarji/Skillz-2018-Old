@@ -55,13 +55,14 @@ namespace Bot
 
         public static bool TryPushAsteroid(Pirate pirate, Asteroid asteroid)
         {
-            if(pirate.CanPush(asteroid))
+            if(pirate.CanPush(asteroid) && !asteroids[asteroid])
             {
                 var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).OrderBy(enemy => GetGroupingNumber(enemy)).FirstOrDefault();
                 if(closestEnemy!=null)
                 {
                     // Push the asteroid towards it.
                     pirate.Push(asteroid, closestEnemy);
+                    asteroids[asteroid]=true;
                     ("Pirate "+ pirate.ToString() + " pushes asteroid "+ asteroid.ToString() + " towards "+ closestEnemy.ToString()).Print();
                     return true;
                 }
