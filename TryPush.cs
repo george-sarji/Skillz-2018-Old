@@ -3,7 +3,7 @@ using System.Text;
 using System.Linq;
 using Pirates;
 
-namespace Bot 
+namespace Bot
 {
     class TryPush : InitializationBot
     {
@@ -37,16 +37,16 @@ namespace Bot
 
         public static bool TryPushEnemyCapsule(Pirate pirate, Pirate capsuleHolder)
         {
-            if(pirate.CanPush(capsuleHolder))
+            if (pirate.CanPush(capsuleHolder))
             {
                 // Check how much other pirates can push it.
                 var numOfPushers = NumOfPushesAvailable(capsuleHolder);
                 // Check if we can either make the pirate lose his capsule or get pushed outside the border.
-                var pushesToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location))/pirate.PushDistance;
-                if(numOfPushers>=pushesToBorder || numOfPushers>=capsuleHolder.NumPushesForCapsuleLoss)
+                var pushesToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location)) / pirate.PushDistance;
+                if (numOfPushers >= pushesToBorder || numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss)
                 {
                     // Push the pirate towards the border!
-                    pirate.Push(capsuleHolder,GetClosestToBorder(capsuleHolder.Location));
+                    pirate.Push(capsuleHolder, GetClosestToBorder(capsuleHolder.Location));
                     return true;
                 }
             }
@@ -55,37 +55,37 @@ namespace Bot
 
         public static bool TryPushAsteroid(Pirate pirate, Asteroid asteroid)
         {
-            if(pirate.CanPush(asteroid) && !asteroids[asteroid])
+            if (pirate.CanPush(asteroid) && !asteroids[asteroid])
             {
                 var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).OrderBy(enemy => GetGroupingNumber(enemy)).FirstOrDefault();
-                if(closestEnemy!=null)
+                if (closestEnemy != null)
                 {
                     // Push the asteroid towards it.
                     pirate.Push(asteroid, closestEnemy);
-                    asteroids[asteroid]=true;
-                    ("Pirate "+ pirate.ToString() + " pushes asteroid "+ asteroid.ToString() + " towards "+ closestEnemy.ToString()).Print();
+                    asteroids[asteroid] = true;
+                    ("Pirate " + pirate.ToString() + " pushes asteroid " + asteroid.ToString() + " towards " + closestEnemy.ToString()).Print();
                     return true;
                 }
             }
             return false;
         }
-        
+
 
         public static bool TryPushEnemy(Pirate pirate, Pirate enemy)
         {
-            if(pirate.CanPush(enemy))
+            if (pirate.CanPush(enemy))
             {
                 pirate.Push(enemy, GetClosestToBorder(enemy.Location));
-                ("Pirate "+pirate.ToString() + " pushes enemy "+ enemy.ToString() + " towards "+ GetClosestToBorder(enemy.Location)).Print();
+                ("Pirate " + pirate.ToString() + " pushes enemy " + enemy.ToString() + " towards " + GetClosestToBorder(enemy.Location)).Print();
                 return true;
             }
             return false;
         }
 
 
-        public static int GetGroupingNumber(Pirate pirate )
+        public static int GetGroupingNumber(Pirate pirate)
         {
-            return game.GetEnemyLivingPirates().Where(p => p.InRange(pirate, game.PushRange*2)).Count();
+            return game.GetEnemyLivingPirates().Where(p => p.InRange(pirate, game.PushRange * 2)).Count();
         }
 
         public static void TryPushMyCapsule()
@@ -162,7 +162,33 @@ namespace Bot
                 return false;
             }
             return true;
+        }
+        public static void PushEachOther()
+        {
+            bool pirate1Reaches = false, pirate2Reaches = false;
+            foreach (Pirate pirateWithCapsule in myPiratesWithCapsule)
+            {
+                var heading = myMotherships.OrderBy(mothership => mothership.Distance(pirateWithCapsule)).FirstOrDefault();
+                pirate1Reaches = false;
+                pirate2Reaches = false;
+                var PiratesWhoCanPush = myPiratesWithCapsule
+                .Where(pirate => pirate.CanPush(pirate)
+                && pirateWithCapsule != pirate
+                && pirate.Distance(heading)>pirate.PushDistance).ToList();
+                while (PiratesWhoCanPush.Count > 1)
+                {
+                    var first = PiratesWhoCanPush.First();
+                    PiratesWhoCanPush.Remove(first);
+                    var second = PiratesWhoCanPush.First();
+                    PushPair(first,second,heading.Location);
+                }
+            }
+        }
 
+        public static void PushPair(Pirate pirate1,Pirate pirate2,Location destination)
+        {  
+            pirate1.Push(pirate2,destination);
+            pirate2.Push(pirate1,destination);
         }
     }
 }
