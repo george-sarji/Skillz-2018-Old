@@ -21,7 +21,7 @@ namespace Bot
             return num;
         }
 
-        public static double Sqrt(this double num)
+        public static double Sqrt(this int num)
         {
             return System.Math.Sqrt(num);
         }

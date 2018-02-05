@@ -57,7 +57,7 @@ namespace Bot
         {
             if(pirate.CanPush(asteroid))
             {
-                var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).FirstOrDefault();
+                var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).OrderBy(enemy => GetGroupingNumber(enemy)).FirstOrDefault();
                 if(closestEnemy!=null)
                 {
                     // Push the asteroid towards it.
@@ -67,6 +67,24 @@ namespace Bot
                 }
             }
             return false;
+        }
+        
+
+        public static bool TryPushEnemy(Pirate pirate, Pirate enemy)
+        {
+            if(pirate.CanPush(enemy))
+            {
+                pirate.Push(enemy, GetClosestToBorder(enemy.Location));
+                ("Pirate "+pirate.ToString() + " pushes enemy "+ enemy.ToString() + " towards "+ GetClosestToBorder(enemy.Location)).Print();
+                return true;
+            }
+            return false;
+        }
+
+
+        public static int GetGroupingNumber(Pirate pirate )
+        {
+            return game.GetEnemyLivingPirates().Where(p => p.InRange(pirate, game.PushRange*2)).Count();
         }
     }
 }
