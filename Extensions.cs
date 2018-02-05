@@ -36,7 +36,7 @@ namespace Bot
             return numbers.OrderBy(num => num).First();
         }
 
-        public static double Power(this double num, int power)
+        public static double Power(this int num, int power)
         {
             return System.Math.Pow(num, power);
         }

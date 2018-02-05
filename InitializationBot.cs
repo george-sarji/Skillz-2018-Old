@@ -24,6 +24,11 @@ namespace Bot
 
         protected static Dictionary<Pirate, Location> pirateDestinations;
 
+        protected static Dictionary<MapObject , int> GeneralPriority;
+
+        protected static int MinPriorirty = 0;
+        protected static int MaxPriority = 10;
+
         protected static bool defence = false;
 
         public void DoTurn(PirateGame game)
@@ -35,6 +40,7 @@ namespace Bot
             DefensiveBot.PerformBunker();
             AggressiveBot.PushAsteroids();
             MovePiratesToDestinations();
+            Priorities.GenerateGeneralPriority();
         }
 
         private void Initialize(PirateGame pirateGame)
