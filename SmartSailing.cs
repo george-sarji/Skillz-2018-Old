@@ -9,20 +9,39 @@ namespace Bot
     {
         public static Location SmartSail(Pirate pirate, MapObject destination)
         {
+            // List<Location> best = new List<Location>();//Location Available for sailing who contain a safe route
+            // best.Add(pirate.Location);
+            // for (int i = 1; i <= 24; i++)
+            // {
+            //     int alpha = (int)((2*System.Math.PI * i) / 24);//turn from radians to degrees
+            //     Location current = new Location((int)(pirate.Location.Row - pirate.MaxSpeed * System.Math.Sin(alpha))
+            //     , (int)(pirate.Location.Col + pirate.MaxSpeed * System.Math.Cos(alpha)));
+            //     if (!current.InMap())//check if in map
+            //         continue;
+            //     if(!IsHittingAsteroid(current) && !IsInRange(current))//check if it is a safe route
+            //         best.Add(current);
+
+            // }
+            //  return best.OrderBy(location => location.Distance(destination)).FirstOrDefault();// get the closest and safest route
             Location best = pirate.Location;
-            for (int i = 0; i < 24; i++)
+            int col = 0, row = 0;
+            for (row = pirate.GetLocation().Row - pirate.MaxSpeed; row < pirate.GetLocation().Row + pirate.MaxSpeed; row += 5)
             {
-                int alpha = (int)((System.Math.PI * i) / 24);
-                Location current = new Location((int)(pirate.Location.Row - pirate.MaxSpeed * System.Math.Sin(alpha)), (int)(pirate.Location.Col + pirate.MaxSpeed * System.Math.Cos(alpha)));
-                if (!current.InMap())
-                    continue;
-                if (current.Distance(destination) < pirate.Distance(destination) && current.Distance(destination) >= pirate.Distance(destination) - pirate.MaxSpeed && !IsInRange(current) && !IsHittingAsteroid(current))
+                for (col = pirate.GetLocation().Col - pirate.MaxSpeed; col < pirate.GetLocation().Col + pirate.MaxSpeed; col += 5)
                 {
-                    if ((best != pirate.Location && best.Distance(destination) > current.Distance(destination)) || (best == pirate.Location))
-                        best = current;
+                    Location current = new Location(row, col);
+                    if (!current.InMap())
+                        continue;
+                    if (current.Distance(destination) < pirate.Distance(destination) && current.Distance(destination) >= pirate.Distance(destination) - pirate.MaxSpeed && !IsInRange(current)&& !IsHittingAsteroid(current))
+                    {
+                        if ((best.Distance(destination) > current.Distance(destination)) || (best == pirate.Location))
+                            best = current;
+                    }
                 }
             }
             return best;
+            
+           
         }
 
         public static bool IsHittingAsteroid(Location loc)
