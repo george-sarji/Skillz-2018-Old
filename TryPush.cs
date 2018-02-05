@@ -165,30 +165,40 @@ namespace Bot
         }
         public static void PushEachOther()
         {
-            bool pirate1Reaches = false, pirate2Reaches = false;
+            var PiratesWithCapsuleCanPushOthers = new Dictionary<Pirate, List<Pirate>>();
+            var UsedPirates = new List<Pirate>();
             foreach (Pirate pirateWithCapsule in myPiratesWithCapsule)
             {
                 var heading = myMotherships.OrderBy(mothership => mothership.Distance(pirateWithCapsule)).FirstOrDefault();
-                pirate1Reaches = false;
-                pirate2Reaches = false;
                 var PiratesWhoCanPush = myPiratesWithCapsule
-                .Where(pirate => pirate.CanPush(pirate)
+                .Where(pirate => pirate.CanPush(pirateWithCapsule)
                 && pirateWithCapsule != pirate
-                && pirate.Distance(heading)>pirate.PushDistance).ToList();
-                while (PiratesWhoCanPush.Count > 1)
+                && pirate.Distance(heading) < pirate.PushDistance).ToList();
+                if (PiratesWhoCanPush.Count == 0)
                 {
-                    var first = PiratesWhoCanPush.First();
-                    PiratesWhoCanPush.Remove(first);
-                    var second = PiratesWhoCanPush.First();
-                    PushPair(first,second,heading.Location);
+                    continue;
+                }
+                PiratesWithCapsuleCanPushOthers[pirateWithCapsule] = PiratesWhoCanPush;
+            }
+            foreach (var pirate in PiratesWithCapsuleCanPushOthers.
+            OrderBy(item => item.Value.Count)
+            .ToDictionary(pair => pair.Key, pair => pair.Value).Keys.ToList())
+            {
+                var heading = myMotherships.OrderBy(mothership => mothership.Distance(pirate)).FirstOrDefault();
+                if (myPirates.Contains(pirate))
+                {
+                    Pirate OtherPushingPirate = PiratesWithCapsuleCanPushOthers[pirate].First();
+                    PushPair(pirate, OtherPushingPirate, heading.Location);
+                    myPirates.Remove(pirate);
+                    myPirates.Remove(OtherPushingPirate);
                 }
             }
         }
 
-        public static void PushPair(Pirate pirate1,Pirate pirate2,Location destination)
-        {  
-            pirate1.Push(pirate2,destination);
-            pirate2.Push(pirate1,destination);
+        public static void PushPair(Pirate pirate1, Pirate pirate2, Location destination)
+        {
+            pirate1.Push(pirate2, destination);
+            pirate2.Push(pirate1, destination);
         }
     }
 }
