@@ -79,11 +79,12 @@ namespace Bot
 
         public static void PushAsteroidsNearby()
         {
+            
             var usedPirates = new List<Pirate>();
             foreach(var pirate in myPirates)
             {
                 // Get the asteroids that are near our pirates.
-                var asteroidsOrdered = game.GetLivingAsteroids().Where(asteroid => asteroid.Location.Add(asteroid.Direction).InRange(pirate, pirate.PushRange*2));//change game to pirate if they delete the game.pushRange in the future we are ready(Mahmoud)
+                var asteroidsOrdered = game.GetLivingAsteroids().OrderBy(asteroid => asteroid.Distance(pirate));//change game to pirate if they delete the game.pushRange in the future we are ready(Mahmoud)
                 if(asteroidsOrdered.Any())
                 {
                     // There is an asteroid near us. Push it.

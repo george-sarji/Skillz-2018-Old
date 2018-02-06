@@ -57,18 +57,46 @@ namespace Bot
         {
             if (pirate.CanPush(asteroid) && !asteroids[asteroid])
             {
-                var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).OrderBy(enemy => GetGroupingNumber(enemy)).FirstOrDefault();
-                if (closestEnemy != null)
+                var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(asteroid)).OrderBy(enemy => GetGroupingNumber(enemy)).FirstOrDefault();
+                var pushDestination = game.GetLivingAsteroids().OrderBy(ast => ast.Distance(asteroid)).Where(ast => ast != asteroid).FirstOrDefault();
+                if(closestEnemy!=null && pushDestination!=null)
                 {
-                    // Push the asteroid towards it.
-                    pirate.Push(asteroid, closestEnemy);
+                    // Check which one is closest to the pirate.
+                    if(closestEnemy.Distance(pirate)<pushDestination.Distance(pirate))
+                    {
+                        // Push the asteroid towards the enemies.
+                        pirate.Push(asteroid, closestEnemy);
+                        ("Pirate "+pirate.ToString() + " pushes asteroid "+ asteroid.ToString() + " towards "+ closestEnemy.ToString()).Print();
+                    }
+                    else
+                    {
+                        pirate.Push(asteroid, pushDestination);
+                        ("Pirate "+pirate.ToString() + " pushes asteroid "+ asteroid.ToString() + " towards "+ pushDestination.ToString()).Print();
+                    }
                     asteroids[asteroid] = true;
-                    ("Pirate " + pirate.ToString() + " pushes asteroid " + asteroid.ToString() + " towards " + closestEnemy.ToString()).Print();
+                    return true;
+                }
+                else if (closestEnemy != null)
+                {
+                    // astroids.OrderBy(asteroid => asteroid.Distance(destination)).OrderBy(asteroid => asteroid.Distance(closestAsteroid)).Where(asteroid => asteroid != closestAsteroid).FirstOrDefault()
+                    // Push the asteroid towards it.
+                    
+                    pirate.Push(asteroid, closestEnemy);
+                    ("Pirate "+pirate.ToString() + " pushes asteroid "+ asteroid.ToString() + " towards "+ closestEnemy.ToString()).Print();
+                    asteroids[asteroid] = true;
+                    return true;
+                }
+                else if(pushDestination!=null)
+                {
+                    pirate.Push(asteroid, pushDestination);
+                    ("Pirate "+pirate.ToString() + " pushes asteroid "+ asteroid.ToString() + " towards "+ pushDestination.ToString()).Print();
+                    asteroids[asteroid] = true;
                     return true;
                 }
             }
             return false;
         }
+
 
 
         public static bool TryPushEnemy(Pirate pirate, Pirate enemy)
