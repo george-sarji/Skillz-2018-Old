@@ -40,6 +40,8 @@ namespace Bot
 
         protected static Dictionary<MapObject , int> GeneralPriority;
 
+        protected static Dictionary<Capsule, int> enemyCapsulesPushes;
+
         protected static int MinPriorirty = 0;
         protected static int MaxPriority = 10;
 
@@ -48,18 +50,25 @@ namespace Bot
         public void DoTurn(PirateGame game)
         {
             Initialize(game);
-            TryPush.PushEachOther();
-            AggressiveBot.PushAsteroidsNearby();
-            AggressiveBot.MoveCapsuleHoldersToIntersection();
-            DefensiveBot.PerformBunker();
-            // AggressiveBot.GoHelpAllyWithCapsule();
-            TryPush.TryPushMyCapsule();
-            AggressiveBot.CaptureCapsules();
-            AggressiveBot.PushAsteroids();
-            AggressiveBot.AttackEnemies();
-            MovePiratesToDestinations();
-            // Priorities.GenerateGeneralPriority();
-            PrintDictionary(pirateDestinations);
+            if(defence)
+            {
+                DefensiveBot.PerformBunker();
+            }
+            else
+            {
+                TryPush.PushEachOther();
+                AggressiveBot.PushAsteroidsNearby();
+                AggressiveBot.MoveCapsuleHoldersToIntersection();
+                DefensiveBot.BuildBunker();
+                // AggressiveBot.GoHelpAllyWithCapsule();
+                TryPush.TryPushMyCapsule();
+                AggressiveBot.CaptureCapsules();
+                AggressiveBot.PushAsteroids();
+                AggressiveBot.AttackEnemies();
+                MovePiratesToDestinations();
+                // Priorities.GenerateGeneralPriority();
+                PrintDictionary(pirateDestinations);
+            }
         }
 
         private void Initialize(PirateGame pirateGame)
@@ -72,12 +81,14 @@ namespace Bot
             enemyPirates = game.GetEnemyLivingPirates().ToList();
             enemyCapsules = game.GetEnemyCapsules().ToList();
             myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
+            enemyCapsulesPushes = game.GetEnemyCapsules().ToDictionary(key => key, value => 0);
             pirateDestinations = new Dictionary<Pirate, Location>();
             asteroids = new Dictionary<Asteroid, bool>();
             foreach(var asteroid in game.GetLivingAsteroids())
             {
                 asteroids.Add(asteroid, false);
             }
+            defence = game.GetMyMotherships().Count()==0 || game.GetMyCapsules().Count()==0;
         }
         private void PrintDictionary(Dictionary<Pirate,Location> dictionary)
         {

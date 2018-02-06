@@ -43,10 +43,11 @@ namespace Bot
                 var numOfPushers = NumOfPushesAvailable(capsuleHolder);
                 // Check if we can either make the pirate lose his capsule or get pushed outside the border.
                 var pushesToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location)) / pirate.PushDistance;
-                if (numOfPushers >= pushesToBorder || numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss)
+                if ((numOfPushers >= pushesToBorder && enemyCapsulesPushes[capsuleHolder.Capsule]<pushesToBorder) || (numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss && enemyCapsulesPushes[capsuleHolder.Capsule]<capsuleHolder.NumPushesForCapsuleLoss))
                 {
                     // Push the pirate towards the border!
                     pirate.Push(capsuleHolder, GetClosestToBorder(capsuleHolder.Location));
+                    enemyCapsulesPushes[capsuleHolder.Capsule]++;
                     return true;
                 }
             }
@@ -97,6 +98,35 @@ namespace Bot
             return false;
         }
 
+
+        public static bool TryPushAsteroidTowardsCapsule(Pirate pirate, Asteroid asteroid)
+        {
+            if (pirate.CanPush(asteroid) && !asteroids[asteroid])
+            {
+                // Check if there is a capsule holder.
+                var enemyCapsuleHolders =enemyPirates.Where(p=> p.HasCapsule());
+                if(enemyCapsuleHolders.Any())
+                {
+                    enemyCapsuleHolders = enemyCapsuleHolders.OrderBy(p => p.Distance(asteroid));
+                    var closestHolder = enemyCapsuleHolders.FirstOrDefault();
+                    var closestMothership = enemyMotherships.OrderBy(m => m.Distance(closestHolder)).FirstOrDefault();
+                    if(closestMothership!=null)
+                    {
+                        // Intercept the capsule with the asteroid.
+                        var interception = GameExtension.IntersectionPoint(closestHolder.Location, asteroid.Location, closestMothership.Location, closestHolder.MaxSpeed, asteroid.Speed);
+                        if(interception!=null)
+                        {
+                            // Push the asteroid.
+                            pirate.Push(asteroid, interception);
+                            asteroids[asteroid]=true;
+                            ("Pirate "+ pirate.ToString() + " pushes asteroid " + asteroid.ToString() + " to intercept "+ closestHolder.ToString() + " at "+interception).Print();
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
 
 
         public static bool TryPushEnemy(Pirate pirate, Pirate enemy)

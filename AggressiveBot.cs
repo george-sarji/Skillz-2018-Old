@@ -88,7 +88,7 @@ namespace Bot
                 if(asteroidsOrdered.Any())
                 {
                     // There is an asteroid near us. Push it.
-                    if(TryPush.TryPushAsteroid(pirate, asteroidsOrdered.FirstOrDefault()))
+                    if(TryPush.TryPushAsteroidTowardsCapsule(pirate, asteroidsOrdered.FirstOrDefault()) || TryPush.TryPushAsteroid(pirate, asteroidsOrdered.FirstOrDefault()))
                     {
                         usedPirates.Add(pirate);
                     }
@@ -257,7 +257,7 @@ namespace Bot
                 {
                     var pirate = closestAvailablePirate.FirstOrDefault();
                     // Check if the pirate can push it already. If not, sail towards the destination where it is in range.
-                    if(!TryPush.TryPushAsteroid(pirate,  asteroid))
+                    if(!TryPush.TryPushAsteroidTowardsCapsule(pirate, asteroid) && !TryPush.TryPushAsteroid(pirate,  asteroid))
                     {
                         // Sail towards the asteroid.
                         if(!pirateDestinations.ContainsKey(pirate))
