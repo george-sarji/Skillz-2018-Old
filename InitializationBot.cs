@@ -12,14 +12,14 @@ namespace Bot
         // Bot stats:
         // ----------------------------------------
         // GeorgePushSenior - Win 8-0 - 88 turns
-        // LargeRocks - Win 8-2 - 175 turns
+        // LargeRocks - Win 8-5 - 223 turns
         // OneManArmy - Win 1-0 - 400 turns
-        // Meteorite - Win 8-3  - 253 turns
-        // Steroids - Win 8-0 - 224 turns
-        // Lepton - Win 8-3 - 556 turns
-        // Voyager1 - Win 8-4 - 344 turns
+        // Meteorite - Win 8-3  - 219 turns
+        // Steroids - Win 8-0 - 467 turns
+        // Lepton - Win 8-4 - 556 turns
+        // Voyager1 - Win 8-3 - 376 turns
         // YouShallNotPass - Win 8-7 - 366 turns
-        // Pullpullon - Win 8-5 - 259 turns
+        // Pullpullon - Win 8-4 - 209 turns
         // ---------------------------------------- 
         public  static PirateGame game;
         public const bool Debug = true;
