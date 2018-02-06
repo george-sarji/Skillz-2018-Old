@@ -49,7 +49,7 @@ namespace Bot
             bool hitting = false;
             foreach (Asteroid asteroid in game.GetLivingAsteroids())
             {
-                if (loc.InRange(asteroid, asteroid.Size))
+                if (loc.InRange(asteroid.Location.Add(asteroid.Direction), asteroid.Size))
                     hitting = true;
             }
             return hitting;
