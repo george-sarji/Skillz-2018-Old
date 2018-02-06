@@ -57,7 +57,7 @@ namespace Bot
         {
             if (pirate.CanPush(asteroid) && !asteroids[asteroid])
             {
-                var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(asteroid)).OrderBy(enemy => GetGroupingNumber(enemy)).FirstOrDefault();
+                var closestEnemy = enemyPirates.OrderBy(enemy => enemy.Distance(asteroid)).OrderByDescending(enemy => GetGroupingNumber(enemy)).FirstOrDefault();
                 var pushDestination = game.GetLivingAsteroids().OrderBy(ast => ast.Distance(asteroid)).Where(ast => ast != asteroid).FirstOrDefault();
                 if(closestEnemy!=null && pushDestination!=null)
                 {

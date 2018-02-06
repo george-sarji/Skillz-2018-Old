@@ -108,10 +108,10 @@ namespace Bot
 
         protected static Location GetClosestToBorder(Location location)
         {
-            var up = new Location(0, location.Col);
-            var down = new Location(game.Rows - 1, location.Col);
-            var left = new Location(location.Row, 0);
-            var right = new Location(location.Row, game.Cols - 1);
+            var up = new Location(-5, location.Col);
+            var down = new Location(game.Rows +5, location.Col);
+            var left = new Location(location.Row, -5);
+            var right = new Location(location.Row, game.Cols +5);
 
             return Closest(location, up, down, left, right);
         }
