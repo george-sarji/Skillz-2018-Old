@@ -37,6 +37,7 @@ namespace Bot
 
         public static bool TryPushEnemyCapsule(Pirate pirate, Pirate capsuleHolder)
         {
+            var bestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsuleHolder)).FirstOrDefault();;
             if (pirate.CanPush(capsuleHolder))
             {
                 // Check how much other pirates can push it.
@@ -50,6 +51,15 @@ namespace Bot
                     enemyCapsulesPushes[capsuleHolder.Capsule]++;
                     return true;
                 }
+            }
+            else if(capsuleHolder.InRange(pirate, pirate.PushRange*2) && pirate.InRange(bestMothership, (int)(bestMothership.UnloadRange*1.7)))
+            {
+                // Send the pirate towards the capsule where it can push.
+                if(pirateDestinations.ContainsKey(pirate))
+                    pirateDestinations[pirate]=capsuleHolder.Location.Towards(pirate, (int)(pirate.PushRange*0.9));
+                else
+                    pirateDestinations.Add(pirate, capsuleHolder.Location.Towards(pirate, (int)(pirate.PushRange*0.9)));
+                return true;
             }
             return false;
         }
