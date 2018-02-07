@@ -52,7 +52,7 @@ namespace Bot
                     return true;
                 }
             }
-            else if(capsuleHolder.InRange(pirate, pirate.PushRange*2) && pirate.InRange(bestMothership, (int)(bestMothership.UnloadRange*1.7)))
+            else if(capsuleHolder.InRange(pirate, pirate.PushRange*2) && pirate.InRange(bestMothership, (int)(bestMothership.UnloadRange*1.5)))
             {
                 // Send the pirate towards the capsule where it can push.
                 if(pirateDestinations.ContainsKey(pirate))
