@@ -97,7 +97,7 @@ namespace Bot
             {
                 str+=key.Id+":"+"("+dictionary[key].Col+","+dictionary[key].Row+")"+",";
             }
-            game.Debug(str+"}");
+            (str+"}").Print();
         }
         private void MovePiratesToDestinations()
         {
