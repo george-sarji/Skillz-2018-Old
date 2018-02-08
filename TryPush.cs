@@ -206,7 +206,7 @@ namespace Bot
                 foreach (Pirate pirate in MyPiratesNotInRange)
                 {
                     int PiratesCanPush = MyPiratesNotInRange.Where(mypirate => pirate != mypirate && pirate.CanPush(mypirate)).Count();
-                    int PushesNeeded = pirate.Distance(target) / game.PushDistance;
+                    int PushesNeeded = pirate.Distance(target) / (game.PushDistance+1);
                     if (PiratesCanPush >= PushesNeeded)
                     {
                         PiratesPush[pirate] = pirate.Distance(target) / game.PushDistance;
