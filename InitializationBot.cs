@@ -42,6 +42,8 @@ namespace Bot
 
         protected static Dictionary<Capsule, int> enemyCapsulesPushes;
 
+        protected static List<Wormhole> activeWormholes;
+
         protected static int MinPriorirty = 0;
         protected static int MaxPriority = 10;
 
@@ -82,6 +84,7 @@ namespace Bot
             enemyCapsules = game.GetEnemyCapsules().ToList();
             myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
             enemyCapsulesPushes = game.GetEnemyCapsules().ToDictionary(key => key, value => 0);
+            activeWormholes = game.GetActiveWormholes().ToList();
             pirateDestinations = new Dictionary<Pirate, Location>();
             asteroids = new Dictionary<Asteroid, bool>();
             foreach(var asteroid in game.GetLivingAsteroids())
