@@ -18,7 +18,7 @@ namespace Bot
             //     , (int)(pirate.Location.Col + pirate.MaxSpeed * System.Math.Cos(alpha)));
             //     if (!current.InMap())//check if in map
             //         continue;
-            //     if(!IsHittingAsteroid(current) && !IsInRange(current))//check if it is a safe route
+            //     if(!IsHittingAsteroid(current) && !IsInRangeOfEnemy(current))//check if it is a safe route
             //         best.Add(current);
 
             // }
@@ -32,7 +32,7 @@ namespace Bot
                     Location current = new Location(row, col);
                     if (!current.InMap())
                         continue;
-                    if (current.Distance(destination) < pirate.Distance(destination) && current.Distance(destination) >= pirate.Distance(destination) - pirate.MaxSpeed && !IsInRange(current)&& !IsHittingAsteroid(current))
+                    if (current.Distance(destination) < pirate.Distance(destination) && current.Distance(destination) >= pirate.Distance(destination) - pirate.MaxSpeed && !IsInRangeOfEnemy(current)&& !IsHittingAsteroid(current))
                     {
                         if ((best.Distance(destination) > current.Distance(destination)) || (best == pirate.Location))
                             best = current;
@@ -42,6 +42,18 @@ namespace Bot
             return best;
             
            
+        }
+
+        public static bool IsInDanger(Location loc)
+        {
+            return IsHittingAsteroid(loc)&&IsInRangeOfEnemy(loc)&&IsInWormHoleRange(loc);
+        }
+
+        public static bool IsInWormHoleRange(Location loc)
+        {
+            return InitializationBot.activeWormholes.
+            Where(wormhole => wormhole.InRange(loc,wormhole.WormholeRange)).ToList()
+            .Count>0;
         }
 
         public static bool IsHittingAsteroid(Location loc)
@@ -54,7 +66,7 @@ namespace Bot
             }
             return hitting;
         }
-        public static bool IsInRange(Location loc)
+        public static bool IsInRangeOfEnemy(Location loc)
         {
             int count = 0;
             foreach (Pirate pirate in game.GetEnemyLivingPirates())
