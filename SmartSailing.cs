@@ -25,14 +25,14 @@ namespace Bot
             //  return best.OrderBy(location => location.Distance(destination)).FirstOrDefault();// get the closest and safest route
             Location best = pirate.Location;
             int col = 0, row = 0;
-            for (row = pirate.GetLocation().Row - pirate.MaxSpeed; row < pirate.GetLocation().Row + pirate.MaxSpeed; row += 5)
+            for (row = pirate.GetLocation().Row - pirate.MaxSpeed; row < pirate.GetLocation().Row + pirate.MaxSpeed; row += 5)// go over a couple of location and get the best
             {
                 for (col = pirate.GetLocation().Col - pirate.MaxSpeed; col < pirate.GetLocation().Col + pirate.MaxSpeed; col += 5)
                 {
                     Location current = new Location(row, col);
                     if (!current.InMap())
                         continue;
-                    if (current.Distance(destination) < pirate.Distance(destination) && current.Distance(destination) >= pirate.Distance(destination) - pirate.MaxSpeed && !IsInRangeOfEnemy(current)&& !IsHittingAsteroid(current))
+                    if (current.Distance(destination) < pirate.Distance(destination) && current.Distance(destination) >= pirate.Distance(destination) - pirate.MaxSpeed && !IsInDanger(current))
                     {
                         if ((best.Distance(destination) > current.Distance(destination)) || (best == pirate.Location))
                             best = current;
