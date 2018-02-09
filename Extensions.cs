@@ -21,6 +21,17 @@ namespace Bot
             return num;
         }
 
+        public static int ClosestDistance(this GameObject from, MapObject to, IEnumerable<Wormhole> wormholes)
+       {
+           if (wormholes.Any()) {
+               int distanceWithoutWormholes = from.Distance(to);
+               int distanceWithWormholes = wormholes.Select(wormhole => from.Distance(wormhole) + wormhole.Partner.Distance(to)).Min();
+               return System.Math.Min(distanceWithoutWormholes, distanceWithWormholes);
+           }
+           return from.Distance(to);
+       }
+
+
         public static double Sqrt(this double num)
         {
             return System.Math.Sqrt(num);
