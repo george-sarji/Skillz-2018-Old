@@ -367,7 +367,7 @@ namespace Bot
             }
         }
 
-        public static bool CheckIfCapsuleCanReach(Pirate CapsuleHolder, Mothership mothership)
+        public static bool CheckIfCapsuleCanReach(Pirate CapsuleHolder, Mothership mothership)//Working on this Function -Mahmoud
         {
             if (CapsuleHolder.InRange(mothership, mothership.UnloadRange * 3) && GameExtension.NumberOfAvailableEnemyPushers(CapsuleHolder) < CapsuleHolder.NumPushesForCapsuleLoss)
             {
@@ -381,7 +381,7 @@ namespace Bot
             return false;
         }
 
-        public static void GroupPair(Pirate FirstPirate, Pirate SecondPirate, Mothership heading)
+        public static void GroupPair(Pirate FirstPirate, Pirate SecondPirate, Mothership heading, List<Pirate> capsuleHolders)//Working on this function -Mahmoud
         {
             // Get the intersection point
             var intersectionPoint = GameExtension.Interception(FirstPirate.Location, heading.Location, SecondPirate.Location);
@@ -429,24 +429,10 @@ namespace Bot
                         pirateDestinations.Add(SecondPirate, SmartSailing.SmartSail(SecondPirate, heading));
                 }
             }
-            else if (second)
-            {
-                if (pirateDestinations.ContainsKey(SecondPirate))
-                    pirateDestinations[SecondPirate] = heading.Location;
-                else
-                    pirateDestinations.Add(SecondPirate, heading.Location);
-            }
-            else if (first)
-            {
-                if (pirateDestinations.ContainsKey(FirstPirate))
-                    pirateDestinations[FirstPirate] = heading.Location;
-                else
-                    pirateDestinations.Add(FirstPirate, heading.Location);
-                myPirates.Remove(FirstPirate);
-                myPirates.Remove(SecondPirate);
-                myPirates.Remove(FirstPirate);
-                myPirates.Remove(SecondPirate);
-            }
+            capsuleHolders.Remove(FirstPirate);
+            capsuleHolders.Remove(SecondPirate);
+            myPirates.Remove(FirstPirate);
+            myPirates.Remove(SecondPirate);
         }
         public static void AttackEnemies()
         {
