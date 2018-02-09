@@ -21,17 +21,6 @@ namespace Bot
             return num;
         }
 
-        public static int ClosestDistance(this GameObject from, MapObject to, IEnumerable<Wormhole> wormholes)
-       {
-           if (wormholes.Any()) {
-               int distanceWithoutWormholes = from.Distance(to);
-               int distanceWithWormholes = wormholes.Select(wormhole => from.Distance(wormhole) + wormhole.Partner.Distance(to)).Min();
-               return System.Math.Min(distanceWithoutWormholes, distanceWithWormholes);
-           }
-           return from.Distance(to);
-       }
-
-
         public static double Sqrt(this double num)
         {
             return System.Math.Sqrt(num);
@@ -109,6 +98,13 @@ namespace Bot
        public static int NumberOfAvailableEnemyPushers(Pirate pirate)
        {
            return InitializationBot.game.GetEnemyLivingPirates().Where(enemy => enemy.CanPush(pirate)).Count();
+       }
+
+       public static Location MidPoint(Pirate pirate1, Pirate pirate2)
+       {
+           int x1 = pirate1.Location.Col, x2 = pirate2.Location.Col;
+           int y1 = pirate1.Location.Row, y2 = pirate2.Location.Row;
+           return new Location((y1+y2)/2, (x1+x2)/2);
        }
 
     }

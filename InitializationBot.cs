@@ -129,5 +129,13 @@ namespace Bot
 
             return Closest(location, up, down, left, right);
         }
+
+        protected static void AssignDestination(Pirate pirate, Location destination)
+        {
+            if(pirateDestinations.ContainsKey(pirate))
+                pirateDestinations[pirate]=destination;
+            else   
+                pirateDestinations.Add(pirate, destination);   
+        }
     }
 }

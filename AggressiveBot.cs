@@ -369,70 +369,54 @@ namespace Bot
 
         public static bool CheckIfCapsuleCanReach(Pirate CapsuleHolder, Mothership mothership)//Working on this Function -Mahmoud
         {
+            if(mothership == null) return false;
             if (CapsuleHolder.InRange(mothership, mothership.UnloadRange * 3) && GameExtension.NumberOfAvailableEnemyPushers(CapsuleHolder) < CapsuleHolder.NumPushesForCapsuleLoss)
             {
-                if (pirateDestinations.ContainsKey(CapsuleHolder))
-                    pirateDestinations[CapsuleHolder] = mothership.Location;
-                else
-                    pirateDestinations.Add(CapsuleHolder, mothership.Location);
+                AssignDestination(CapsuleHolder, mothership.Location);
                 return true;
 
             }
             return false;
         }
 
-        public static void GroupPair(Pirate FirstPirate, Pirate SecondPirate, Location heading, List<Pirate> capsuleHolders)//Working on this function -Mahmoud
+        public static void GroupPair(Pirate first, Pirate second, Location destination)
         {
-            // Get the intersection point
-            var intersectionPoint = GameExtension.Interception(FirstPirate.Location, heading, SecondPirate.Location);
-            var secondIntersection = GameExtension.Interception(SecondPirate.Location, heading, FirstPirate.Location);
+            var firstIntersection = GameExtension.Interception(first.Location,destination, second.Location);
+            var secondIntersection = GameExtension.Interception(second.Location,destination, first.Location);
             Location bestIntersection = null;
-            if (intersectionPoint != null && secondIntersection != null)
+            if(firstIntersection!=null && secondIntersection!=null)
             {
-                // Get the closest.
-                if (heading.Distance(intersectionPoint) > heading.Distance(secondIntersection))
+                // Get the closest to the destination.
+                if(firstIntersection.Distance(destination)>secondIntersection.Distance(destination))
                 {
                     bestIntersection = secondIntersection;
                 }
                 else
-                    bestIntersection = intersectionPoint;
+                    bestIntersection = firstIntersection;
             }
-            else if (intersectionPoint != null)
-                bestIntersection = intersectionPoint;
-            else
-                bestIntersection = secondIntersection;
-            if (bestIntersection != null)
+            else if(firstIntersection!=null)
             {
-                // Send the pirates to the intersection if they're not in each other's push range.
-                if (!FirstPirate.Location.Equals(SecondPirate.Location))
-                {
-                    if (pirateDestinations.ContainsKey(FirstPirate))
-                        pirateDestinations[FirstPirate] = bestIntersection;
-                    else
-                        pirateDestinations.Add(FirstPirate, bestIntersection);
-                    if (pirateDestinations.ContainsKey(SecondPirate))
-                        pirateDestinations[SecondPirate] = bestIntersection;
-                    else
-                        pirateDestinations.Add(SecondPirate, bestIntersection);
-                }
-                else
-                {
-                    // Send them towards the mothership
-                    if (pirateDestinations.ContainsKey(FirstPirate))
-
-                        pirateDestinations[FirstPirate] = SmartSailing.SmartSail(FirstPirate, heading);
-                    else
-                        pirateDestinations.Add(FirstPirate, SmartSailing.SmartSail(FirstPirate, heading));
-                    if (pirateDestinations.ContainsKey(SecondPirate))
-                        pirateDestinations[SecondPirate] = SmartSailing.SmartSail(SecondPirate, heading);
-                    else
-                        pirateDestinations.Add(SecondPirate, SmartSailing.SmartSail(SecondPirate, heading));
-                }
+                bestIntersection = firstIntersection;
             }
-            capsuleHolders.Remove(FirstPirate);
-            capsuleHolders.Remove(SecondPirate);
-            myPirates.Remove(FirstPirate);
-            myPirates.Remove(SecondPirate);
+            else if(secondIntersection!=null)
+                bestIntersection = secondIntersection;
+            else
+                bestIntersection = GameExtension.MidPoint(first, second);
+            // Move the pirates now.
+            var capsuleHolders = game.GetMyLivingPirates().Where(p => p.HasCapsule());
+            var mothershipInLocation = myMotherships.Where(mothership => mothership.Location.Equals(destination)).FirstOrDefault();
+            if(first.Distance(second)< mothershipInLocation.Distance(first) && !first.InPushRange(second))
+            {
+                AssignDestination(first, SmartSailing.SmartSail(first, bestIntersection));
+                AssignDestination(second, SmartSailing.SmartSail(second, bestIntersection));
+            }
+            else
+            {
+                AssignDestination(first, destination);
+                AssignDestination(second, destination);    
+            }
+            myPirates.Remove(first);
+            myPirates.Remove(second);
         }
         public static void AttackEnemies()
         {
