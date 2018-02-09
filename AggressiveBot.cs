@@ -381,11 +381,11 @@ namespace Bot
             return false;
         }
 
-        public static void GroupPair(Pirate FirstPirate, Pirate SecondPirate, Mothership heading, List<Pirate> capsuleHolders)//Working on this function -Mahmoud
+        public static void GroupPair(Pirate FirstPirate, Pirate SecondPirate, Location heading, List<Pirate> capsuleHolders)//Working on this function -Mahmoud
         {
             // Get the intersection point
-            var intersectionPoint = GameExtension.Interception(FirstPirate.Location, heading.Location, SecondPirate.Location);
-            var secondIntersection = GameExtension.Interception(SecondPirate.Location, heading.Location, FirstPirate.Location);
+            var intersectionPoint = GameExtension.Interception(FirstPirate.Location, heading, SecondPirate.Location);
+            var secondIntersection = GameExtension.Interception(SecondPirate.Location, heading, FirstPirate.Location);
             Location bestIntersection = null;
             if (intersectionPoint != null && secondIntersection != null)
             {
