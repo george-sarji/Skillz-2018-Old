@@ -338,6 +338,70 @@ namespace Bot
 
         }
 
+
+        public static void MoveToIntersection()
+
+        {
+            var usedPirates = new List<Pirate>();
+            var capsuleHolders = myPirates.Where(p => p.HasCapsule()).ToList();
+            while(capsuleHolders.Count()>1)
+            {
+                // Get the best mothership
+                var first = capsuleHolders.FirstOrDefault();
+                capsuleHolders.Remove(first);
+                var mothership = myMotherships.OrderBy(m => m.Distance(first)/((double)m.ValueMultiplier).Sqrt()).FirstOrDefault();
+                if(mothership!=null)
+                {
+                    var closestHolder = capsuleHolders.OrderBy(p => p.Distance(mothership)).FirstOrDefault();
+                    capsuleHolders.Remove(closestHolder);
+                    // Check if each of the pirates can reach.
+                    bool firstReach = false, secondReach=false;
+                    if(CheckIfCapsuleCanReach(first, mothership))
+                    {
+                        firstReach = true;
+                    }
+                    if(CheckIfCapsuleCanReach(closestHolder, mothership))
+                    {
+                        secondReach = true;
+                    }
+                    if(!firstReach && !secondReach)
+                    {
+                        GroupPair(first, closestHolder, mothership.Location);
+                    }
+                    else if(secondReach)
+                        AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));
+                    else if(firstReach)
+                        AssignDestination(first, SmartSailing.SmartSail(first, mothership));
+                    myPirates.Remove(first);
+                    myPirates.Remove(closestHolder);
+                }
+            }
+            if(capsuleHolders.Count() ==1)
+            {
+                // There's a lonely pirate. Pair him up for the sake of Valentine.
+                var lonelyPirate = capsuleHolders.FirstOrDefault();
+                var mothership = myMotherships.OrderBy(m => m.Distance(lonelyPirate)/((double)m.ValueMultiplier).Sqrt()).FirstOrDefault();
+                if(mothership!=null)
+                {
+                    var closestPirate = myPirates.OrderBy(p => p.Distance(lonelyPirate)).FirstOrDefault();
+                    if(closestPirate!=null)
+                    {
+                        if(CheckIfCapsuleCanReach(lonelyPirate, mothership))
+                        {
+                            capsuleHolders.Remove(lonelyPirate);
+                            myPirates.Remove(lonelyPirate);
+                        }
+                        else
+                        {
+                            GroupPair(lonelyPirate, closestPirate, mothership.Location);
+                        }
+                        myPirates.Remove(lonelyPirate);
+                        myPirates.Remove(closestPirate);
+                    }
+                }
+            }
+        }
+
         public static void PushAsteroids()
         {
             var usedPirates = new List<Pirate>();
@@ -373,6 +437,7 @@ namespace Bot
             if (CapsuleHolder.InRange(mothership, mothership.UnloadRange * 3) && GameExtension.NumberOfAvailableEnemyPushers(CapsuleHolder) < CapsuleHolder.NumPushesForCapsuleLoss)
             {
                 AssignDestination(CapsuleHolder, mothership.Location);
+                myPirates.Remove(CapsuleHolder);
                 return true;
 
             }
