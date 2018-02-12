@@ -170,7 +170,7 @@ namespace Bot
                         .FirstOrDefault();
                 LocationOfPush = myPirateWithCapsule.Location.Towards(destination, mypirate.PushDistance);
 
-                if ((SmartSailing.IsInDanger(mypirate.GetLocation(), LocationOfPush, mypirate)|| ((numberOfPushesNeeded - numberOfEnemiesAroundMyCapsule == 1) || !myPirates.Contains(mypirate))))
+                if ((SmartSailing.IsInDanger(mypirate.GetLocation(), LocationOfPush, mypirate) || ((numberOfPushesNeeded - numberOfEnemiesAroundMyCapsule == 1) || !myPirates.Contains(mypirate))))
                 {
                     ("Breaking for loop, not enough pushes.").Print();
                     ((!myPirates.Contains(mypirate)).ToString()).Print();
@@ -215,7 +215,7 @@ namespace Bot
         //         }
         //     }
         // }
-        public static bool PushAlliesToEnemy(Pirate target)
+        public static bool PushAlliesToEnemy(Pirate target)//will document soon
         {
             int count = game.GetMyLivingPirates().Where(pirate => pirate.CanPush(target)).Except(myPiratesWithCapsule).Count();
             if (!(count >= target.NumPushesForCapsuleLoss))
@@ -228,7 +228,7 @@ namespace Bot
                     int PushesNeeded = pirate.Distance(target) / (game.PushDistance + 1);
                     if (PiratesCanPush >= PushesNeeded)
                     {
-                        PiratesPush[pirate] = pirate.Distance(target) / (game.PushDistance+1);
+                        PiratesPush[pirate] = pirate.Distance(target) / (game.PushDistance + 1);
                     }
                 }
                 var PushingPirate = PiratesPush.OrderBy(x => x.Value).ToDictionary(pair => pair.Key, pair => pair.Value).FirstOrDefault();
@@ -250,15 +250,38 @@ namespace Bot
             }
             return true;
         }
+
+        public static void PushWormhole()
+        {
+            int count = 0;
+            foreach (Pirate pirate in myPirates)//go over all of my pirates
+            {
+                if (count > allWormholes.Count)//if I assigned a pirate to each wormhole then exit
+                    break;
+                Wormhole wormhole = Priorities.GetBestWormhole(pirate);//the best wormhole for the current pirate
+                Location pushLocation = Priorities.GetPushLocation(wormhole, pirate);//the best pushLocation for the current pirate
+                if (pirate.CanPush(wormhole))//if the pirate has a push and is in range of the wormhole
+                {
+                    pirate.Push(wormhole, pushLocation);//push and set the turn to true so we don't get ignored actions
+                    FinishedTurn[pirate] = true;
+                }
+                else//if pirate can't push the wormhole make him sail to the wormhole by assigning his destinationto the wormhole
+                {
+                    AssignDestination(pirate, wormhole.Location);
+                }
+                myPirates.Remove(pirate);
+                count++;
+            }
+        }
         public static void PushEachOther()
         {
             var PiratesWithCapsuleCanPushOthers = new Dictionary<Pirate, List<Pirate>>();
             var UsedPirates = new List<Pirate>();
-            foreach (Pirate pirateWithCapsule in myPiratesWithCapsule)
+            foreach (Pirate pirateWithCapsule in myPiratesWithCapsule)//go over all my pirate with capsule and make a list of who they can push
             {
                 var heading = myMotherships.OrderBy(mothership => mothership.Distance(pirateWithCapsule)).FirstOrDefault();
                 var PiratesWhoCanPush = myPiratesWithCapsule
-                .Where(pirate => pirate.CanPush(pirateWithCapsule)
+                .Where(pirate => pirate.CanPush(pirateWithCapsule)//All pirate who can push the current pirate with capsule
                 && pirateWithCapsule != pirate
                 && pirate.Distance(heading) - ((Mothership)heading).UnloadRange < pirate.PushDistance).ToList();
                 if (PiratesWhoCanPush.Count == 0)
@@ -267,22 +290,24 @@ namespace Bot
                 }
                 PiratesWithCapsuleCanPushOthers[pirateWithCapsule] = PiratesWhoCanPush;
             }
-            foreach (var pirate in PiratesWithCapsuleCanPushOthers.
-            OrderBy(item => item.Value.Count)
-            .ToDictionary(pair => pair.Key, pair => pair.Value).Keys.ToList())
+            foreach (var pirate in PiratesWithCapsuleCanPushOthers
+            .OrderBy(item => item.Value.Count)
+            .ToDictionary(pair => pair.Key, pair => pair.Value).Keys.ToList())//go over all my Pirates with capsule in the dictionary but in order of the length of the list
             {
                 var heading = myMotherships.OrderBy(mothership => mothership.Distance(pirate)).FirstOrDefault();
                 if (myPirates.Contains(pirate))
                 {
-                    Pirate OtherPushingPirate = PiratesWithCapsuleCanPushOthers[pirate].First();
-                    PushPair(pirate, OtherPushingPirate, heading.Location);
-                    myPirates.Remove(pirate);
+                    Pirate OtherPushingPirate = PiratesWithCapsuleCanPushOthers[pirate].First();//Get FirstPirate who can push the current pirate with capsule
+                    PushPair(pirate, OtherPushingPirate, heading.Location);//Push them
+                    myPirates.Remove(pirate);//Remove both from list
                     myPirates.Remove(OtherPushingPirate);
+                    FinishedTurn[pirate] = true;//Set turns to finished
+                    FinishedTurn[OtherPushingPirate] = true;
                 }
             }
         }
 
-        public static void PushPair(Pirate pirate1, Pirate pirate2, Location destination)
+        public static void PushPair(Pirate pirate1, Pirate pirate2, Location destination)//Take two pirates and a destination and lets them push eachother towards the destination
         {
             pirate1.Push(pirate2, destination);
             pirate2.Push(pirate1, destination);
