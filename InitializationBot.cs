@@ -68,6 +68,7 @@ namespace Bot
                 AggressiveBot.PushAsteroids();
                 AggressiveBot.AttackEnemies();
                 MovePiratesToDestinations();
+                GetWormholesForPirates();
                 // Priorities.GenerateGeneralPriority();
                 PrintDictionary(pirateDestinations);
             }
@@ -144,6 +145,16 @@ namespace Bot
                 pirateDestinations[pirate] = destination;
             else
                 pirateDestinations.Add(pirate, destination);
+        }
+
+        protected static void GetWormholesForPirates()
+        {
+            foreach(var map in pirateDestinations)
+            {
+                // Debug the wormhole!
+                var bestWormhole = GameExtension.GetBestWormhole(game.GetActiveWormholes(), map.Value, map.Key);
+                ("Best wormhole for "+map.Key + " towards "+ map.Value + " is "+ bestWormhole).Print();
+            }
         }
     }
 }

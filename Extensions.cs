@@ -108,14 +108,14 @@ namespace Bot
        }
 
        private static int DistanceThroughWormhole(Location from, MapObject to, Wormhole wormhole, IEnumerable<Wormhole> wormholes)
-       {
+        {
            return from.Distance(wormhole) +
                   ClosestDistance(wormhole.Partner.Location, to,
                                   wormholes.Where(w => w.Id != wormhole.Id && w.Id != wormhole.Partner.Id));
-       }
+        }
 
-       private static int ClosestDistance(Location from, MapObject to, IEnumerable<Wormhole> wormholes)
-       {
+        private static int ClosestDistance(Location from, MapObject to, IEnumerable<Wormhole> wormholes)
+        {
            if (wormholes.Any())
            {
                int distanceWithoutWormholes = from.Distance(to);
@@ -125,6 +125,27 @@ namespace Bot
                return System.Math.Min(distanceWithoutWormholes, distanceWithWormholes);
            }
            return from.Distance(to);
+        }
+
+
+       public static Wormhole GetBestWormhole(IEnumerable<Wormhole> wormholes, Location destination, Pirate pirate)
+       {
+           var wormholeDistances = new Dictionary<Wormhole, int>();
+           foreach(var wormhole in wormholes)
+           {
+            //    Assign the closest distance for the wormhole
+                wormholeDistances.Add(wormhole, DistanceThroughWormhole(pirate.Location, destination, wormhole, wormholes));
+           }
+        //    Get the minimum
+            var bestWormhole = wormholeDistances.OrderBy(map => map.Value).FirstOrDefault();
+            if(bestWormhole.Key!=null)
+            {
+                // Check the regular distance.
+                var normalDistance = pirate.Distance(destination);
+                if(bestWormhole.Value<normalDistance)
+                    return bestWormhole.Key;
+            }
+            return null;
        }
 
 
