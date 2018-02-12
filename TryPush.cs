@@ -256,7 +256,7 @@ namespace Bot
             int count = 0;
             foreach (Pirate pirate in myPirates.ToList())//go over all of my pirates
             {
-                if (count > allWormholes.Count)//if I assigned a pirate to each wormhole then exit
+                if (count >= allWormholes.Count)//if I assigned a pirate to each wormhole then exit
                     break;
                 Wormhole wormhole = Priorities.GetBestWormhole(pirate);//the best wormhole for the current pirate
                 Location pushLocation = Priorities.GetPushLocation(wormhole, pirate);//the best pushLocation for the current pirate
