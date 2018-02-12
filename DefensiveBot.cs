@@ -87,12 +87,15 @@ namespace Bot
 
         public static void BuildDefensiveBunker()
         {
+            var capsuleMothership = new Dictionary<Capsule, Mothership>();
             foreach(var capsule in game.GetEnemyCapsules().Where(cap => cap.Holder!=null))
             {
                 // Get the closest mothership.
                 var closestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsule)).FirstOrDefault();
                 if(closestMothership!=null)
                 {
+                    capsuleMothership.Add(capsule, closestMothership);
+                    var rangeNeeded = capsuleMothership.Values.Where(val => val.Equals(closestMothership)).Count();
                     // Get the amount of pushes towards the border.
                     var closestToBorder = GetClosestToBorder(closestMothership.Location);
                     var amountOfPushes = closestMothership.Distance(closestToBorder)/(game.PushDistance+1);
@@ -102,8 +105,8 @@ namespace Bot
                         requiredPirates = pushesTillLoss;
                     else
                         requiredPirates = amountOfPushes;
-                    requiredPirates+=2;
                     // Get the pirates that we can use.
+                    requiredPirates=pushesTillLoss+1;
                     var useablePirates = myPirates.OrderBy(p => p.Distance(closestMothership)).Where(p=> p.Steps(closestMothership)>p.PushReloadTurns);
                     if(useablePirates.Count()>=requiredPirates)
                     {
@@ -114,7 +117,7 @@ namespace Bot
                                 usedPirates.Add(pirate);
                             else
                             {
-                                AssignDestination(pirate, closestMothership.Location.Towards(capsule, closestMothership.UnloadRange));
+                                AssignDestination(pirate, closestMothership.Location.Towards(capsule, pirate.PushRange*(int)((double)rangeNeeded).Power(2)));
                                 usedPirates.Add(pirate);
                             }
                         }
