@@ -39,7 +39,7 @@ namespace Bot
                 double deltaX = pirate.MaxSpeed * System.Math.Cos(angle);
                 double deltaY = pirate.MaxSpeed * System.Math.Sin(angle);
                 Location option = new Location((int)(PirateLocation.Row - deltaY), (int)(PirateLocation.Col + deltaX));
-                if (!IsInDanger(option) && option.InMap())
+                if (!IsInDanger(option, destination.GetLocation(), pirate) && option.InMap())
                 {
                     candidates.Add(option);
                 }
@@ -52,9 +52,9 @@ namespace Bot
             return bestOption;
         }
 
-        public static bool IsInDanger(Location loc)
+        public static bool IsInDanger(Location loc, Location destination, Pirate pirate)
         {
-            return IsHittingAsteroid(loc)||IsInRangeOfEnemy(loc);
+            return IsHittingAsteroid(loc)||IsInRangeOfEnemy(loc) || IsInWormholeDanger(loc, destination, pirate);
         }
 
 
@@ -67,6 +67,18 @@ namespace Bot
                     hitting = true;
             }
             return hitting;
+        }
+
+        public static bool IsInWormholeDanger(Location location, Location destination, Pirate pirate)
+        {
+            // Get the closest wormhole to the current locatio.
+            var wormholes = InitializationBot.game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate<pirate.Steps(destination)/4).OrderBy(wormhole => wormhole.Distance(pirate));
+            var closestWormhole = wormholes.FirstOrDefault();
+            if(closestWormhole==null)
+                return false;
+            else if(closestWormhole.Equals(GameExtension.GetBestWormhole(destination, pirate)))
+                return false;
+            return true;
         }
         public static bool IsInRangeOfEnemy(Location loc)
         {
