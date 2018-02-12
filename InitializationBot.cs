@@ -65,6 +65,7 @@ namespace Bot
                 DefensiveBot.BuildDefensiveBunker();
                 // AggressiveBot.GoHelpAllyWithCapsule();
                 AggressiveBot.CaptureCapsules();
+                TryPush.PushWormhole();
                 AggressiveBot.PushAsteroids();
                 AggressiveBot.AttackEnemies();
                 MovePiratesToDestinations();
