@@ -54,7 +54,7 @@ namespace Bot
 
         public static bool IsInDanger(Location loc)
         {
-            return IsHittingAsteroid(loc)&&IsInRangeOfEnemy(loc);
+            return IsHittingAsteroid(loc)||IsInRangeOfEnemy(loc);
         }
 
 
