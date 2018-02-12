@@ -84,6 +84,7 @@ namespace Bot
             enemyMotherships = game.GetEnemyMotherships().ToList();
             enemyPirates = game.GetEnemyLivingPirates().ToList();
             enemyCapsules = game.GetEnemyCapsules().ToList();
+            allWormholes = game.GetAllWormholes().ToList();
             myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
             enemyCapsulesPushes = game.GetEnemyCapsules().ToDictionary(key => key, value => 0);
             activeWormholes = game.GetActiveWormholes().ToList();
