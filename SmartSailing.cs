@@ -23,38 +23,40 @@ namespace Bot
 
             // }
             //  return best.OrderBy(location => location.Distance(destination)).FirstOrDefault();// get the closest and safest route
-            Location best = pirate.Location;
-            int col = 0, row = 0;
-            for (row = pirate.GetLocation().Row - pirate.MaxSpeed; row < pirate.GetLocation().Row + pirate.MaxSpeed; row += 5)// go over a couple of location and get the best
+            List<Location> candidates = new List<Location>();
+            var bestOption = pirate.GetLocation();
+            const int steps = 24;
+            Location PirateLocation=pirate.GetLocation();
+            if((pirate.Location.Distance(destination))-bestOption.Distance(destination)>=(pirate.MaxSpeed/2) && pirate.HasCapsule())
             {
-                for (col = pirate.GetLocation().Col - pirate.MaxSpeed; col < pirate.GetLocation().Col + pirate.MaxSpeed; col += 5)
-                {
-                    Location current = new Location(row, col);
-                    if (!current.InMap())
-                        continue;
-                    if (current.Distance(destination) < pirate.Distance(destination) && current.Distance(destination) >= pirate.Distance(destination) - pirate.MaxSpeed && !IsInDanger(current))
-                    {
-                        if ((best.Distance(destination) > current.Distance(destination)) || (best == pirate.Location))
-                            best = current;
-                    }
-                }
+                var LocationOfPush=TryPush.TryPushMyCapsule(pirate);
+                if(PirateLocation != null)
+                    PirateLocation=LocationOfPush;
             }
-            return best;
-            
-           
+            for (int i = 0; i < steps; i++)
+            {
+                double angle = System.Math.PI * 2 * i / steps;
+                double deltaX = pirate.MaxSpeed * System.Math.Cos(angle);
+                double deltaY = pirate.MaxSpeed * System.Math.Sin(angle);
+                Location option = new Location((int)(PirateLocation.Row - deltaY), (int)(PirateLocation.Col + deltaX));
+                if (!IsInDanger(option) && option.InMap())
+                {
+                    candidates.Add(option);
+                }
+
+            }
+            if (candidates.Any())
+            {
+                bestOption = candidates.OrderBy(option => option.Distance(destination)).First();
+            }
+            return bestOption;
         }
 
         public static bool IsInDanger(Location loc)
         {
-            return IsHittingAsteroid(loc)&&IsInRangeOfEnemy(loc)&&IsInWormHoleRange(loc);
+            return IsHittingAsteroid(loc)&&IsInRangeOfEnemy(loc);
         }
 
-        public static bool IsInWormHoleRange(Location loc)
-        {
-            return InitializationBot.activeWormholes.
-            Where(wormhole => wormhole.InRange(loc,wormhole.WormholeRange)).ToList()
-            .Count>0;
-        }
 
         public static bool IsHittingAsteroid(Location loc)
         {
