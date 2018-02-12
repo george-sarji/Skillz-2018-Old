@@ -13,7 +13,6 @@ namespace Bot
             // Go over the capsules
             foreach (var capsule in myCapsules)
             {
-                var usedPirates = new List<Pirate>();
                 // Sort the pirates per the distance
                 myPirates = myPirates.OrderBy(pirate => pirate.Distance(capsule.InitialLocation)).ToList();
                 // Check if the capsule was taken.
@@ -23,22 +22,30 @@ namespace Bot
                     var pirateSailer = myPirates.FirstOrDefault(pirate => !pirate.HasCapsule());
                     if (pirateSailer != null)
                     {
-                        pirateDestinations.Add(pirateSailer, capsule.InitialLocation);
-                        usedPirates.Add(pirateSailer);
+                        var bestWormhole = GameExtension.GetBestWormhole(capsule.InitialLocation, pirateSailer);
+                        if(bestWormhole!=null)
+                        {
+                            // Go towards the wormhole.
+                            AssignDestination(pirateSailer, bestWormhole.Location);
+                        }
+                        else
+                            AssignDestination(pirateSailer, capsule.InitialLocation);
+                        myPirates.Remove(pirateSailer);
                     }
-                    myPirates = myPirates.Except(usedPirates).ToList();
                 }
                 else if (myPirates.Any())
                 {
                     // Send the closest pirate to capture the capsule.
                     var sailingPirate = myPirates.First();
-                    if (pirateDestinations.ContainsKey(sailingPirate))
+                    var bestWormhole = GameExtension.GetBestWormhole(capsule.InitialLocation, sailingPirate);
+                    if(bestWormhole!=null)
                     {
-                        pirateDestinations[sailingPirate] = capsule.InitialLocation;
+                        // Assign to the wormhole
+                        AssignDestination(sailingPirate, bestWormhole.Location);
                     }
                     else
-                        pirateDestinations.Add(sailingPirate, capsule.InitialLocation);
-                    myPirates = myPirates.Where(pirate => !pirate.Equals(sailingPirate)).ToList();
+                        AssignDestination(sailingPirate, capsule.InitialLocation);
+                    myPirates.Remove(sailingPirate);
                 }
             }
         }
@@ -91,28 +98,64 @@ namespace Bot
                 var mothership = myMotherships.OrderBy(m => m.Distance(first) / ((double)m.ValueMultiplier).Sqrt()).FirstOrDefault();
                 if (mothership != null)
                 {
+
+                    // Get the best wormhole
+                    var bestWormhole = GameExtension.GetBestWormhole(mothership.Location, first);
                     var closestHolder = capsuleHolders.OrderBy(p => p.Distance(mothership)).FirstOrDefault();
                     capsuleHolders.Remove(closestHolder);
+<<<<<<< HEAD
                     // Check if each of the pirates can reach.
                     bool firstReach = false, secondReach = false;
                     if (CheckIfCapsuleCanReach(first, mothership))
+=======
+                    if(bestWormhole!=null)
+>>>>>>> e38e8d298a916cc3638f96d60e811a5f3da10691
                     {
-                        firstReach = true;
+                        // There is a wormhole. Send them with an intersection.
+                        GroupPair(first, closestHolder, bestWormhole.Location);
+                        myPirates.Remove(first);
+                        myPirates.Remove(closestHolder);
                     }
+<<<<<<< HEAD
                     if (CheckIfCapsuleCanReach(closestHolder, mothership))
                     {
                         secondReach = true;
                     }
                     if (!firstReach && !secondReach)
+=======
+                    else
+>>>>>>> e38e8d298a916cc3638f96d60e811a5f3da10691
                     {
-                        GroupPair(first, closestHolder, mothership.Location);
+                        // Check if each of the pirates can reach.
+                        bool firstReach = false, secondReach=false;
+                        if(CheckIfCapsuleCanReach(first, mothership))
+                        {
+                            firstReach = true;
+                        }
+                        if(CheckIfCapsuleCanReach(closestHolder, mothership))
+                        {
+                            secondReach = true;
+                        }
+                        if(!firstReach && !secondReach)
+                        {
+                            GroupPair(first, closestHolder, mothership.Location);
+                        }
+                        else if(secondReach)
+                            AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));
+                        else if(firstReach)
+                            AssignDestination(first, SmartSailing.SmartSail(first, mothership));
+                        myPirates.Remove(first);
+                        myPirates.Remove(closestHolder);
                     }
+<<<<<<< HEAD
                     else if (secondReach)
                         AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));
                     else if (firstReach)
                         AssignDestination(first, SmartSailing.SmartSail(first, mothership));
                     myPirates.Remove(first);
                     myPirates.Remove(closestHolder);
+=======
+>>>>>>> e38e8d298a916cc3638f96d60e811a5f3da10691
                 }
             }
             if (capsuleHolders.Count() == 1)
@@ -123,10 +166,22 @@ namespace Bot
                 if (mothership != null)
                 {
                     var closestPirate = myPirates.OrderBy(p => p.Distance(lonelyPirate)).FirstOrDefault();
+<<<<<<< HEAD
                     if (closestPirate != null)
                     {
                         if (CheckIfCapsuleCanReach(lonelyPirate, mothership))
+=======
+                    var bestWormhole = GameExtension.GetBestWormhole(mothership.Location, lonelyPirate);
+                    if(closestPirate!=null)
+                    {
+                        if(bestWormhole!=null)
                         {
+                            GroupPair(lonelyPirate, closestPirate, bestWormhole.Location);
+                        }
+                        else if(CheckIfCapsuleCanReach(lonelyPirate, mothership))
+>>>>>>> e38e8d298a916cc3638f96d60e811a5f3da10691
+                        {
+                            AssignDestination(lonelyPirate, mothership.Location);
                             capsuleHolders.Remove(lonelyPirate);
                             myPirates.Remove(lonelyPirate);
                         }
@@ -137,7 +192,10 @@ namespace Bot
                         myPirates.Remove(lonelyPirate);
                         myPirates.Remove(closestPirate);
                     }
+                    else
+                        AssignDestination(lonelyPirate, bestWormhole.Location);
                 }
+                
             }
         }
 
@@ -209,7 +267,11 @@ namespace Bot
             // Move the pirates now.
             var capsuleHolders = game.GetMyLivingPirates().Where(p => p.HasCapsule());
             var mothershipInLocation = myMotherships.Where(mothership => mothership.Location.Equals(destination)).FirstOrDefault();
+<<<<<<< HEAD
             if (first.Distance(second) < mothershipInLocation.Distance(first) && !first.InPushRange(second))
+=======
+            if(first.Distance(second)< destination.Distance(first) && !first.InPushRange(second))
+>>>>>>> e38e8d298a916cc3638f96d60e811a5f3da10691
             {
                 AssignDestination(first, SmartSailing.SmartSail(first, bestIntersection));
                 AssignDestination(second, SmartSailing.SmartSail(second, bestIntersection));

@@ -130,12 +130,22 @@ namespace Bot
         }
 
 
+<<<<<<< HEAD
         public static Wormhole GetBestWormhole(IEnumerable<Wormhole> wormholes, Location destination, Pirate pirate)
         {
             var wormholeDistances = new Dictionary<Wormhole, int>();
             foreach (var wormhole in wormholes)
             {
                 //    Assign the closest distance for the wormhole
+=======
+       public static Wormhole GetBestWormhole(Location destination, Pirate pirate)
+       {
+           var wormholeDistances = new Dictionary<Wormhole, int>();
+           var wormholes = InitializationBot.game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate<pirate.Steps(destination)/4);
+           foreach(var wormhole in wormholes)
+           {
+            //    Assign the closest distance for the wormhole
+>>>>>>> e38e8d298a916cc3638f96d60e811a5f3da10691
                 wormholeDistances.Add(wormhole, DistanceThroughWormhole(pirate.Location, destination, wormhole, wormholes));
             }
             //    Get the minimum

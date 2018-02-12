@@ -152,7 +152,7 @@ namespace Bot
             foreach(var map in pirateDestinations)
             {
                 // Debug the wormhole!
-                var bestWormhole = GameExtension.GetBestWormhole(game.GetActiveWormholes(), map.Value, map.Key);
+                var bestWormhole = GameExtension.GetBestWormhole(map.Value, map.Key);
                 ("Best wormhole for "+map.Key + " towards "+ map.Value + " is "+ bestWormhole).Print();
             }
         }
