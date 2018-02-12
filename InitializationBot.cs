@@ -61,8 +61,8 @@ namespace Bot
             {
                 TryPush.PushEachOther();
                 AggressiveBot.PushAsteroidsNearby();
-                AggressiveBot.MoveCapsuleHoldersToIntersection();
-                DefensiveBot.BuildBunker();
+                AggressiveBot.MoveToIntersection();
+                DefensiveBot.BuildDefensiveBunker();
                 // AggressiveBot.GoHelpAllyWithCapsule();
                 AggressiveBot.CaptureCapsules();
                 AggressiveBot.PushAsteroids();

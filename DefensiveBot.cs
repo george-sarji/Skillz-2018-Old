@@ -84,83 +84,42 @@ namespace Bot
             }
         } 
 
-        public static void BuildBunker()
+
+        public static void BuildDefensiveBunker()
         {
-            foreach(var capsule in enemyCapsules.Where(cap => !cap.Location.Equals(cap.InitialLocation)))
+            foreach(var capsule in game.GetEnemyCapsules().Where(cap => cap.Holder!=null))
             {
                 // Get the closest mothership.
                 var closestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsule)).FirstOrDefault();
                 if(closestMothership!=null)
                 {
-                    var usedPirates = new List<Pirate>();
-                    // Get the closest point to the border from the mothership
+                    // Get the amount of pushes towards the border.
                     var closestToBorder = GetClosestToBorder(closestMothership.Location);
-                    // Get how much pushes it needs to get to the border + 1
                     var amountOfPushes = closestMothership.Distance(closestToBorder)/game.PushDistance;
-                    amountOfPushes++;
-                    // Check if that amount is bigger than the required for the capsule loss.
-                    if(amountOfPushes>=game.NumPushesForCapsuleLoss)
-                    {
-                        // Send only the amount of pushes for capsule loss towards the capsule.
-                        myPirates = myPirates.OrderBy(pirate => pirate.Distance(closestMothership)).ToList();
-                        var useablePirates = myPirates.Where(pirate => pirate.Steps(closestMothership)>=pirate.PushReloadTurns).ToList();
-                        if(useablePirates.Count()>=game.NumPushesForCapsuleLoss)
-                        {
-                            // Take the first number of pirates and send them.
-                            foreach(var pirate in useablePirates.Take(game.NumPushesForCapsuleLoss))
-                            {
-                                var closestCapsule = enemyCapsules.OrderBy(cap => cap.Distance(closestMothership)).FirstOrDefault();
-                                if(closestCapsule!=null)
-                                {
-                                    // Send the pirates towards the unload range * 0.5
-                                    var destination = closestMothership.Location.Towards(closestCapsule,  (int)(closestMothership.UnloadRange*1));
-                                    if(closestCapsule.Holder!=null && TryPush.TryPushEnemyCapsule(pirate, closestCapsule.Holder))
-                                    {
-                                        usedPirates.Add(pirate);
-                                        continue;
-                                    }
-                                    // Add to the destination.
-                                    else if(!pirateDestinations.ContainsKey(pirate))
-                                    {
-                                        pirateDestinations.Add(pirate, destination);
-                                        usedPirates.Add(pirate);
-                                    }
-                                    
-                                }
-                                
-                            }
-                        }
-                    }
+                    var pushesTillLoss = capsule.Holder.NumPushesForCapsuleLoss;
+                    int requiredPirates;
+                    if(amountOfPushes>=pushesTillLoss)
+                        requiredPirates = pushesTillLoss;
                     else
+                        requiredPirates = amountOfPushes;
+                    requiredPirates+=2;
+                    // Get the pirates that we can use.
+                    var useablePirates = myPirates.OrderBy(p => p.Distance(closestMothership)).Where(p=> p.Steps(closestMothership)>p.PushReloadTurns);
+                    if(useablePirates.Count()>=requiredPirates)
                     {
-                        myPirates = myPirates.OrderBy(pirate => pirate.Distance(closestMothership)).ToList();
-                        var useablePirates = myPirates.Where(pirate => pirate.Steps(closestMothership)>=pirate.PushReloadTurns).ToList();
-                        if(useablePirates.Count()>=amountOfPushes)
+                        var usedPirates = new List<Pirate>();
+                        foreach(var pirate in useablePirates.Take(requiredPirates))
                         {
-                            foreach(var pirate in useablePirates.Take(amountOfPushes))
+                            if(TryPush.TryPushEnemyCapsule(pirate, capsule.Holder))
+                                usedPirates.Add(pirate);
+                            else
                             {
-                                var closestCapsule = enemyCapsules.OrderBy(cap => cap.Distance(closestMothership)).FirstOrDefault();
-                                if(closestCapsule!=null)
-                                {
-                                    // Send the pirates towards the unload range * 0.5
-                                    var destination = closestMothership.Location.Towards(closestCapsule,  (int)(closestMothership.UnloadRange*1));
-                                    if(closestCapsule.Holder!=null && TryPush.TryPushEnemyCapsule(pirate, closestCapsule.Holder))
-                                    {
-                                        usedPirates.Add(pirate);
-                                        continue;
-                                    }
-                                    // Add to the destination.
-                                    else if(!pirateDestinations.ContainsKey(pirate))
-                                    {
-                                        pirateDestinations.Add(pirate, destination);
-                                        usedPirates.Add(pirate);
-                                    }
-                                    
-                                }
+                                AssignDestination(pirate, closestMothership.Location.Towards(capsule, closestMothership.UnloadRange));
+                                usedPirates.Add(pirate);
                             }
                         }
+                        myPirates = myPirates.Except(usedPirates).ToList();
                     }
-                    myPirates = myPirates.Except(usedPirates).ToList();
                 }
             }
         }
