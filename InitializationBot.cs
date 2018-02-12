@@ -43,7 +43,7 @@ namespace Bot
         protected static Dictionary<Capsule, int> enemyCapsulesPushes;
 
         protected static List<Wormhole> activeWormholes;
-        protected static Dictionary<Pirate, bool> FinsihedTurn;
+        protected static Dictionary<Pirate, bool> FinishedTurn;
 
         protected static int MinPriorirty = 0;
         protected static int MaxPriority = 10;
@@ -90,7 +90,7 @@ namespace Bot
             asteroids = new Dictionary<Asteroid, bool>();
             foreach (Pirate pirate in myPirates)
             {
-                FinsihedTurn.Add(pirate, false);
+                FinishedTurn.Add(pirate, false);
             }
             foreach (var asteroid in game.GetLivingAsteroids())
             {
@@ -113,7 +113,7 @@ namespace Bot
             {
                 var pirate = map.Key;
                 var destination = map.Value;
-                if (!FinsihedTurn[pirate])
+                if (!FinishedTurn[pirate])
                 {
                     string message = "";
                     pirate.Sail(destination);
