@@ -22,7 +22,7 @@ namespace Bot
                     var pirateSailer = myPirates.FirstOrDefault(pirate => !pirate.HasCapsule());
                     if (pirateSailer != null)
                     {
-                        var bestWormhole = GameExtension.GetBestWormhole(game.GetAllWormholes(), capsule.InitialLocation, pirateSailer);
+                        var bestWormhole = GameExtension.GetBestWormhole(capsule.InitialLocation, pirateSailer);
                         if(bestWormhole!=null)
                         {
                             // Go towards the wormhole.
@@ -37,7 +37,7 @@ namespace Bot
                 {
                     // Send the closest pirate to capture the capsule.
                     var sailingPirate = myPirates.First();
-                    var bestWormhole = GameExtension.GetBestWormhole(game.GetAllWormholes(), capsule.InitialLocation, sailingPirate);
+                    var bestWormhole = GameExtension.GetBestWormhole(capsule.InitialLocation, sailingPirate);
                     if(bestWormhole!=null)
                     {
                         // Assign to the wormhole
@@ -98,28 +98,41 @@ namespace Bot
                 var mothership = myMotherships.OrderBy(m => m.Distance(first)/((double)m.ValueMultiplier).Sqrt()).FirstOrDefault();
                 if(mothership!=null)
                 {
+
+                    // Get the best wormhole
+                    var bestWormhole = GameExtension.GetBestWormhole(mothership.Location, first);
                     var closestHolder = capsuleHolders.OrderBy(p => p.Distance(mothership)).FirstOrDefault();
                     capsuleHolders.Remove(closestHolder);
-                    // Check if each of the pirates can reach.
-                    bool firstReach = false, secondReach=false;
-                    if(CheckIfCapsuleCanReach(first, mothership))
+                    if(bestWormhole!=null)
                     {
-                        firstReach = true;
+                        // There is a wormhole. Send them with an intersection.
+                        GroupPair(first, closestHolder, bestWormhole.Location);
+                        myPirates.Remove(first);
+                        myPirates.Remove(closestHolder);
                     }
-                    if(CheckIfCapsuleCanReach(closestHolder, mothership))
+                    else
                     {
-                        secondReach = true;
+                        // Check if each of the pirates can reach.
+                        bool firstReach = false, secondReach=false;
+                        if(CheckIfCapsuleCanReach(first, mothership))
+                        {
+                            firstReach = true;
+                        }
+                        if(CheckIfCapsuleCanReach(closestHolder, mothership))
+                        {
+                            secondReach = true;
+                        }
+                        if(!firstReach && !secondReach)
+                        {
+                            GroupPair(first, closestHolder, mothership.Location);
+                        }
+                        else if(secondReach)
+                            AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));
+                        else if(firstReach)
+                            AssignDestination(first, SmartSailing.SmartSail(first, mothership));
+                        myPirates.Remove(first);
+                        myPirates.Remove(closestHolder);
                     }
-                    if(!firstReach && !secondReach)
-                    {
-                        GroupPair(first, closestHolder, mothership.Location);
-                    }
-                    else if(secondReach)
-                        AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));
-                    else if(firstReach)
-                        AssignDestination(first, SmartSailing.SmartSail(first, mothership));
-                    myPirates.Remove(first);
-                    myPirates.Remove(closestHolder);
                 }
             }
             if(capsuleHolders.Count() ==1)
@@ -130,10 +143,16 @@ namespace Bot
                 if(mothership!=null)
                 {
                     var closestPirate = myPirates.OrderBy(p => p.Distance(lonelyPirate)).FirstOrDefault();
+                    var bestWormhole = GameExtension.GetBestWormhole(mothership.Location, lonelyPirate);
                     if(closestPirate!=null)
                     {
-                        if(CheckIfCapsuleCanReach(lonelyPirate, mothership))
+                        if(bestWormhole!=null)
                         {
+                            GroupPair(lonelyPirate, closestPirate, bestWormhole.Location);
+                        }
+                        else if(CheckIfCapsuleCanReach(lonelyPirate, mothership))
+                        {
+                            AssignDestination(lonelyPirate, mothership.Location);
                             capsuleHolders.Remove(lonelyPirate);
                             myPirates.Remove(lonelyPirate);
                         }
@@ -144,7 +163,10 @@ namespace Bot
                         myPirates.Remove(lonelyPirate);
                         myPirates.Remove(closestPirate);
                     }
+                    else
+                        AssignDestination(lonelyPirate, bestWormhole.Location);
                 }
+                
             }
         }
 
@@ -216,7 +238,7 @@ namespace Bot
             // Move the pirates now.
             var capsuleHolders = game.GetMyLivingPirates().Where(p => p.HasCapsule());
             var mothershipInLocation = myMotherships.Where(mothership => mothership.Location.Equals(destination)).FirstOrDefault();
-            if(first.Distance(second)< mothershipInLocation.Distance(first) && !first.InPushRange(second))
+            if(first.Distance(second)< destination.Distance(first) && !first.InPushRange(second))
             {
                 AssignDestination(first, SmartSailing.SmartSail(first, bestIntersection));
                 AssignDestination(second, SmartSailing.SmartSail(second, bestIntersection));
