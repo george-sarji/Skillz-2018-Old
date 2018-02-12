@@ -228,7 +228,7 @@ namespace Bot
                     int PushesNeeded = pirate.Distance(target) / (game.PushDistance + 1);
                     if (PiratesCanPush >= PushesNeeded)
                     {
-                        PiratesPush[pirate] = pirate.Distance(target) / game.PushDistance;
+                        PiratesPush[pirate] = pirate.Distance(target) / (game.PushDistance+1);
                     }
                 }
                 var PushingPirate = PiratesPush.OrderBy(x => x.Value).ToDictionary(pair => pair.Key, pair => pair.Value).FirstOrDefault();

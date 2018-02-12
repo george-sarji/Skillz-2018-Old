@@ -16,7 +16,7 @@ namespace Bot
                 // Get the closest point to the border from the mothership
                 var closestToBorder = GetClosestToBorder(mothership.Location);
                 // Get how much pushes it needs to get to the border + 1
-                var amountOfPushes = mothership.Distance(closestToBorder)/game.PushDistance;
+                var amountOfPushes = mothership.Distance(closestToBorder)/(game.PushDistance+1);
                 amountOfPushes++;
                 // Check if that amount is bigger than the required for the capsule loss.
                 if(amountOfPushes>=game.NumPushesForCapsuleLoss)
@@ -95,7 +95,7 @@ namespace Bot
                 {
                     // Get the amount of pushes towards the border.
                     var closestToBorder = GetClosestToBorder(closestMothership.Location);
-                    var amountOfPushes = closestMothership.Distance(closestToBorder)/game.PushDistance;
+                    var amountOfPushes = closestMothership.Distance(closestToBorder)/(game.PushDistance+1);
                     var pushesTillLoss = capsule.Holder.NumPushesForCapsuleLoss;
                     int requiredPirates;
                     if(amountOfPushes>=pushesTillLoss)

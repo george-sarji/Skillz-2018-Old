@@ -13,7 +13,6 @@ namespace Bot
             // Go over the capsules
             foreach (var capsule in myCapsules)
             {
-                var usedPirates = new List<Pirate>();
                 // Sort the pirates per the distance
                 myPirates = myPirates.OrderBy(pirate => pirate.Distance(capsule.InitialLocation)).ToList();
                 // Check if the capsule was taken.
@@ -23,22 +22,30 @@ namespace Bot
                     var pirateSailer = myPirates.FirstOrDefault(pirate => !pirate.HasCapsule());
                     if (pirateSailer != null)
                     {
-                        pirateDestinations.Add(pirateSailer, capsule.InitialLocation);
-                        usedPirates.Add(pirateSailer);
+                        var bestWormhole = GameExtension.GetBestWormhole(game.GetAllWormholes(), capsule.InitialLocation, pirateSailer);
+                        if(bestWormhole!=null)
+                        {
+                            // Go towards the wormhole.
+                            AssignDestination(pirateSailer, bestWormhole.Location);
+                        }
+                        else
+                            AssignDestination(pirateSailer, capsule.InitialLocation);
+                        myPirates.Remove(pirateSailer);
                     }
-                    myPirates = myPirates.Except(usedPirates).ToList();
                 }
                 else if (myPirates.Any())
                 {
                     // Send the closest pirate to capture the capsule.
                     var sailingPirate = myPirates.First();
-                    if (pirateDestinations.ContainsKey(sailingPirate))
+                    var bestWormhole = GameExtension.GetBestWormhole(game.GetAllWormholes(), capsule.InitialLocation, sailingPirate);
+                    if(bestWormhole!=null)
                     {
-                        pirateDestinations[sailingPirate] = capsule.InitialLocation;
+                        // Assign to the wormhole
+                        AssignDestination(sailingPirate, bestWormhole.Location);
                     }
                     else
-                        pirateDestinations.Add(sailingPirate, capsule.InitialLocation);
-                    myPirates = myPirates.Where(pirate => !pirate.Equals(sailingPirate)).ToList();
+                        AssignDestination(sailingPirate, capsule.InitialLocation);
+                    myPirates.Remove(sailingPirate);
                 }
             }
         }
