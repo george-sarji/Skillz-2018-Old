@@ -26,7 +26,7 @@ namespace Bot
         protected static List<Pirate> myPirates;
         protected static List<Pirate> myPiratesWithCapsule;
         protected static List<Capsule> myCapsules;
-
+        protected static List<Wormhole> allWormholes;
         protected static List<Mothership> myMotherships;
 
         protected static List<Mothership> enemyMotherships;
