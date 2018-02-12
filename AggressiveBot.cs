@@ -164,7 +164,7 @@ namespace Bot
                         myPirates.Remove(closestPirate);
                     }
                     else
-                        AssignDestination(lonelyPirate, bestWormhole.Location);
+                        AssignDestination(lonelyPirate, SmartSailing.SmartSail(lonelyPirate, bestWormhole.Location));
                 }
                 
             }
@@ -240,13 +240,25 @@ namespace Bot
             var mothershipInLocation = myMotherships.Where(mothership => mothership.Location.Equals(destination)).FirstOrDefault();
             if(first.Distance(second)< destination.Distance(first) && !first.InPushRange(second))
             {
-                AssignDestination(first, SmartSailing.SmartSail(first, bestIntersection));
-                AssignDestination(second, SmartSailing.SmartSail(second, bestIntersection));
+                var FirstDestination=bestIntersection;
+                if(first.HasCapsule())
+                    FirstDestination=SmartSailing.SmartSail(first,bestIntersection);
+                var SecondDestination=bestIntersection;
+                if(second.HasCapsule())
+                    SecondDestination=SmartSailing.SmartSail(second,bestIntersection);
+                AssignDestination(first, FirstDestination);
+                AssignDestination(second, SecondDestination);
             }
             else
             {
-                AssignDestination(first, destination);
-                AssignDestination(second, destination);    
+                var FirstDestination=destination;
+                if(first.HasCapsule())
+                    FirstDestination=SmartSailing.SmartSail(first,destination);
+                var SecondDestination=destination;
+                if(second.HasCapsule())
+                    SecondDestination=SmartSailing.SmartSail(second,destination);
+                AssignDestination(first, FirstDestination);
+                AssignDestination(second, SecondDestination);
             }
             myPirates.Remove(first);
             myPirates.Remove(second);
