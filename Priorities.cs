@@ -21,11 +21,10 @@ namespace Bot
             GeneralPriority[mapObject] = Priority;
         }
 
-        public static int StepsScaled(int Distance, int speed)
+        public static int StepsScaled(int distance)
         {
-            int steps = Distance / speed;
-            double scale = ((double)(game.Cols.Power(2) + game.Rows.Power(2))).Sqrt();
-            return (int)(scale / steps);
+            double scale = (((double)(game.Cols.Power(2) + game.Rows.Power(2))).Sqrt());
+            return (int)((distance / scale) * game.WormholeInactiveTurns);
         }
 
         public static int NumberOfEnemies(MapObject mapObject)  // Returns number of enemies in range of a mapobject fix it
@@ -58,13 +57,10 @@ namespace Bot
                                 .OrderBy(capsule => capsule.Distance(partner))
                                 .FirstOrDefault();
             if (bestMothership != null)
-                score += StepsScaled(bestMothership.Distance(wormhole), pirate.MaxSpeed);
+                score += StepsScaled(bestMothership.Distance(wormhole));
             if (bestCapsule != null)
-                score += StepsScaled(bestCapsule.Distance(partner), pirate.MaxSpeed);
-
+                score += StepsScaled(bestCapsule.Distance(partner));
             return score;
-
-
         }
 
         public static Wormhole GetBestWormhole(Pirate pirate)
@@ -74,6 +70,7 @@ namespace Bot
             {
                 wormholesScore.Add(wormhole, GetWormholeLocationScore(wormhole.Location, wormhole.Partner.Location, pirate));//Add all wormholes with their Scores according to the pirate
             }
+            PrintWormhole(wormholesScore, pirate);
             return wormholesScore.OrderBy(x => x.Value)
                     .ToDictionary(pair => pair.Key, pair => pair.Value)
                     .FirstOrDefault().Key;//Order the wormholes by the score the lowest score is the best wormhole
@@ -88,12 +85,14 @@ namespace Bot
             for (int i = 0; i < steps; i++)
             {
                 double angle = System.Math.PI * 2 * i / steps;
-                double deltaX = pirate.PushDistance * System.Math.Cos(angle);
-                double deltaY = pirate.PushDistance * System.Math.Sin(angle);
-                Location option1 = new Location((int)(wormhole.Location.Row - deltaY), (int)(wormhole.Location.Col + deltaX));
+                double deltaX = pirate.PushDistance * System.Math.Sin(angle);
+                double deltaY = pirate.PushDistance * System.Math.Cos(angle);
+                Location option = new Location((int)(wormhole.Location.Row - deltaY), (int)(wormhole.Location.Col + deltaX));
                 //InitializationBot.game.Debug(option);
                 //InitializationBot.game.Debug(WormholeLocationScore(option, wormhole.Partner.Location));
-                candidates.Add(option1);
+                if (option.InMap())
+                    continue;
+                candidates.Add(option);
 
             }
             if (candidates.Any())
