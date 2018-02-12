@@ -170,7 +170,7 @@ namespace Bot
                         .FirstOrDefault();
                 LocationOfPush = myPirateWithCapsule.Location.Towards(destination, mypirate.PushDistance);
 
-                if ((SmartSailing.IsInDanger(LocationOfPush) && ((numberOfPushesNeeded - numberOfEnemiesAroundMyCapsule == 1) || !myPirates.Contains(mypirate))))
+                if ((SmartSailing.IsInDanger(LocationOfPush)|| ((numberOfPushesNeeded - numberOfEnemiesAroundMyCapsule == 1) || !myPirates.Contains(mypirate))))
                 {
                     ("Breaking for loop, not enough pushes.").Print();
                     ((!myPirates.Contains(mypirate)).ToString()).Print();
