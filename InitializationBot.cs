@@ -110,6 +110,15 @@ namespace Bot
             }
             (str + "}").Print();
         }
+        protected static void PrintWormhole(Dictionary<Wormhole, int> dictionary, Pirate pirate)
+        {
+            string str = "{ "+pirate.Id;
+            foreach (var key in dictionary.Keys)
+            {
+                str += key.Id + ":"  + dictionary[key] + ",";
+            }
+            (str + "}").Print();
+        }
         private void MovePiratesToDestinations()
         {
             foreach (var map in pirateDestinations)
@@ -151,11 +160,11 @@ namespace Bot
 
         protected static void GetWormholesForPirates()
         {
-            foreach(var map in pirateDestinations)
+            foreach (var map in pirateDestinations)
             {
                 // Debug the wormhole!
                 var bestWormhole = GameExtension.GetBestWormhole(map.Value, map.Key);
-                ("Best wormhole for "+map.Key + " towards "+ map.Value + " is "+ bestWormhole).Print();
+                ("Best wormhole for " + map.Key + " towards " + map.Value + " is " + bestWormhole).Print();
             }
         }
     }
