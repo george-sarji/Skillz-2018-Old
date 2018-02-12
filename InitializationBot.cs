@@ -76,7 +76,7 @@ namespace Bot
         private void Initialize(PirateGame pirateGame)
         {
             game = pirateGame;
-            FinsihedTurn = new Dictionary<Pirate, bool>();
+            FinishedTurn = new Dictionary<Pirate, bool>();
             myPirates = game.GetMyLivingPirates().ToList();
             myCapsules = game.GetMyCapsules().ToList();
             myMotherships = game.GetMyMotherships().ToList();
