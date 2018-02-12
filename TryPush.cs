@@ -254,7 +254,7 @@ namespace Bot
         public static void PushWormhole()
         {
             int count = 0;
-            foreach (Pirate pirate in myPirates)//go over all of my pirates
+            foreach (Pirate pirate in myPirates.ToList())//go over all of my pirates
             {
                 if (count > allWormholes.Count)//if I assigned a pirate to each wormhole then exit
                     break;
