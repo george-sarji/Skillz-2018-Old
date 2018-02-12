@@ -100,6 +100,11 @@ namespace Bot
            return InitializationBot.game.GetEnemyLivingPirates().Where(enemy => enemy.CanPush(pirate)).Count();
        }
 
+       public static int NumberOfPushersAtLocation(Location location)
+       {
+           return InitializationBot.game.GetEnemyLivingPirates().Where(enemy => enemy.InRange(location, enemy.PushRange)&&enemy.PushReloadTurns!=0).Count();
+       }
+
        public static Location MidPoint(Pirate pirate1, Pirate pirate2)
        {
            int x1 = pirate1.Location.Col, x2 = pirate2.Location.Col;
