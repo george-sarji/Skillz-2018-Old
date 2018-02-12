@@ -106,7 +106,7 @@ namespace Bot
                     else
                         requiredPirates = amountOfPushes;
                     // Get the pirates that we can use.
-                    requiredPirates=pushesTillLoss+1;
+                    requiredPirates=pushesTillLoss;
                     var useablePirates = myPirates.OrderBy(p => p.Distance(closestMothership)).Where(p=> p.Steps(closestMothership)>p.PushReloadTurns);
                     if(useablePirates.Count()>=requiredPirates)
                     {
