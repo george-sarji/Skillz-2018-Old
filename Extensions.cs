@@ -11,7 +11,10 @@ namespace Bot
         {
             return pirate.Distance(mapObject) / pirate.MaxSpeed + 1;
         }
-
+        public static int StepsScaled(int Distance, int speed)
+        {
+            return (int)(Sqrt(Power(InitializationBot.game.Rows,2)+Power(InitializationBot.game.Cols,2))*(Distance/speed));
+        }
         public static int Clamp(this int num, int min, int max)
         {
             if (num < min)
@@ -155,84 +158,6 @@ namespace Bot
             }
             return null;
         }
-
-        public static int WormholeLocationScore(Location location, Location partner, Pirate pirate)
-        {
-            // Evaluates how good a Wormhole's location is by its distance from the best mothership and capsule from ours and the enemy's.
-            // The lower the score that gets reported, the better. Use to compare before and after pushing results.
-            // int enemyScore = 0, myScore = 0;
-            // var bestEnemyMothership = InitializationBot.game.GetEnemyMotherships()
-            // .OrderBy(enemy => enemy.Distance(location) * Sqrt(enemy.ValueMultiplier)).FirstOrDefault();
-            // if (bestEnemyMothership != null)
-            // {
-            //     if (location.Distance(bestEnemyMothership) < partner.Distance(bestEnemyMothership))
-            //         enemyScore = (int)(bestEnemyMothership.Distance(location) * Sqrt(bestEnemyMothership.ValueMultiplier));
-            //     else
-            //     {
-            //         var bestEnemyCapsule = InitializationBot.game.GetEnemyCapsules()
-            //         .OrderBy(capsule => capsule.InitialLocation.Distance(location)).FirstOrDefault();
-            //         enemyScore = bestEnemyCapsule.Distance(location);
-            //     }
-            // }
-            // else enemyScore = 0;
-            // var bestMothership = InitializationBot.game.GetMyMotherships()
-            // .OrderBy(mothership => mothership.Distance(location) * Sqrt(mothership.ValueMultiplier)).FirstOrDefault();
-            // if (bestMothership != null)
-            // {
-            //     if (location.Distance(bestMothership) < partner.Distance(bestMothership))
-            //         myScore = (int)(bestMothership.Distance(location) * Sqrt(bestMothership.ValueMultiplier));
-            //     else
-            //     {
-            //         var bestCapsule = InitializationBot.game.GetMyCapsules()
-            //         .OrderBy(capsule => capsule.InitialLocation.Distance(location)).FirstOrDefault();
-            //         myScore = bestCapsule.Distance(location);
-            //     }
-            // }
-            // else myScore = 0;
-            // return myScore - enemyScore;
-            int score=0;
-            var bestMothership = InitializationBot.game
-                                .GetMyMotherships()
-                                .OrderBy(mothership => mothership.Distance(location))
-                                .FirstOrDefault();
-            return score;
-            
-
-        }
-
-        public static Location WorthPushingWormhole(Wormhole wormhole, Pirate pirate)
-        {
-            // Checks if the wormhole can be pushed to a better location, and if is it returns the new location.
-            if (wormhole == null) return null;
-            List<Location> candidates = new List<Location>();
-            var bestOption = wormhole.GetLocation();
-            const int steps = 24;
-            for (int i = 0; i < steps; i++)
-            {
-                double angle = System.Math.PI * 2 * i / steps;
-                double deltaX = InitializationBot.game.PushRange * System.Math.Cos(angle);
-                double deltaY = InitializationBot.game.PushRange * System.Math.Sin(angle);
-                Location option1 = new Location((int)(wormhole.Location.Row - deltaY), (int)(wormhole.Location.Col + deltaX));
-                Location option2 = new Location((int)(wormhole.Location.Row - (deltaY / 2)), (int)(wormhole.Location.Col + (deltaX / 2)));
-                //InitializationBot.game.Debug(option);
-                //InitializationBot.game.Debug(WormholeLocationScore(option, wormhole.Partner.Location));
-                if (wormhole != null && WormholeLocationScore(option1, wormhole.Partner.Location, pirate) < WormholeLocationScore(wormhole.Location, wormhole.Partner.Location, pirate) - 150)
-                {
-                    candidates.Add(option1);
-                }
-                if (wormhole != null && WormholeLocationScore(option2, wormhole.Partner.Location, pirate) < WormholeLocationScore(wormhole.Location, wormhole.Partner.Location, pirate) - 150)
-                {
-                    candidates.Add(option2);
-                }
-            }
-            if (candidates.Any())
-            {//InitializationBot.game.Debug(WormholeLocationScore(candidates.OrderBy(option => WormholeLocationScore(option, wormhole.Partner.Location)).FirstOrDefault(),wormhole.Partner.Location));
-                return candidates.OrderBy(option => WormholeLocationScore(option, wormhole.Partner.Location, pirate)).FirstOrDefault();
-            }
-            return wormhole.Location;
-        }
-
-
     }
 
 }
