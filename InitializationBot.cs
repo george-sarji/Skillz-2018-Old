@@ -21,12 +21,12 @@ namespace Bot
         // YouShallNotPass - Win 8-7 - 366 turns
         // Pullpullon - Win 8-4 - 209 turns
         // ---------------------------------------- 
-        public  static PirateGame game;
+        public static PirateGame game;
         public const bool Debug = true;
         protected static List<Pirate> myPirates;
         protected static List<Pirate> myPiratesWithCapsule;
         protected static List<Capsule> myCapsules;
-        
+
         protected static List<Mothership> myMotherships;
 
         protected static List<Mothership> enemyMotherships;
@@ -38,11 +38,12 @@ namespace Bot
 
         protected static Dictionary<Pirate, Location> pirateDestinations;
 
-        protected static Dictionary<MapObject , int> GeneralPriority;
+        protected static Dictionary<MapObject, int> GeneralPriority;
 
         protected static Dictionary<Capsule, int> enemyCapsulesPushes;
 
         protected static List<Wormhole> activeWormholes;
+        protected static Dictionary<Pirate, bool> FinsihedTurn;
 
         protected static int MinPriorirty = 0;
         protected static int MaxPriority = 10;
@@ -52,7 +53,7 @@ namespace Bot
         public void DoTurn(PirateGame game)
         {
             Initialize(game);
-            if(defence)
+            if (defence)
             {
                 DefensiveBot.PerformBunker();
             }
@@ -63,7 +64,6 @@ namespace Bot
                 AggressiveBot.MoveCapsuleHoldersToIntersection();
                 DefensiveBot.BuildBunker();
                 // AggressiveBot.GoHelpAllyWithCapsule();
-                TryPush.TryPushMyCapsule();
                 AggressiveBot.CaptureCapsules();
                 AggressiveBot.PushAsteroids();
                 AggressiveBot.AttackEnemies();
@@ -75,7 +75,8 @@ namespace Bot
 
         private void Initialize(PirateGame pirateGame)
         {
-            game=pirateGame;
+            game = pirateGame;
+            FinsihedTurn = new Dictionary<Pirate, bool>();
             myPirates = game.GetMyLivingPirates().ToList();
             myCapsules = game.GetMyCapsules().ToList();
             myMotherships = game.GetMyMotherships().ToList();
@@ -87,31 +88,38 @@ namespace Bot
             activeWormholes = game.GetActiveWormholes().ToList();
             pirateDestinations = new Dictionary<Pirate, Location>();
             asteroids = new Dictionary<Asteroid, bool>();
-            foreach(var asteroid in game.GetLivingAsteroids())
+            foreach (Pirate pirate in myPirates)
+            {
+                FinsihedTurn.Add(pirate, false);
+            }
+            foreach (var asteroid in game.GetLivingAsteroids())
             {
                 asteroids.Add(asteroid, false);
             }
-            defence = game.GetMyMotherships().Count()==0 || game.GetMyCapsules().Count()==0;
+            defence = game.GetMyMotherships().Count() == 0 || game.GetMyCapsules().Count() == 0;
         }
-        private void PrintDictionary(Dictionary<Pirate,Location> dictionary)
+        private void PrintDictionary(Dictionary<Pirate, Location> dictionary)
         {
-            string str="{";
-            foreach(var key in dictionary.Keys)
+            string str = "{";
+            foreach (var key in dictionary.Keys)
             {
-                str+=key.Id+":"+"("+dictionary[key].Col+","+dictionary[key].Row+")"+",";
+                str += key.Id + ":" + "(" + dictionary[key].Col + "," + dictionary[key].Row + ")" + ",";
             }
-            (str+"}").Print();
+            (str + "}").Print();
         }
         private void MovePiratesToDestinations()
         {
-            foreach(var map in pirateDestinations)
+            foreach (var map in pirateDestinations)
             {
                 var pirate = map.Key;
                 var destination = map.Value;
-                string message = "";
-                pirate.Sail(destination);
-                message = "Pirate "+ pirate.ToString() + " sails towards "+destination.ToString();
-                message.Print();
+                if (!FinsihedTurn[pirate])
+                {
+                    string message = "";
+                    pirate.Sail(destination);
+                    message = "Pirate " + pirate.ToString() + " sails towards " + destination.ToString();
+                    message.Print();
+                }
             }
         }
 
@@ -123,19 +131,19 @@ namespace Bot
         protected static Location GetClosestToBorder(Location location)
         {
             var up = new Location(-5, location.Col);
-            var down = new Location(game.Rows +5, location.Col);
+            var down = new Location(game.Rows + 5, location.Col);
             var left = new Location(location.Row, -5);
-            var right = new Location(location.Row, game.Cols +5);
+            var right = new Location(location.Row, game.Cols + 5);
 
             return Closest(location, up, down, left, right);
         }
 
         protected static void AssignDestination(Pirate pirate, Location destination)
         {
-            if(pirateDestinations.ContainsKey(pirate))
-                pirateDestinations[pirate]=destination;
-            else   
-                pirateDestinations.Add(pirate, destination);   
+            if (pirateDestinations.ContainsKey(pirate))
+                pirateDestinations[pirate] = destination;
+            else
+                pirateDestinations.Add(pirate, destination);
         }
     }
 }
