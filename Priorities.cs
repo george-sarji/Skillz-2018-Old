@@ -21,10 +21,12 @@ namespace Bot
             GeneralPriority[mapObject] = Priority;
         }
 
-        public static int StepsScaled(int distance)
+        public static int StepsScaled(int distance, int turns, int assigned)
         {
             double scale = (((double)(game.Cols.Power(2) + game.Rows.Power(2))).Sqrt());
-            return (int)((distance / scale) * game.WormholeInactiveTurns);
+            if (turns == 0)
+                return (int)((distance / scale + assigned) * 100);
+            return (int)(((distance / scale) + assigned) * 100 * turns);
         }
 
         public static int NumberOfEnemies(MapObject mapObject)  // Returns number of enemies in range of a mapobject fix it
@@ -47,19 +49,19 @@ namespace Bot
             return 0;
         }
 
-        public static int GetWormholeLocationScore(Location wormhole, Location partner, Pirate pirate)
+        public static int GetWormholeLocationScore(Wormhole wormhole, Location wormholeLocation, Location partner, Pirate pirate)
         {
             int score = 0;
             Mothership bestMothership = myMotherships//Closest Mothership to wormhole
-                                .OrderBy(mothership => mothership.Distance(wormhole))
+                                .OrderBy(mothership => mothership.Distance(wormholeLocation))
                                 .FirstOrDefault();
             Capsule bestCapsule = myCapsules//Closest Capsule to 
                                 .OrderBy(capsule => capsule.Distance(partner))
                                 .FirstOrDefault();
             if (bestMothership != null)
-                score += StepsScaled(bestMothership.Distance(wormhole));
+                score += StepsScaled(bestMothership.Distance(wormholeLocation), wormhole.TurnsToReactivate, wormhole.TurnsToReactivate);
             if (bestCapsule != null)
-                score += StepsScaled(bestCapsule.Distance(partner));
+                score += StepsScaled(bestCapsule.Distance(partner), wormhole.TurnsToReactivate, wormhole.TurnsToReactivate);
             return score;
         }
 
@@ -68,7 +70,7 @@ namespace Bot
             Dictionary<Wormhole, int> wormholesScore = new Dictionary<Wormhole, int>();
             foreach (var wormhole in allWormholes)
             {
-                wormholesScore.Add(wormhole, GetWormholeLocationScore(wormhole.Location, wormhole.Partner.Location, pirate));//Add all wormholes with their Scores according to the pirate
+                wormholesScore.Add(wormhole, GetWormholeLocationScore(wormhole, wormhole.Location, wormhole.Partner.Location, pirate));//Add all wormholes with their Scores according to the pirate
             }
             PrintWormhole(wormholesScore, pirate);
             return wormholesScore.OrderBy(x => x.Value)
@@ -90,14 +92,14 @@ namespace Bot
                 Location option = new Location((int)(wormhole.Location.Row - deltaY), (int)(wormhole.Location.Col + deltaX));
                 //InitializationBot.game.Debug(option);
                 //InitializationBot.game.Debug(WormholeLocationScore(option, wormhole.Partner.Location));
-                if (option.InMap())
+                if (!option.InMap())
                     continue;
                 candidates.Add(option);
 
             }
             if (candidates.Any())
             {//InitializationBot.game.Debug(WormholeLocationScore(candidates.OrderBy(option => WormholeLocationScore(option, wormhole.Partner.Location)).FirstOrDefault(),wormhole.Partner.Location));
-                return candidates.OrderBy(option => GetWormholeLocationScore(option, wormhole.Partner.Location, pirate)).FirstOrDefault();
+                return candidates.OrderBy(option => GetWormholeLocationScore(wormhole, option, wormhole.Partner.Location, pirate)).FirstOrDefault();
             }
             return wormhole.Location;
         }
