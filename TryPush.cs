@@ -269,7 +269,7 @@ namespace Bot
                 }
                 else//if pirate can't push the wormhole make him sail to the wormhole by assigning his destinationto the wormhole
                 {
-                    AssignDestination(pirate, wormhole.Location.Towards(pirate, wormhole.WormholeRange));
+                    AssignDestination(pirate, wormhole.Location);
                 }
                 myPirates.Remove(pirate);
                 count++;
