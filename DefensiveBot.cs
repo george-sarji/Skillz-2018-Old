@@ -121,24 +121,16 @@ namespace Bot
                                 var closestToCapsule = closestWormhole.Partner;
                                 ("Closest wormhole to capsule: "+closestToCapsule).Print();
                                 ("Closest wormhole to mothership: "+closestWormhole).Print();
-                                if(TryPush.TryPushWormhole(pirate, closestWormhole))
+                                if(!TryPush.TryPushWormhole(pirate, closestWormhole))
                                 {
-                                    usedPirates.Add(pirate);
-                                    continue;
-                                }
-                                else
-                                {
-                                    usedPirates.Add(pirate);
                                     AssignDestination(pirate, closestWormhole.Location.Towards(pirate, closestWormhole.WormholeRange));
                                 }
-                            }
-                            else if(TryPush.TryPushEnemyCapsule(pirate, capsule.Holder))
                                 usedPirates.Add(pirate);
-                            else
-                            {
+                                continue;
+                            }
+                            else if(!TryPush.TryPushEnemyCapsule(pirate, capsule.Holder))
                                 AssignDestination(pirate, closestMothership.Location.Towards(capsule, pirate.PushRange*(int)((double)rangeNeeded).Power(2)));
-                                usedPirates.Add(pirate);
-                            }
+                            usedPirates.Add(pirate);
                         }
                         myPirates = myPirates.Except(usedPirates).ToList();
                     }
