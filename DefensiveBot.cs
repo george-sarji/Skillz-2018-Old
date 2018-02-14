@@ -94,42 +94,54 @@ namespace Bot
                 var closestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsule)).FirstOrDefault();
                 if(closestMothership!=null)
                 {
-                    capsuleMothership.Add(capsule, closestMothership);
-                    var rangeNeeded = capsuleMothership.Values.Where(val => val.Equals(closestMothership)).Count();
+                    
                     // Get the amount of pushes towards the border.
                     var closestToBorder = GetClosestToBorder(closestMothership.Location);
-                    var amountOfPushes = closestMothership.Distance(closestToBorder)/(game.PushDistance+1);
-                    var pushesTillLoss = capsule.Holder.NumPushesForCapsuleLoss;
-                    int requiredPirates;
-                    if(amountOfPushes>=pushesTillLoss)
-                        requiredPirates = pushesTillLoss;
+                    var requiredPirates=capsule.Holder.NumPushesForCapsuleLoss+1;
+                    var closestWormholeToCapsule = game.GetAllWormholes().Where(wormhole => wormhole.InRange(capsule, wormhole.WormholeRange*2)).OrderBy(wormhole => wormhole.Distance(capsule)).FirstOrDefault();
+                    int rangeNeeded=0;
+                    var closestWormholeToMothership = game.GetAllWormholes().Where(wormhole => wormhole.InRange(closestMothership, wormhole.WormholeRange*2)).OrderBy(wormhole => wormhole.Distance(closestMothership)).FirstOrDefault();
+                    Mothership closestMothershipThroughWormhole = null;
+                    if(closestWormholeToCapsule!=null)
+                    {
+                        closestMothershipThroughWormhole = enemyMotherships.OrderBy(mothership => GameExtension.DistanceThroughWormhole(capsule.Location, mothership.Location, closestWormholeToCapsule, closestWormholeToCapsule.Location, closestWormholeToCapsule.Partner.Location, game.GetAllWormholes())).FirstOrDefault();
+                        if(closestMothershipThroughWormhole!=null)
+                        {
+                            capsuleMothership.Add(capsule, closestMothership);
+                            rangeNeeded = capsuleMothership.Count(map => map.Value.Equals(closestMothership)).Power(2)*game.PushRange;
+                        }
+                    }
                     else
-                        requiredPirates = amountOfPushes;
-                    // Get the pirates that we can use.
-                    requiredPirates=pushesTillLoss+1;
-                    var useablePirates = myPirates.OrderBy(p => p.Distance(closestMothership)).OrderBy(p => p.Distance(capsule)).Where(p=> p.Steps(closestMothership)>p.PushReloadTurns);
+                    {
+                        capsuleMothership.Add(capsule, closestMothership);
+                        rangeNeeded = capsuleMothership.Count(map => map.Value.Equals(closestMothership)).Power(2)*game.PushRange;
+                    }
+                    
+                    var useablePirates = myPirates.OrderBy(p => p.Distance(closestMothership)).Where(p=> p.Steps(closestMothership)>p.PushReloadTurns);
                     if(useablePirates.Count()>=requiredPirates)
                     {
-                        var closestWormhole = game.GetAllWormholes().Where(wormhole => wormhole.InRange(closestMothership, closestMothership.UnloadRange*2)).OrderBy(wormhole => wormhole.Partner.Distance(capsule.Holder)).FirstOrDefault();
                         var usedPirates = new List<Pirate>();
-                        ("Wormhole: "+closestWormhole).Print();
                         foreach(var pirate in useablePirates.Take(requiredPirates))
                         {
-                            var bestWormhole = GameExtension.GetBestWormhole(closestMothership.Location, capsule.Holder);
-                            if(closestWormhole!=null)
+                            if(closestMothershipThroughWormhole!=null)
                             {
-                                var closestToCapsule = closestWormhole.Partner;
-                                ("Closest wormhole to capsule: "+closestToCapsule).Print();
-                                ("Closest wormhole to mothership: "+closestWormhole).Print();
-                                if(!TryPush.TryPushWormhole(pirate, closestWormhole))
+                                // Attempt pushing the closest wormhole.
+                                var closestWormhole = game.GetAllWormholes().Where(wormhole => wormhole.InRange(closestMothershipThroughWormhole, wormhole.WormholeRange*2)).FirstOrDefault();
+                                if(closestWormhole!=null)
                                 {
-                                    AssignDestination(pirate, closestWormhole.Location.Towards(pirate, closestWormhole.WormholeRange));
+                                    if(!TryPush.TryPushWormhole(pirate, closestWormhole))
+                                        AssignDestination(pirate, closestWormhole.Location.Towards(closestMothershipThroughWormhole, closestWormhole.WormholeRange));
+                                    usedPirates.Add(pirate);
+                                    continue;
                                 }
-                                usedPirates.Add(pirate);
-                                continue;
+                                else
+                                {
+                                    if(!TryPush.TryPushEnemyCapsule(pirate, capsule.Holder))
+                                        AssignDestination(pirate, closestMothership.Location.Towards(capsule, rangeNeeded));
+                                }
                             }
                             else if(!TryPush.TryPushEnemyCapsule(pirate, capsule.Holder))
-                                AssignDestination(pirate, closestMothership.Location.Towards(capsule, pirate.PushRange));
+                                AssignDestination(pirate, closestMothership.Location.Towards(capsule, rangeNeeded));                            
                             usedPirates.Add(pirate);
                         }
                         myPirates = myPirates.Except(usedPirates).ToList();
