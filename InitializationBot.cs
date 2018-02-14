@@ -30,6 +30,8 @@ namespace Bot
         protected static List<Mothership> myMotherships;
 
         protected static List<Mothership> enemyMotherships;
+
+        protected static double scale;
         protected static List<Pirate> enemyPirates;
 
         protected static List<Capsule> enemyCapsules;
@@ -87,6 +89,7 @@ namespace Bot
             enemyPirates = game.GetEnemyLivingPirates().ToList();
             enemyCapsules = game.GetEnemyCapsules().ToList();
             allWormholes = game.GetAllWormholes().ToList();
+            scale = (((double)(game.Cols.Power(2) + game.Rows.Power(2))).Sqrt());
             NumOfAssignedPiratesToWormhole = new Dictionary<Wormhole, int>();
             foreach (Wormhole wormhole in allWormholes)
             {
