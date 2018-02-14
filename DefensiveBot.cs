@@ -149,5 +149,43 @@ namespace Bot
                 }
             }
         }
+
+
+        public static void BuildBunkerTest()
+        {
+            var capsuleMothership = new Dictionary<Capsule, Mothership>();
+            foreach(var capsule in game.GetEnemyCapsules().Where(cap => cap.Holder!=null))
+            {
+                // Print the best mothership
+                ("Best mothership: "+GameExtension.GetBestMothershipThroughWormholes(capsule.Holder).ToString()).Print();
+                // Get the closest mothership.
+                var closestMothership = GameExtension.GetBestMothershipThroughWormholes(capsule.Holder);
+                if(closestMothership!=null)
+                {
+                    capsuleMothership.Add(capsule, closestMothership);
+                    var rangeNeeded = capsuleMothership.Count(map => map.Value.Equals(closestMothership)).Power(2)*game.PushDistance;
+                    var requiredPirates=capsule.Holder.NumPushesForCapsuleLoss+1;
+                    var useablePirates = myPirates.OrderBy(p => p.Distance(closestMothership)).Where(p=> p.Steps(closestMothership)>p.PushReloadTurns);
+                    var closestWormhole = GameExtension.GetBestWormhole(closestMothership.Location, capsule.Holder);
+                    if(useablePirates.Count()>=requiredPirates)
+                    {
+                        var usedPirates = new List<Pirate>();
+                        foreach(var pirate in useablePirates.Take(requiredPirates))
+                        {
+                            if(closestWormhole!=null && closestWormhole.Partner.InRange(closestMothership, closestWormhole.WormholeRange*2))
+                            {
+                                closestWormhole = closestWormhole.Partner;
+                                if(!TryPush.TryPushWormhole(pirate, closestWormhole))
+                                    AssignDestination(pirate, closestWormhole.Location.Towards(pirate, closestWormhole.WormholeRange));
+                            }
+                            else if(!TryPush.TryPushEnemyCapsule(pirate, capsule.Holder))
+                                AssignDestination(pirate, closestMothership.Location.Towards(capsule, rangeNeeded));
+                            usedPirates.Add(pirate);
+                        }
+                        myPirates = myPirates.Except(usedPirates).ToList();
+                    }
+                }
+            }
+        }
     }
 }

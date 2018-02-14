@@ -161,6 +161,38 @@ namespace Bot
             }
             return null;
         }
+
+        public static Mothership GetBestMothershipThroughWormholes(Pirate pirate)
+        {
+            var mothershipWormholes = new Dictionary<Mothership, int>();
+            Mothership bestMothership = null;
+            int distance = int.MaxValue;
+            foreach(var mothership in InitializationBot.game.GetEnemyMotherships())
+            {
+                var distances = new List<int>();
+                foreach(var wormhole in InitializationBot.game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate<pirate.Steps(mothership)/4))
+                {
+                    var distanceThroughCurrent = DistanceThroughWormhole(pirate.Location, mothership.Location, wormhole,wormhole.Location, wormhole.Partner.Location, InitializationBot.game.GetAllWormholes().Where(hole => hole.TurnsToReactivate<pirate.Steps(mothership)/4));
+                    distances.Add(distanceThroughCurrent);
+                }
+                var normalDistance = pirate.Distance(mothership);
+                if(distances.Any() && distances.Min()<distance)
+                {
+                    bestMothership = mothership;
+                    distance = distances.Min();
+                }
+                if(distances.Any() && normalDistance<distance)
+                {
+                    bestMothership = mothership;
+                    distance = normalDistance;
+                }
+            }
+            if(bestMothership==null)
+            {
+                bestMothership = InitializationBot.game.GetEnemyMotherships().OrderBy(mothership => mothership.Distance(pirate)/(int)((double)mothership.ValueMultiplier).Sqrt()).FirstOrDefault();
+            }
+            return bestMothership;
+        }
     }
 
 }
