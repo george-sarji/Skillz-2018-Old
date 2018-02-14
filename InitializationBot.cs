@@ -33,7 +33,7 @@ namespace Bot
         protected static List<Pirate> enemyPirates;
 
         protected static List<Capsule> enemyCapsules;
-        protected static Dictionary<Wormhole,int> NumOfAssignedPiratesToWormhole;
+        protected static Dictionary<Wormhole, int> NumOfAssignedPiratesToWormhole;
 
         protected static Dictionary<Asteroid, bool> asteroids;
 
@@ -86,8 +86,12 @@ namespace Bot
             enemyMotherships = game.GetEnemyMotherships().ToList();
             enemyPirates = game.GetEnemyLivingPirates().ToList();
             enemyCapsules = game.GetEnemyCapsules().ToList();
-            NumOfAssignedPiratesToWormhole = new Dictionary<Wormhole, int>();
             allWormholes = game.GetAllWormholes().ToList();
+            NumOfAssignedPiratesToWormhole = new Dictionary<Wormhole, int>();
+            foreach (Wormhole wormhole in allWormholes)
+            {
+                NumOfAssignedPiratesToWormhole.Add(wormhole, 0);
+            }
             myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
             enemyCapsulesPushes = game.GetEnemyCapsules().ToDictionary(key => key, value => 0);
             activeWormholes = game.GetActiveWormholes().ToList();
@@ -114,10 +118,10 @@ namespace Bot
         }
         protected static void PrintWormhole(Dictionary<Wormhole, int> dictionary, Pirate pirate)
         {
-            string str = "{ "+pirate.Id;
+            string str = "{ " + pirate.Id;
             foreach (var key in dictionary.Keys)
             {
-                str += key.Id + ":"  + dictionary[key] + ",";
+                str += key.Id + ":" + dictionary[key] + ",";
             }
             (str + "}").Print();
         }
