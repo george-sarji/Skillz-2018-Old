@@ -46,6 +46,8 @@ namespace Bot
         protected static Dictionary<Capsule, int> enemyCapsulesPushes;
 
         protected static List<Wormhole> activeWormholes;
+
+        protected static Dictionary<Wormhole, Location> NewWormholeLocation;
         protected static Dictionary<Pirate, bool> FinishedTurn;
 
         protected static int MinPriorirty = 0;
@@ -91,8 +93,10 @@ namespace Bot
             allWormholes = game.GetAllWormholes().ToList();
             scale = (((double)(game.Cols.Power(2) + game.Rows.Power(2))).Sqrt());
             NumOfAssignedPiratesToWormhole = new Dictionary<Wormhole, int>();
+            NewWormholeLocation = new Dictionary<Wormhole, Location>();
             foreach (Wormhole wormhole in allWormholes)
             {
+                NewWormholeLocation.Add(wormhole,wormhole.Location);
                 NumOfAssignedPiratesToWormhole.Add(wormhole, 0);
             }
             myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
