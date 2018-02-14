@@ -72,7 +72,7 @@ namespace Bot
                 AggressiveBot.PushAsteroids();
                 AggressiveBot.AttackEnemies();
                 MovePiratesToDestinations();
-                GetWormholesForPirates();
+                // GetWormholesForPirates();
                 // Priorities.GenerateGeneralPriority();
                 PrintDictionary(pirateDestinations);
             }
