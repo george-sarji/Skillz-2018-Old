@@ -172,7 +172,7 @@ namespace Bot
                 var distances = new List<int>();
                 foreach(var wormhole in InitializationBot.game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate<pirate.Steps(mothership)/4))
                 {
-                    var distanceThroughCurrent = DistanceThroughWormhole(pirate.Location, mothership.Location, wormhole,wormhole.Location, wormhole.Partner.Location, InitializationBot.game.GetAllWormholes().Where(hole => hole.TurnsToReactivate<pirate.Steps(mothership)/4));
+                    var distanceThroughCurrent = DistanceThroughWormhole(pirate.Location, mothership.Location, wormhole, InitializationBot.game.GetAllWormholes().Where(hole => hole.TurnsToReactivate<pirate.Steps(mothership)/4));
                     distances.Add(distanceThroughCurrent);
                 }
                 var normalDistance = pirate.Distance(mothership);
