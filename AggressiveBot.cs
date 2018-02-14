@@ -86,7 +86,6 @@ namespace Bot
 
 
         public static void MoveToIntersection()
-
         {
             var usedPirates = new List<Pirate>();
             var capsuleHolders = myPirates.Where(p => p.HasCapsule()).ToList();
@@ -126,9 +125,9 @@ namespace Bot
                         {
                             GroupPair(first, closestHolder, mothership.Location);
                         }
-                        else if(secondReach)
+                        if(secondReach)
                             AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));
-                        else if(firstReach)
+                        if(firstReach)
                             AssignDestination(first, SmartSailing.SmartSail(first, mothership));
                         myPirates.Remove(first);
                         myPirates.Remove(closestHolder);
