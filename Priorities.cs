@@ -21,12 +21,12 @@ namespace Bot
             GeneralPriority[mapObject] = Priority;
         }
 
-        public static int StepsScaled(int distance, int turns, int assigned)
+        public static int StepsScaled(Wormhole wormhole ,int distance)
         {
             double scale = (((double)(game.Cols.Power(2) + game.Rows.Power(2))).Sqrt());
-            if (turns == 0)
-                return (int)((distance / scale + assigned) * 100);
-            return (int)(((distance / scale) + assigned) * 100 * turns);
+            if (wormhole.TurnsToReactivate == 0)
+                return (int)((distance / scale + NumOfAssignedPiratesToWormhole[wormhole]) * 100);
+            return (int)(((distance / scale) + NumOfAssignedPiratesToWormhole[wormhole]) * 100 * wormhole.TurnsToReactivate);
         }
 
         public static int NumberOfEnemies(MapObject mapObject)  // Returns number of enemies in range of a mapobject fix it
@@ -59,9 +59,9 @@ namespace Bot
                                 .OrderBy(capsule => capsule.Distance(partner))
                                 .FirstOrDefault();
             if (bestMothership != null)
-                score += StepsScaled(bestMothership.Distance(wormholeLocation), wormhole.TurnsToReactivate, wormhole.TurnsToReactivate);
+                score += StepsScaled(wormhole,bestMothership.Distance(wormholeLocation));
             if (bestCapsule != null)
-                score += StepsScaled(bestCapsule.Distance(partner), wormhole.TurnsToReactivate, wormhole.TurnsToReactivate);
+                score += StepsScaled(wormhole,bestCapsule.Distance(partner));
             return score;
         }
 
