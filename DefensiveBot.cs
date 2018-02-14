@@ -104,7 +104,7 @@ namespace Bot
                     Mothership closestMothershipThroughWormhole = null;
                     if(closestWormholeToCapsule!=null)
                     {
-                        closestMothershipThroughWormhole = enemyMotherships.OrderBy(mothership => GameExtension.DistanceThroughWormhole(capsule.Location, mothership.Location, closestWormholeToCapsule, closestWormholeToCapsule.Location, closestWormholeToCapsule.Partner.Location, game.GetAllWormholes())).FirstOrDefault();
+                        closestMothershipThroughWormhole = enemyMotherships.OrderBy(mothership => GameExtension.DistanceThroughWormhole(capsule.Location, mothership.Location, closestWormholeToCapsule, game.GetAllWormholes())).FirstOrDefault();
                         if(closestMothershipThroughWormhole!=null)
                         {
                             capsuleMothership.Add(capsule, closestMothership);
