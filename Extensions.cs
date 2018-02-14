@@ -117,20 +117,20 @@ namespace Bot
            return new Location((y1+y2)/2, (x1+x2)/2);
        }
 
-        private static int DistanceThroughWormhole(Location from, MapObject to, Wormhole wormhole, IEnumerable<Wormhole> wormholes)
+        public static int DistanceThroughWormhole(Location from, Location to,Wormhole wormhole, Location wormholeLocation, Location partner, IEnumerable<Wormhole> wormholes)
         {
-            return from.Distance(wormhole) +
-                   ClosestDistance(wormhole.Partner.Location, to,
+            return from.Distance(wormholeLocation) +
+                   ClosestDistance(partner, to,
                                    wormholes.Where(w => w.Id != wormhole.Id && w.Id != wormhole.Partner.Id));
         }
 
-        private static int ClosestDistance(Location from, MapObject to, IEnumerable<Wormhole> wormholes)
+        private static int ClosestDistance(Location from, Location to, IEnumerable<Wormhole> wormholes)
         {
             if (wormholes.Any())
             {
                 int distanceWithoutWormholes = from.Distance(to);
                 int distanceWithWormholes = wormholes
-                    .Select(wormhole => DistanceThroughWormhole(from, to, wormhole, wormholes))
+                    .Select(wormhole => DistanceThroughWormhole(from, to, wormhole,wormhole.Location,wormhole.Partner.Location, wormholes))
                     .Min();
                 return System.Math.Min(distanceWithoutWormholes, distanceWithWormholes);
             }
@@ -145,7 +145,7 @@ namespace Bot
            foreach(var wormhole in wormholes)
            {
             //    Assign the closest distance for the wormhole
-                wormholeDistances.Add(wormhole, DistanceThroughWormhole(pirate.Location, destination, wormhole, wormholes));
+                wormholeDistances.Add(wormhole, DistanceThroughWormhole(pirate.Location, destination, wormhole, wormhole.Location,wormhole.Partner.Location, wormholes));
             }
             //    Get the minimum
             var bestWormhole = wormholeDistances.OrderBy(map => map.Value).FirstOrDefault();
