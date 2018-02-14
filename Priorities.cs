@@ -21,7 +21,7 @@ namespace Bot
             GeneralPriority[mapObject] = Priority;
         }
 
-        public static int StepsScaled(Wormhole wormhole ,int distance)
+        public static int StepsScaled(Wormhole wormhole, int distance)
         {
             double scale = (((double)(game.Cols.Power(2) + game.Rows.Power(2))).Sqrt());
             if (wormhole.TurnsToReactivate == 0)
@@ -59,9 +59,9 @@ namespace Bot
                                 .OrderBy(capsule => capsule.Distance(partner))
                                 .FirstOrDefault();
             if (bestMothership != null)
-                score += StepsScaled(wormhole,bestMothership.Distance(wormholeLocation));
+                score += StepsScaled(wormhole, bestMothership.Distance(wormholeLocation));
             if (bestCapsule != null)
-                score += StepsScaled(wormhole,bestCapsule.Distance(partner));
+                score += StepsScaled(wormhole, bestCapsule.Distance(partner));
             return score;
         }
 
