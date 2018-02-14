@@ -254,18 +254,16 @@ namespace Bot
         public static void PushWormholes()
         {
             int count = 0;
-            if(allWormholes.Count==0)
+            if (allWormholes.Count == 0)
                 return;
             foreach (Pirate pirate in myPirates.ToList())//go over all of my pirates
             {
                 if (count > allWormholes.Count)//if I assigned a pirate to each wormhole then exit
                     break;
                 Wormhole wormhole = Priorities.GetBestWormhole(pirate);//the best wormhole for the current pirate
-                if(NumOfAssignedPiratesToWormhole.ContainsKey(wormhole))
-                    NumOfAssignedPiratesToWormhole[wormhole]++;
-                else
-                    NumOfAssignedPiratesToWormhole.Add(wormhole,1);
-                
+                NumOfAssignedPiratesToWormhole[wormhole]++;
+                PrintWormhole(NumOfAssignedPiratesToWormhole, pirate);
+
                 Location pushLocation = Priorities.GetPushLocation(wormhole, pirate);//the best pushLocation for the current pirate
                 if (pirate.CanPush(wormhole))//if the pirate has a push and is in range of the wormhole
                 {
@@ -283,11 +281,11 @@ namespace Bot
 
         public static bool TryPushWormhole(Pirate pirate, Wormhole wormhole)
         {
-            if(pirate.CanPush(wormhole))
+            if (pirate.CanPush(wormhole))
             {
-                var LocationOfPush=Priorities.GetPushLocation(wormhole,pirate);
-                pirate.Push(wormhole,LocationOfPush);
-                FinishedTurn[pirate]=true;
+                var LocationOfPush = Priorities.GetPushLocation(wormhole, pirate);
+                pirate.Push(wormhole, LocationOfPush);
+                FinishedTurn[pirate] = true;
                 return true;
             }
             return false;
