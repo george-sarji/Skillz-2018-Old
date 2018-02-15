@@ -13,7 +13,7 @@ namespace Bot
         }
         public static int StepsScaled(int Distance, int speed)
         {
-            return (int)(Sqrt(Power(InitializationBot.game.Rows,2)+Power(InitializationBot.game.Cols,2))*(Distance/speed));
+            return (int)(Sqrt(Power(InitializationBot.game.Rows, 2) + Power(InitializationBot.game.Cols, 2)) * (Distance / speed));
         }
         public static int Clamp(this int num, int min, int max)
         {
@@ -105,32 +105,35 @@ namespace Bot
             return InitializationBot.game.GetEnemyLivingPirates().Where(enemy => enemy.CanPush(pirate)).Count();
         }
 
-       public static int NumberOfPushersAtLocation(Location location)
-       {
-           return InitializationBot.game.GetEnemyLivingPirates().Where(enemy => enemy.InRange(location, enemy.PushRange)&&enemy.PushReloadTurns!=0).Count();
-       }
-
-       public static Location MidPoint(Pirate pirate1, Pirate pirate2)
-       {
-           int x1 = pirate1.Location.Col, x2 = pirate2.Location.Col;
-           int y1 = pirate1.Location.Row, y2 = pirate2.Location.Row;
-           return new Location((y1+y2)/2, (x1+x2)/2);
-       }
-
-        public static int DistanceThroughWormhole(Location from, Location to,Wormhole wormhole, Location wormholeLocation, Location partner, IEnumerable<Wormhole> wormholes)
+        public static int NumberOfPushersAtLocation(Location location)
         {
-            return from.Distance(wormholeLocation) +
-                   ClosestDistance(partner, to,
-                                   wormholes.Where(w => w.Id != wormhole.Id && w.Id != wormhole.Partner.Id));
+            return InitializationBot.game.GetEnemyLivingPirates().Where(enemy => enemy.InRange(location, enemy.PushRange) && enemy.PushReloadTurns != 0).Count();
         }
 
-        private static int ClosestDistance(Location from, Location to, IEnumerable<Wormhole> wormholes)
+        public static Location MidPoint(Pirate pirate1, Pirate pirate2)
+        {
+            int x1 = pirate1.Location.Col, x2 = pirate2.Location.Col;
+            int y1 = pirate1.Location.Row, y2 = pirate2.Location.Row;
+            return new Location((y1 + y2) / 2, (x1 + x2) / 2);
+        }
+
+        public static int DistanceThroughWormhole(Location from, MapObject to, Wormhole wormhole, IEnumerable<Wormhole> wormholes)
+        {
+            return from.Distance(wormhole) +
+                   ClosestDistance(wormhole.Partner.Location, to,
+                                   wormholes.Where(w => w.Id != wormhole.Id && w.Id != wormhole.Partner.Id));
+        }
+        public static int WormholePossibleLocationDistance(Location from, Location to, Location wormhole, Location partner)
+        {
+            return Min(from.Distance(wormhole) + to.Distance(partner),from.Distance(partner)+to.Distance(wormhole));
+        }
+        public static int ClosestDistance(Location from, MapObject to, IEnumerable<Wormhole> wormholes)
         {
             if (wormholes.Any())
             {
                 int distanceWithoutWormholes = from.Distance(to);
                 int distanceWithWormholes = wormholes
-                    .Select(wormhole => DistanceThroughWormhole(from, to, wormhole,wormhole.Location,wormhole.Partner.Location, wormholes))
+                    .Select(wormhole => DistanceThroughWormhole(from, to, wormhole, wormholes))
                     .Min();
                 return System.Math.Min(distanceWithoutWormholes, distanceWithWormholes);
             }
@@ -138,14 +141,14 @@ namespace Bot
         }
 
 
-       public static Wormhole GetBestWormhole(Location destination, Pirate pirate)
-       {
-           var wormholeDistances = new Dictionary<Wormhole, int>();
-           var wormholes = InitializationBot.game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate<pirate.Steps(destination)/4);
-           foreach(var wormhole in wormholes)
-           {
-            //    Assign the closest distance for the wormhole
-                wormholeDistances.Add(wormhole, DistanceThroughWormhole(pirate.Location, destination, wormhole, wormhole.Location,wormhole.Partner.Location, wormholes));
+        public static Wormhole GetBestWormhole(Location destination, Pirate pirate)
+        {
+            var wormholeDistances = new Dictionary<Wormhole, int>();
+            var wormholes = InitializationBot.game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate < pirate.Steps(destination) / 4);
+            foreach (var wormhole in wormholes)
+            {
+                //    Assign the closest distance for the wormhole
+                wormholeDistances.Add(wormhole, DistanceThroughWormhole(pirate.Location, destination, wormhole, wormholes));
             }
             //    Get the minimum
             var bestWormhole = wormholeDistances.OrderBy(map => map.Value).FirstOrDefault();
@@ -169,7 +172,7 @@ namespace Bot
                 var distances = new List<int>();
                 foreach(var wormhole in InitializationBot.game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate<pirate.Steps(mothership)/4))
                 {
-                    var distanceThroughCurrent = DistanceThroughWormhole(pirate.Location, mothership.Location, wormhole,wormhole.Location, wormhole.Partner.Location, InitializationBot.game.GetAllWormholes().Where(hole => hole.TurnsToReactivate<pirate.Steps(mothership)/4));
+                    var distanceThroughCurrent = DistanceThroughWormhole(pirate.Location, mothership.Location, wormhole, InitializationBot.game.GetAllWormholes().Where(hole => hole.TurnsToReactivate<pirate.Steps(mothership)/4));
                     distances.Add(distanceThroughCurrent);
                 }
                 var normalDistance = pirate.Distance(mothership);

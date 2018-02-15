@@ -27,11 +27,6 @@ namespace Bot
             GeneralPriority[mapObject] = Priority;
         }
 
-        public static int StepsScaled(Wormhole wormhole, int distance)
-        {
-            return ScaleNumber(distance, wormhole.TurnsToReactivate, scale);
-        }
-
         public static int NumberOfEnemies(MapObject mapObject)  // Returns number of enemies in range of a mapobject fix it
         {
             if (mapObject is Mothership)
@@ -52,19 +47,16 @@ namespace Bot
             return 0;
         }
 
-        public static int GetWormholeLocationScore(Wormhole wormhole, Location wormholeLocation, Location partner, Pirate pirate)
+        public static int GetWormholeLocationScore(Wormhole wormhole, Location wormholeLocation, Location partner)
         {
             int score = 0;
-            Mothership bestMothership = myMotherships//Closest Mothership to wormhole
-                                .OrderBy(mothership => mothership.Distance(wormholeLocation))
-                                .FirstOrDefault();
-            Capsule bestCapsule = myCapsules//Closest Capsule to 
-                                .OrderBy(capsule => capsule.Distance(partner))
-                                .FirstOrDefault();
-            int distance = GameExtension.DistanceThroughWormhole(bestMothership.Location, bestCapsule.Location,wormhole, wormholeLocation,wormhole.Partner.Location, allWormholes);
-            if (bestMothership != null && bestCapsule != null)
-                score += ScaleNumber(distance, wormhole.TurnsToReactivate, scale);
-            score += ScaleNumber(pirate.Distance(wormholeLocation), wormhole.TurnsToReactivate, scale);
+            var best = bestMothershipAndCapsulePair(wormhole);
+            int distance = GameExtension.
+                            WormholePossibleLocationDistance(best.First().GetLocation()
+                            , best.Last().GetLocation()
+                            , wormhole.Location
+                            , NewWormholeLocation[wormhole.Partner]);
+            score += ScaleNumber(distance, wormhole.TurnsToReactivate, scale);
             return score;
         }
 
@@ -73,36 +65,100 @@ namespace Bot
             Dictionary<Wormhole, int> wormholesScore = new Dictionary<Wormhole, int>();
             foreach (var wormhole in allWormholes)
             {
-                wormholesScore.Add(wormhole, GetWormholeLocationScore(wormhole, wormhole.Location, wormhole.Partner.Location, pirate));//Add all wormholes with their Scores according to the pirate
+                Location partnerLocation = wormhole.Partner.Location;
+                if (NewWormholeLocation[wormhole.Partner] != partnerLocation)
+                {
+                    partnerLocation = wormhole.Partner.Location.Towards(partnerLocation, pirate.PushDistance);
+                }
+                wormholesScore.Add(wormhole, GetWormholeLocationScore(wormhole, wormhole.Location, partnerLocation));//Add all wormholes with their Scores according to the pirate
             }
             PrintWormhole(wormholesScore, pirate);
             return wormholesScore.OrderBy(x => x.Value)
                     .FirstOrDefault().Key;//Order the wormholes by the score the lowest score is the best wormhole
         }
 
-        public static Location GetPushLocation(Wormhole wormhole, Pirate pirate)
+        public static List<MapObject> bestMothershipAndCapsulePair(Wormhole wormhole)
+        {
+            List<MapObject> best = new List<MapObject>();
+            Location partnerLocation = wormhole.Partner.Location;
+            Mothership bestMothership = myMotherships//Closest Mothership to wormhole
+                                .OrderBy(mothership => mothership.Distance(wormhole.Location))
+                                .FirstOrDefault();
+            Capsule bestCapsule = myCapsules//Closest Capsule to partner
+                                .OrderBy(capsule => capsule.Distance(wormhole.Partner))
+                                .FirstOrDefault();
+            if (NewWormholeLocation[wormhole.Partner] != partnerLocation)
+            {
+                partnerLocation = wormhole.Partner.Location.Towards(partnerLocation, game.PushDistance);
+            }
+            int distance = GameExtension.WormholePossibleLocationDistance(bestMothership.Location, bestCapsule.Location, wormhole.Location, partnerLocation);
+            bestMothership = myMotherships//Closest Mothership to partner
+                                .OrderBy(mothership => mothership.Distance(wormhole.Partner))
+                                .FirstOrDefault();
+            bestCapsule = myCapsules//Closest Capsule to wormholelocation
+                                .OrderBy(capsule => capsule.Distance(wormhole.Location))
+                                .FirstOrDefault();
+            int distance2 = GameExtension.WormholePossibleLocationDistance(bestMothership.Location, bestCapsule.Location, wormhole.Location, partnerLocation);
+            if (distance < distance2)
+            {
+                bestMothership = myMotherships//Closest Mothership to wormhole
+                               .OrderBy(mothership => mothership.Distance(wormhole.Location))
+                               .FirstOrDefault();
+                bestCapsule = myCapsules//Closest Capsule to partner
+                                   .OrderBy(capsule => capsule.Distance(wormhole.Partner))
+                                   .FirstOrDefault();
+                best.Add(bestMothership);
+                best.Add(bestCapsule);
+                return best;
+            }
+            best.Add(bestMothership);
+            best.Add(bestCapsule);
+            return best;
+
+        }
+
+        public static Dictionary<Pirate,MapObject> PushWormhole(Wormhole wormhole,List<Pirate> availablePirates, bool Assign)
         {
             // Checks if the wormhole can be pushed to a better location, and if is it returns the new location.
-            List<Location> candidates = new List<Location>();
-            candidates.Add(wormhole.GetLocation());
-            const int steps = 24;
-            for (int i = 0; i < steps; i++)
+            // List<Location> candidates = new List<Location>();
+            // candidates.Add(wormhole.GetLocation());
+            // const int steps = 24;
+            // for (int i = 0; i < steps; i++)
+            // {
+            //     double angle = System.Math.PI * 2 * i / steps;
+            //     double deltaX = pirate.PushDistance * System.Math.Sin(angle);
+            //     double deltaY = pirate.PushDistance * System.Math.Cos(angle);
+            //     Location option = wormhole.Location.Add(new Location(-(int)deltaX, (int)deltaY));
+            //     if (!option.InMap())
+            //     {
+            //         continue;
+            //     }
+            //     candidates.Add(option);
+
+            // }
+            Dictionary<Pirate,MapObject> PiratePush = new Dictionary<Pirate,MapObject>();
+            List<MapObject> best = bestMothershipAndCapsulePair(wormhole);
+            foreach (MapObject mapObject in best)
             {
-                double angle = System.Math.PI * 2 * i / steps;
-                double deltaX = pirate.PushDistance * System.Math.Sin(angle);
-                double deltaY = pirate.PushDistance * System.Math.Cos(angle);
-                Location option = wormhole.Location.Add(new Location((int)deltaX,(int)deltaY));
-                if (!option.InMap())
+                Pirate closestPirate = availablePirates.OrderBy(pirate => pirate.Distance(wormhole)).FirstOrDefault();
+                if(closestPirate == null)
+                    break;
+                PiratePush.Add(closestPirate,mapObject);
+                availablePirates.Remove(closestPirate);
+                myPirates.Remove(closestPirate);
+                if(closestPirate.CanPush(wormhole))
                 {
-                    ("reached").Print();
-                    continue;
+                    closestPirate.Push(wormhole,mapObject);
+                    NewWormholeLocation[wormhole]=mapObject.GetLocation();
+                    FinishedTurn[closestPirate]=true;
                 }
-                candidates.Add(option);
-
+                else if(Assign)
+                {
+                    AssignDestination(closestPirate,wormhole.GetLocation());
+                }
+                wormhole=wormhole.Partner;
             }
-            var BestCandidate=candidates.OrderBy(option => GetWormholeLocationScore(wormhole, option, wormhole.Partner.Location, pirate)).FirstOrDefault();
-
-            return candidates.OrderBy(option => GetWormholeLocationScore(wormhole, option, wormhole.Partner.Location, pirate)).FirstOrDefault();
+            return PiratePush;
         }
     }
 }
