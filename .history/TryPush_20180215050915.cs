@@ -267,11 +267,13 @@ namespace Bot
 
         public static bool TryPushWormhole(Pirate pirate, Wormhole wormhole)
         {
-            List<Pirate> AvailablePirates = new List<Pirate>();
-            AvailablePirates.Add(pirate);
             if (pirate.CanPush(wormhole))
-                Priorities.PushWormhole(wormhole, AvailablePirates, false);
-            return AvailablePirates.Count==0;
+            {
+                List<Pirate> AvailablePirates = new List<Pirate>();
+                var PiratePush = Priorities.PushWormhole(wormhole,AvailablePirates, false);
+            }
+            return false;
+
         }
         public static void PushEachOther()
         {

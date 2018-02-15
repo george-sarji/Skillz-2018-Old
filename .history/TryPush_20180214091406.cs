@@ -52,7 +52,7 @@ namespace Bot
                     return true;
                 }
             }
-            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int)(game.PushDistance * 2)))
+            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int)(bestMothership.UnloadRange * 1.7)))
             {
                 // Send the pirate towards the capsule where it can push.
                 if (pirateDestinations.ContainsKey(pirate))
@@ -253,25 +253,42 @@ namespace Bot
 
         public static void PushWormholes()
         {
-            List<Wormhole> usedWormholes = new List<Wormhole>();
+            int count = 0;
             if (allWormholes.Count == 0)
                 return;
-            foreach (Wormhole wormhole in allWormholes)
+            foreach (Pirate pirate in myPirates.ToList())//go over all of my pirates
             {
-                if (usedWormholes.Contains(wormhole.Partner))
-                    continue;
-                var PiratePush = Priorities.PushWormhole(wormhole, myPirates, true);
-                usedWormholes.Add(wormhole);
+                if (count > allWormholes.Count)//if I assigned a pirate to each wormhole then exit
+                    break;
+                Wormhole wormhole = Priorities.GetBestWormhole(pirate);//the best wormhole for the current pirate
+                NumOfAssignedPiratesToWormhole[wormhole]++;
+                PrintWormhole(NumOfAssignedPiratesToWormhole, pirate);
+
+                Location pushLocation = Priorities.GetPushLocation(wormhole, pirate);//the best pushLocation for the current pirate
+                if (pirate.CanPush(wormhole))//if the pirate has a push and is in range of the wormhole
+                {
+                    pirate.Push(wormhole, pushLocation);//push and set the turn to true so we don't get ignored actions
+                    FinishedTurn[pirate] = true;
+                }
+                else//if pirate can't push the wormhole make him sail to the wormhole by assigning his destinationto the wormhole
+                {
+                    AssignDestination(pirate, wormhole.Location);
+                }
+                myPirates.Remove(pirate);
+                count++;
             }
         }
 
         public static bool TryPushWormhole(Pirate pirate, Wormhole wormhole)
         {
-            List<Pirate> AvailablePirates = new List<Pirate>();
-            AvailablePirates.Add(pirate);
             if (pirate.CanPush(wormhole))
-                Priorities.PushWormhole(wormhole, AvailablePirates, false);
-            return AvailablePirates.Count==0;
+            {
+                var LocationOfPush = Priorities.GetPushLocation(wormhole, pirate);
+                pirate.Push(wormhole, LocationOfPush);
+                FinishedTurn[pirate] = true;
+                return true;
+            }
+            return false;
         }
         public static void PushEachOther()
         {

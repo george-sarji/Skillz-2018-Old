@@ -154,7 +154,7 @@ namespace Bot
                 }
                 else if(Assign)
                 {
-                    AssignDestination(closestPirate,wormhole.GetLocation());
+                    AssignDestination(closestPirate,wormhole);
                 }
                 wormhole=wormhole.Partner;
             }

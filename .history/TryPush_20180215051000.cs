@@ -271,7 +271,7 @@ namespace Bot
             AvailablePirates.Add(pirate);
             if (pirate.CanPush(wormhole))
                 Priorities.PushWormhole(wormhole, AvailablePirates, false);
-            return AvailablePirates.Count==0;
+            return AvailablePirates.Count==1;
         }
         public static void PushEachOther()
         {

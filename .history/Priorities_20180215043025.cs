@@ -117,7 +117,7 @@ namespace Bot
 
         }
 
-        public static Dictionary<Pirate,MapObject> PushWormhole(Wormhole wormhole,List<Pirate> availablePirates, bool Assign)
+        public static Dictionary<Pirate,Wormhole> PushWormhole(Wormhole wormhole)
         {
             // Checks if the wormhole can be pushed to a better location, and if is it returns the new location.
             // List<Location> candidates = new List<Location>();
@@ -136,29 +136,20 @@ namespace Bot
             //     candidates.Add(option);
 
             // }
-            Dictionary<Pirate,MapObject> PiratePush = new Dictionary<Pirate,MapObject>();
             List<MapObject> best = bestMothershipAndCapsulePair(wormhole);
             foreach (MapObject mapObject in best)
             {
-                Pirate closestPirate = availablePirates.OrderBy(pirate => pirate.Distance(wormhole)).FirstOrDefault();
-                if(closestPirate == null)
-                    break;
-                PiratePush.Add(closestPirate,mapObject);
-                availablePirates.Remove(closestPirate);
-                myPirates.Remove(closestPirate);
+                Pirate closestPirate = myPirates.OrderBy(pirate => pirate.Distance(wormhole)).FirstOrDefault();
                 if(closestPirate.CanPush(wormhole))
                 {
                     closestPirate.Push(wormhole,mapObject);
-                    NewWormholeLocation[wormhole]=mapObject.GetLocation();
                     FinishedTurn[closestPirate]=true;
                 }
-                else if(Assign)
-                {
-                    AssignDestination(closestPirate,wormhole.GetLocation());
-                }
+                else
+                    AssignDestination(closestPirate,mapObject.GetLocation());
+                myPirates.Remove(closestPirate);
                 wormhole=wormhole.Partner;
             }
-            return PiratePush;
         }
     }
 }

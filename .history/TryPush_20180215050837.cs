@@ -260,18 +260,21 @@ namespace Bot
             {
                 if (usedWormholes.Contains(wormhole.Partner))
                     continue;
-                var PiratePush = Priorities.PushWormhole(wormhole, myPirates, true);
+                var PiratePush = Priorities.PushWormhole(wormhole,myPirates,true);
                 usedWormholes.Add(wormhole);
             }
         }
 
         public static bool TryPushWormhole(Pirate pirate, Wormhole wormhole)
         {
-            List<Pirate> AvailablePirates = new List<Pirate>();
-            AvailablePirates.Add(pirate);
-            if (pirate.CanPush(wormhole))
-                Priorities.PushWormhole(wormhole, AvailablePirates, false);
-            return AvailablePirates.Count==0;
+            if(pirate.CanPush(wormhole))
+            {
+            List<Pirate> AvailablePirate()
+            var PiratePush = Priorities.PushWormhole(wormhole ,false);
+            int count = 0;
+            }
+            return false;
+
         }
         public static void PushEachOther()
         {

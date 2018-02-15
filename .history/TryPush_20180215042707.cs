@@ -52,7 +52,7 @@ namespace Bot
                     return true;
                 }
             }
-            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int)(game.PushDistance * 2)))
+            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int)(game.PushDistance*2)))
             {
                 // Send the pirate towards the capsule where it can push.
                 if (pirateDestinations.ContainsKey(pirate))
@@ -253,25 +253,27 @@ namespace Bot
 
         public static void PushWormholes()
         {
-            List<Wormhole> usedWormholes = new List<Wormhole>();
+            int count = 0;
+            List<Wormhole> usedWormholes= new List<Wormhole>();
             if (allWormholes.Count == 0)
                 return;
-            foreach (Wormhole wormhole in allWormholes)
+            foreach(Wormhole wormhole in allWormholes)
             {
-                if (usedWormholes.Contains(wormhole.Partner))
-                    continue;
-                var PiratePush = Priorities.PushWormhole(wormhole, myPirates, true);
-                usedWormholes.Add(wormhole);
+                Priorities.PushWormhole(wormhole);
+                
             }
         }
 
         public static bool TryPushWormhole(Pirate pirate, Wormhole wormhole)
         {
-            List<Pirate> AvailablePirates = new List<Pirate>();
-            AvailablePirates.Add(pirate);
             if (pirate.CanPush(wormhole))
-                Priorities.PushWormhole(wormhole, AvailablePirates, false);
-            return AvailablePirates.Count==0;
+            {
+                var LocationOfPush = Priorities.GetPushLocation(wormhole, pirate);
+                pirate.Push(wormhole, LocationOfPush);
+                FinishedTurn[pirate] = true;
+                return true;
+            }
+            return false;
         }
         public static void PushEachOther()
         {

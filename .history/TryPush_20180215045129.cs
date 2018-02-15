@@ -260,18 +260,59 @@ namespace Bot
             {
                 if (usedWormholes.Contains(wormhole.Partner))
                     continue;
-                var PiratePush = Priorities.PushWormhole(wormhole, myPirates, true);
+                var PiratePush = Priorities.GetPushingPirates(wormhole);
+                int count = 0;
+                foreach (Pirate pirate in PiratePush.Keys)
+                {
+                    if (count == 1)
+                    {
+                        if (pirate.CanPush(wormhole.Partner))
+                        {
+                            pirate.Push(wormhole.Partner, PiratePush[pirate]);
+                            NewWormholeLocation[wormhole.Partner] = PiratePush[pirate].GetLocation();
+                            FinishedTurn[pirate] = true;
+                        }
+                        else
+                            AssignDestination(pirate, wormhole.Partner.Location);
+                    }
+                    else if (pirate.CanPush(wormhole))
+                    {
+                        pirate.Push(wormhole, PiratePush[pirate]);
+                        NewWormholeLocation[wormhole] = PiratePush[pirate].GetLocation();
+                        FinishedTurn[pirate] = true;
+                    }
+                    else
+                        AssignDestination(pirate, wormhole.Location);
+                    count++;
+                }
                 usedWormholes.Add(wormhole);
             }
         }
 
         public static bool TryPushWormhole(Pirate pirate, Wormhole wormhole)
         {
-            List<Pirate> AvailablePirates = new List<Pirate>();
-            AvailablePirates.Add(pirate);
-            if (pirate.CanPush(wormhole))
-                Priorities.PushWormhole(wormhole, AvailablePirates, false);
-            return AvailablePirates.Count==0;
+            var PiratePush = Priorities.GetPushingPirates(wormhole);
+            int count = 0;
+            foreach (Pirate pirateWhoWillPush in PiratePush.Keys)
+            {
+                if (count == 1)
+                {
+                    if (pirate.CanPush(wormhole.Partner))
+                    {
+                        pirate.Push(wormhole.Partner, PiratePush[pirate]);
+                        NewWormholeLocation[wormhole.Partner] = PiratePush[pirate].GetLocation();
+                        FinishedTurn[pirate] = true;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                count++;
+            }
+            return false;
+
         }
         public static void PushEachOther()
         {
