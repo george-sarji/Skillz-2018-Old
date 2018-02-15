@@ -113,22 +113,28 @@ namespace Bot
                     {
                         // Check if each of the pirates can reach.
                         bool firstReach = false, secondReach=false;
-                        if(CheckIfCapsuleCanReach(first, mothership))
+                        if(CheckIfCapsuleCanReach(first, mothership) && !CheckIfCapsuleCanReach(closestHolder, mothership))
                         {
+                            AssignDestination(first, mothership.Location);
+                            AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));                            
                             firstReach = true;
                         }
-                        if(CheckIfCapsuleCanReach(closestHolder, mothership))
+                        else if(CheckIfCapsuleCanReach(closestHolder, mothership) && !CheckIfCapsuleCanReach(first, mothership))
                         {
+                            AssignDestination(closestHolder, mothership.Location);
+                            AssignDestination(first, SmartSailing.SmartSail(first, mothership)); 
                             secondReach = true;
                         }
-                        if(!firstReach && !secondReach)
+                        else if(CheckIfCapsuleCanReach(closestHolder, mothership) && CheckIfCapsuleCanReach(first, mothership))
+                        {
+                            AssignDestination(closestHolder, mothership.Location);
+                            AssignDestination(first, mothership.Location);
+                        }
+                        else if(!CheckIfCapsuleCanReach(closestHolder, mothership) && !CheckIfCapsuleCanReach(first, mothership))
                         {
                             GroupPair(first, closestHolder, mothership.Location);
                         }
-                        if(secondReach)
-                            AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));
-                        if(firstReach)
-                            AssignDestination(first, SmartSailing.SmartSail(first, mothership));
+                        
                         myPirates.Remove(first);
                         myPirates.Remove(closestHolder);
                     }
