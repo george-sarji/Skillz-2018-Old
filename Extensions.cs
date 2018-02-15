@@ -125,7 +125,7 @@ namespace Bot
         }
         public static int WormholePossibleLocationDistance(Location from, Location to, Location wormhole, Location partner)
         {
-            return from.Distance(wormhole) + to.Distance(partner);
+            return Min(from.Distance(wormhole) + to.Distance(partner),from.Distance(partner)+to.Distance(wormhole));
         }
         public static int ClosestDistance(Location from, MapObject to, IEnumerable<Wormhole> wormholes)
         {
