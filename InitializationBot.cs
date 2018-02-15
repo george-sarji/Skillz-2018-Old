@@ -22,7 +22,7 @@ namespace Bot
         // Pullpullon - Win 8-4 - 209 turns
         // ---------------------------------------- 
         public static PirateGame game;
-        public const bool Debug = true;
+        public const bool Debug = false;
         protected static List<Pirate> myPirates;
         protected static List<Pirate> myPiratesWithCapsule;
         protected static List<Capsule> myCapsules;
