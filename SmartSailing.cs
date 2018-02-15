@@ -54,7 +54,7 @@ namespace Bot
 
         public static bool IsInDanger(Location loc, Location destination, Pirate pirate)
         {
-            return IsHittingAsteroid(loc)||IsInRangeOfEnemy(loc) || IsInWormholeDanger(loc, destination, pirate);
+            return IsHittingAsteroid(loc)||IsInRangeOfEnemy(loc, pirate) || IsInWormholeDanger(loc, destination, pirate);
         }
 
 
@@ -80,7 +80,7 @@ namespace Bot
                 return false;
             return true;
         }
-        public static bool IsInRangeOfEnemy(Location loc)
+        public static bool IsInRangeOfEnemy(Location loc, Pirate myPirate)
         {
             int count = 0;
             foreach (Pirate pirate in game.GetEnemyLivingPirates())
@@ -90,7 +90,7 @@ namespace Bot
                     count++;
                 }
             }
-            return count >= game.NumPushesForCapsuleLoss;
+            return count >= myPirate.NumPushesForCapsuleLoss;
         }
     }
 }
