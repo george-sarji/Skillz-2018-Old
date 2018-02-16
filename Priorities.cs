@@ -14,6 +14,48 @@ namespace Bot
                 GeneratePriority(mapobject);
             }
         }
+
+        public static void GetPiratesStates()
+        {
+            foreach(Pirate pirate in game.GetMyLivingPirates())
+            {
+                if(pirate.HasCapsule())
+                {
+                    if(GameExtension.CapsuleHolderInDanger(pirate))
+                        wantToBeHeavy.Add(pirate);
+                    if(!GameExtension.CapsuleHolderInDanger(pirate))
+                        wantToBeNormal.Add(pirate);
+                }
+                else if(pirate.StateName == "normal") willingToBeHeavy.Add(pirate);
+                else willingToBeNormal.Add(pirate);
+            }
+        }
+    public static void TrySwitchPirates(List<Pirate> group1, List<Pirate> group2) 
+    {
+        var pirate1 = group1.FirstOrDefault();
+        var pirate2 = group2.FirstOrDefault();
+
+        if (pirate1 != null && pirate2 != null) {
+        pirate1.SwapStates(pirate2);
+        group1.Remove(pirate1);
+        group2.Remove(pirate2);
+        myPirates.Remove(pirate1);
+        }
+    }
+        public static void HandleSwitchPirates()
+        {
+            foreach(Pirate pirate in wantToBeHeavy)
+            {
+                    if(wantToBeNormal.Any())
+                        TrySwitchPirates(wantToBeHeavy, wantToBeNormal);
+                    else if(willingToBeNormal.Any())
+                        TrySwitchPirates(wantToBeHeavy, willingToBeNormal);
+                }
+                foreach(Pirate pirate in wantToBeNormal){
+                        TrySwitchPirates(wantToBeNormal, willingToBeHeavy);
+                }
+            }
+        
         public static int ScaleNumber(double num, int turns, double scale)
         {
             if (turns == 0)
