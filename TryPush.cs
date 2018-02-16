@@ -11,6 +11,16 @@ namespace Bot
         {
             return myPirates.Where(p => p.CanPush(enemy)).Count();
         }
+        public static int PushDistanceAvailable(Pirate enemy)
+        {
+            int total = 0;
+            foreach(Pirate pirate in game.GetMyLivingPirates())
+            {
+                if(pirate.CanPush(enemy))
+                    total += pirate.PushDistance;
+            }
+            return total;
+        }
 
         public static bool TryPushEnemyCapsule(Pirate pirate, Pirate capsuleHolder)
         {
@@ -20,12 +30,14 @@ namespace Bot
                 // Check how much other pirates can push it.
                 var numOfPushers = NumOfPushesAvailable(capsuleHolder);
                 // Check if we can either make the pirate lose his capsule or get pushed outside the border.
-                var pushesToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location)) / pirate.PushDistance;
-                if ((numOfPushers >= pushesToBorder && enemyCapsulesPushes[capsuleHolder.Capsule] < pushesToBorder) || (numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss && enemyCapsulesPushes[capsuleHolder.Capsule] < capsuleHolder.NumPushesForCapsuleLoss))
+                var pushDistanceAvailable = PushDistanceAvailable(capsuleHolder);
+                var distanceToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location));
+                if ((pushDistanceAvailable >= distanceToBorder && enemyCapsulesPushDistance[capsuleHolder.Capsule] < distanceToBorder) || (numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss && enemyCapsulesPushes[capsuleHolder.Capsule] < capsuleHolder.NumPushesForCapsuleLoss))
                 {
                     // Push the pirate towards the border!
                     pirate.Push(capsuleHolder, GetClosestToBorder(capsuleHolder.Location));
                     enemyCapsulesPushes[capsuleHolder.Capsule]++;
+                    enemyCapsulesPushDistance[capsuleHolder.Capsule] += pirate.PushDistance;
                     return true;
                 }
             }

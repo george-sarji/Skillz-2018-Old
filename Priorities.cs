@@ -14,6 +14,74 @@ namespace Bot
                 GeneratePriority(mapobject);
             }
         }
+
+    //     public static void GetPiratesStates()
+    //     {
+    //         foreach(Pirate pirate in game.GetMyLivingPirates())
+    //         {
+    //             if(pirate.HasCapsule())
+    //             {
+    //                 if(GameExtension.CapsuleHolderInDanger(pirate))
+    //                     wantToBeHeavy.Add(pirate);
+    //                 if(!GameExtension.CapsuleHolderInDanger(pirate))
+    //                     wantToBeNormal.Add(pirate);
+    //             }
+    //             else if(pirate.StateName == "normal") willingToBeHeavy.Add(pirate);
+    //             else willingToBeNormal.Add(pirate);
+    //         }
+    //     }
+    // public static bool TrySwitchPirates(Pirate pirate1, List<Pirate> group) 
+    // {
+    //     var pirate2 = group.FirstOrDefault();
+
+    //     if (pirate1 != null && pirate2 != null) {
+    //     pirate1.SwapStates(pirate2);
+    //     group.Remove(pirate2);
+    //     myPirates.Remove(pirate1);
+    //     return true;
+    //     }
+    //     return false;
+    // }
+    // private bool TrySwitchPirates(List<Pirate> group1, List<Pirate> group2) {
+    //     var pirate1 = group1.FirstOrDefault();
+    //     var pirate2 = group2.FirstOrDefault();
+
+    //     if (pirate1 != null && pirate2 != null) {
+    //         pirate1.SwapStates(pirate2);
+    //         myPirates.Remove(pirate1);
+    //         return true;
+    //     }
+    //     return false;
+    // }
+    //     public static void HandleSwitchPirates()
+    //     {
+    //         foreach(Pirate pirate in wantToBeHeavy)
+    //         {
+    //                 if(wantToBeNormal.Any()){
+    //                     if(TrySwitchPirates(wantToBeHeavy.Where(heavy => heavy == pirate).FirstOrDefault(), wantToBeNormal))
+    //                         {
+    //                             wantToBeHeavy.Remove(pirate);
+    //                             wantToBeNormal.Remove(wantToBeNormal.First());
+    //                         }
+    //                 }
+    //                 else if(willingToBeNormal.Any()){
+    //                     if(TrySwitchPirates(wantToBeHeavy.Where(heavy => heavy == pirate).FirstOrDefault(), willingToBeNormal))
+    //                     {
+    //                             wantToBeHeavy.Remove(pirate);
+    //                             willingToBeNormal.Remove(willingToBeNormal.First());
+    //                     }
+    //             }
+    //         }
+    //         foreach(Pirate pirate in wantToBeNormal)
+    //         {
+    //                 if(TrySwitchPirates(wantToBeNormal.Where(heavy => heavy == pirate).FirstOrDefault(), willingToBeHeavy))
+    //                 {
+    //                     wantToBeNormal.Remove(pirate);
+    //                     willingToBeHeavy.Remove(willingToBeHeavy.First());
+    //                 }
+    //         }  
+    //     }
+        
         public static int ScaleNumber(double num, int turns, double scale)
         {
             if (turns == 0)
