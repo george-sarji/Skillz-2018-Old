@@ -9,20 +9,6 @@ namespace Bot
     {
         public static Location SmartSail(Pirate pirate, MapObject destination)
         {
-            // List<Location> best = new List<Location>();//Location Available for sailing who contain a safe route
-            // best.Add(pirate.Location);
-            // for (int i = 1; i <= 24; i++)
-            // {
-            //     int alpha = (int)((2*System.Math.PI * i) / 24);//turn from radians to degrees
-            //     Location current = new Location((int)(pirate.Location.Row - pirate.MaxSpeed * System.Math.Sin(alpha))
-            //     , (int)(pirate.Location.Col + pirate.MaxSpeed * System.Math.Cos(alpha)));
-            //     if (!current.InMap())//check if in map
-            //         continue;
-            //     if(!IsHittingAsteroid(current) && !IsInRangeOfEnemy(current))//check if it is a safe route
-            //         best.Add(current);
-
-            // }
-            //  return best.OrderBy(location => location.Distance(destination)).FirstOrDefault();// get the closest and safest route
             List<Location> candidates = new List<Location>();
             var bestOption = pirate.GetLocation();
             const int steps = 24;

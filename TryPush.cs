@@ -7,29 +7,6 @@ namespace Bot
 {
     class TryPush : InitializationBot
     {
-        // var game = InitializationBot.game;
-        // var EnemyPirates = game.GetEnemyLivingPirates();
-        // var MyPirates = game.GetMyLivingPirates();
-        // var Asteroids = game.GetLivingAsteroids();
-        // public List<Pirate> PushAsteroid()
-        // {
-        //     foreach (var Enemy in EnemyPirates)
-        //     {
-        //         foreach (var Piratre in MyPirates)
-        //         {
-        //             foreach (var Asteroid in Asteroid)
-        //             {
-        //                 var EnemyNextLocation = Enemy.Location.Towards(Asteroid.Location+Asteroid.Direction,Pirate.PushDistance);
-        //                 if(Pirate.CanPush(Enemy) && EnemyNextLocation.InRange(Asteroid.Location+Asteroid.Direction,Asteroid.Size))
-        //                 {
-        //                     Pirate.Push(Enemy,EnemyNextLocation);
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-        // Test
-
         public static int NumOfPushesAvailable(Pirate enemy)
         {
             return myPirates.Where(p => p.CanPush(enemy)).Count();
@@ -208,25 +185,6 @@ namespace Bot
             myPirates = myPirates.Except(usedPirates).ToList();
             return LocationOfPush;
         }
-
-        // public void TryPushEnemyCapsule()
-        // {
-        //     foreach (Pirate enemyWithCapsule in EnemyPiratesWithCapsule)
-        //     {
-        //         PushAlliesToEnemy(enemyWithCapsule);
-        //         int count = game.GetMyLivingPirates().Where(pirate => pirate.CanPush(enemyWithCapsule) && !FinishedTurn[pirate]).Count();  // Number of my living pirate who can push enemy pirates
-        //         if (count >= enemyWithCapsule.NumPushesForCapsuleLoss)  // If we can drop the capsule
-        //         {
-        //             foreach (Pirate mypirate in game.GetMyLivingPirates().Where(pirate => pirate.CanPush(enemyWithCapsule) && !FinishedTurn[pirate]))  // We push until we drop it
-        //             {
-        //                 if (!enemyWithCapsule.HasCapsule())  // I think all the operations happen simultaneously at the end of the turn, so this will never be the case.
-        //                     break;
-        //                 mypirate.Push(enemyWithCapsule, enemyWithCapsule.InitialLocation);
-        //                 FinishedTurn[mypirate] = true;
-        //             }
-        //         }
-        //     }
-        // }
         public static bool PushAlliesToEnemy(Pirate target)//will document soon
         {
             int count = game.GetMyLivingPirates().Where(pirate => pirate.CanPush(target)).Except(myPiratesWithCapsule).Count();
@@ -323,6 +281,26 @@ namespace Bot
         {
             pirate1.Push(pirate2, destination);
             pirate2.Push(pirate1, destination);
+        }
+
+        public static bool TryPushEnemyCapsuleDefensively(Pirate pirate, Pirate capsuleHolder)
+        {
+            var bestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsuleHolder)).FirstOrDefault(); ;
+            if (pirate.CanPush(capsuleHolder))
+            {
+                // Check how much other pirates can push it.
+                var numOfPushers = NumOfPushesAvailable(capsuleHolder);
+                // Check if we can either make the pirate lose his capsule or get pushed outside the border.
+                var pushesToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location)) / pirate.PushDistance;
+                if ((numOfPushers >= pushesToBorder && enemyCapsulesPushes[capsuleHolder.Capsule] < pushesToBorder) || (numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss && enemyCapsulesPushes[capsuleHolder.Capsule] < capsuleHolder.NumPushesForCapsuleLoss))
+                {
+                    // Push the pirate towards the border!
+                    pirate.Push(capsuleHolder, capsuleHolder.Location.Towards(capsuleHolder.Capsule.InitialLocation, -numOfPushers*pirate.PushDistance));
+                    enemyCapsulesPushes[capsuleHolder.Capsule]++;
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
