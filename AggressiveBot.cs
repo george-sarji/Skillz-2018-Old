@@ -22,9 +22,26 @@ namespace Bot
                     var pirateSailer = myPirates.FirstOrDefault(pirate => !pirate.HasCapsule());
                     if (pirateSailer != null)
                     {
-                        var bestWormhole = GameExtension.GetBestWormhole(capsule.InitialLocation, pirateSailer);
-                        if(bestWormhole!=null)
+                        // Check if sailer is in pirate danger.
+                        var closestPirate = enemyPirates.OrderBy(p => p.Distance(pirateSailer)).FirstOrDefault();
+                        ("Closest pirate: "+closestPirate).Print();
+                        if(closestPirate!=null)
                         {
+                            if(closestPirate.PushReloadTurns==0 && pirateSailer.CanPush(closestPirate) && TryPush.TryPushEnemy(pirateSailer, closestPirate))
+                            {
+                                var bestWormholeAvoid = GameExtension.GetBestWormhole(capsule.InitialLocation, pirateSailer);
+                                if(bestWormholeAvoid!=null)
+                                {
+                                    // Go towards the wormhole.
+                                    AssignDestination(pirateSailer, bestWormholeAvoid.Location);
+                                }
+                                else
+                                    AssignDestination(pirateSailer, capsule.InitialLocation);
+                            }
+                        }
+                        else if(GameExtension.GetBestWormhole(capsule.InitialLocation, pirateSailer)!=null)
+                        {
+                            var bestWormhole=GameExtension.GetBestWormhole(capsule.InitialLocation, pirateSailer);
                             // Go towards the wormhole.
                             AssignDestination(pirateSailer, bestWormhole.Location);
                         }
@@ -38,7 +55,23 @@ namespace Bot
                     // Send the closest pirate to capture the capsule.
                     var sailingPirate = myPirates.First();
                     var bestWormhole = GameExtension.GetBestWormhole(capsule.InitialLocation, sailingPirate);
-                    if(bestWormhole!=null)
+                    var closestPirate = enemyPirates.OrderBy(p => p.Distance(sailingPirate)).FirstOrDefault();
+                    ("Closest pirate: "+closestPirate).Print();
+                    if(closestPirate!=null)
+                    {
+                        if(closestPirate.PushReloadTurns==0 && sailingPirate.CanPush(closestPirate) && TryPush.TryPushEnemy(sailingPirate, closestPirate))
+                        {
+                            var bestWormholeAvoid = GameExtension.GetBestWormhole(capsule.InitialLocation, sailingPirate);
+                            if(bestWormholeAvoid!=null)
+                            {
+                                // Go towards the wormhole.
+                                AssignDestination(sailingPirate, bestWormholeAvoid.Location);
+                            }
+                            else
+                                AssignDestination(sailingPirate, capsule.InitialLocation);
+                        }
+                    }
+                    else if(bestWormhole!=null)
                     {
                         // Assign to the wormhole
                         AssignDestination(sailingPirate, bestWormhole.Location);
@@ -49,6 +82,27 @@ namespace Bot
                 }
             }
         }
+
+        public static void SendCapsuleCaptures()
+        {
+            foreach(var capsule in myCapsules)
+            {
+                var piratesOrdered = myPirates.Where(p => !p.HasCapsule()).OrderBy(p => p.Steps(capsule.InitialLocation));
+                // Check if we have a close pirate to the capsule.
+                if(myPirates.Any())
+                {
+                    // Send the closest pirate to the spawn.
+                    var closestPirate = piratesOrdered.First();
+                    var bestWormhole = GameExtension.GetBestWormhole(capsule.InitialLocation, closestPirate);
+                    if(bestWormhole!=null)
+                        AssignDestination(closestPirate, SmartSailing.SmartSail(closestPirate, bestWormhole));
+                    else
+                        AssignDestination(closestPirate, capsule.InitialLocation);
+                    myPirates.Remove(closestPirate);
+                }
+            }
+        }
+
         public static void GoHelpAllyWithCapsule()
         {
             foreach (Pirate pirate in game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()))
