@@ -26,12 +26,12 @@ namespace Bot
                     var useablePirates = myPirates.Where(pirate => pirate.Steps(mothership)>=pirate.PushReloadTurns).ToList();
                     if(useablePirates.Count()>=game.NumPushesForCapsuleLoss)
                     {
-                        // Take the first number of pirates and send them.
-                        foreach(var pirate in useablePirates.Take(game.NumPushesForCapsuleLoss))
+                        foreach(var closestCapsule in enemyCapsules.Where(cap => cap.Holder!=null).Where(cap => GameExtension.GetBestMothershipThroughWormholes(cap.Holder).Equals(mothership)).OrderBy(cap => cap.Holder.Steps(mothership)))
                         {
-                            var closestCapsule = enemyCapsules.OrderBy(cap => cap.Distance(mothership)).FirstOrDefault();
-                            if(closestCapsule!=null)
+                            // Take the first number of pirates and send them.
+                            foreach(var pirate in useablePirates.Take(game.NumPushesForCapsuleLoss))
                             {
+                                // var closestCapsule = enemyCapsules.OrderBy(cap => cap.Distance(mothership)).FirstOrDefault();
                                 // Send the pirates towards the unload range * 0.5
                                 var destination = mothership.Location.Towards(closestCapsule,  (int)(mothership.UnloadRange*0.8));
                                 if(closestCapsule.Holder!=null && TryPush.TryPushEnemyCapsule(pirate, closestCapsule.Holder))
@@ -45,9 +45,7 @@ namespace Bot
                                     pirateDestinations.Add(pirate, destination);
                                     usedPirates.Add(pirate);
                                 }
-                                
                             }
-                            
                         }
                     }
                 }
@@ -88,13 +86,10 @@ namespace Bot
         public static void BuildDefensiveBunker()
         {
             var capsuleMothership = new Dictionary<Capsule, Mothership>();
-            foreach(var capsule in game.GetEnemyCapsules().Where(cap => cap.Holder!=null))
+            foreach(var closestMothership in enemyMotherships)
             {
-                // Get the closest mothership.
-                var closestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsule)).FirstOrDefault();
-                if(closestMothership!=null)
+                foreach(var capsule in enemyCapsules.Where(cap => cap.Holder!=null).Where(cap => GameExtension.GetBestMothershipThroughWormholes(cap.Holder).Equals(closestMothership)).OrderBy(cap => cap.Holder.Steps(closestMothership)))
                 {
-                    
                     // Get the amount of pushes towards the border.
                     var closestToBorder = GetClosestToBorder(closestMothership.Location);
                     var requiredPirates=capsule.Holder.NumPushesForCapsuleLoss+1;
@@ -150,6 +145,43 @@ namespace Bot
             }
         }
 
+        public static void BuildBunkerForDefence()
+        {
+            foreach(var mothership in enemyMotherships)
+            {
+                foreach(var capsule in enemyCapsules.Where(cap => cap.Holder!=null).Where(cap => GameExtension.GetBestMothershipThroughWormholes(cap.Holder).Equals(mothership)).OrderBy(cap => cap.Holder.Steps(mothership)))
+                {
+                    ("Entered bunker defence").Print();
+                    var useablePirates = myPirates.Where(pirate => pirate.Steps(mothership)>=pirate.PushReloadTurns).ToList();
+                    var closestToBorder = GetClosestToBorder(mothership.Location);
+                    // Get how much pushes it needs to get to the border + 1
+                    var amountOfPushes = mothership.Distance(closestToBorder)/(game.PushDistance+1);
+                    var pushesTillBorder = mothership.Distance(GetClosestToBorder(mothership.Location))/(game.PushDistance+1);
+                    if(pushesTillBorder==0)
+                        pushesTillBorder++;
+                    int requiredPirates = 0;
+                    if(capsule.Holder.NumPushesForCapsuleLoss<=pushesTillBorder)
+                        requiredPirates = capsule.Holder.NumPushesForCapsuleLoss;
+                    else
+                        requiredPirates = pushesTillBorder;
+                    if(useablePirates.Count()>=requiredPirates)
+                    {
+                        var usedPirates = new List<Pirate>();
+                        foreach(var pirate in useablePirates.OrderBy(p => p.Steps(capsule)).Take(requiredPirates))
+                        {
+                            var destination = mothership.Location.Towards(capsule,  (int)(mothership.UnloadRange*0.5));
+                            if(!TryPush.TryPushEnemyCapsuleDefensively(pirate, capsule.Holder))
+                            {
+                                AssignDestination(pirate, destination);
+                            }
+                            // Add to the destination.
+                            usedPirates.Add(pirate);
+                        }
+                        myPirates = myPirates.Except(usedPirates).ToList();
+                    }
+                }
+            }
+        }
 
         public static void BuildBunkerTest()
         {
