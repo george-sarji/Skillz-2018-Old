@@ -22,22 +22,21 @@ namespace Bot
             return total;
         }
 
+
         public static bool TryPushEnemyCapsule(Pirate pirate, Pirate capsuleHolder)
         {
-            var bestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsuleHolder)).FirstOrDefault(); ;
+            var bestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsuleHolder)).FirstOrDefault();
             if (pirate.CanPush(capsuleHolder))
             {
                 // Check how much other pirates can push it.
                 var numOfPushers = NumOfPushesAvailable(capsuleHolder);
                 // Check if we can either make the pirate lose his capsule or get pushed outside the border.
-                var pushDistanceAvailable = PushDistanceAvailable(capsuleHolder);
-                var distanceToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location));
-                if ((pushDistanceAvailable >= distanceToBorder && enemyCapsulesPushDistance[capsuleHolder.Capsule] < distanceToBorder) || (numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss && enemyCapsulesPushes[capsuleHolder.Capsule] < capsuleHolder.NumPushesForCapsuleLoss))
+                var pushesToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location)) / pirate.PushDistance;
+                if ((numOfPushers >= pushesToBorder && enemyCapsulesPushes[capsuleHolder.Capsule] < pushesToBorder) || (numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss && enemyCapsulesPushes[capsuleHolder.Capsule] < capsuleHolder.NumPushesForCapsuleLoss))
                 {
                     // Push the pirate towards the border!
-                    pirate.Push(capsuleHolder, GetClosestToBorder(capsuleHolder.Location));
+                    pirate.Push(capsuleHolder, capsuleHolder.Location.Towards(capsuleHolder.Capsule.InitialLocation, -pirate.PushDistance*numOfPushers));
                     enemyCapsulesPushes[capsuleHolder.Capsule]++;
-                    enemyCapsulesPushDistance[capsuleHolder.Capsule] += pirate.PushDistance;
                     return true;
                 }
             }

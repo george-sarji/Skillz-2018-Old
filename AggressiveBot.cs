@@ -30,21 +30,29 @@ namespace Bot
         public static void PushAsteroidsNearby()
         {
 
-            var usedPirates = new List<Pirate>();
-            foreach (var pirate in myPirates)
+            // var usedPirates = new List<Pirate>();
+            // foreach (var pirate in myPirates)
+            // {
+            //     // Get the asteroids that are near our pirates.
+            //     var asteroidsOrdered = game.GetLivingAsteroids().OrderBy(asteroid => asteroid.Location.Add(asteroid.Direction).Distance(pirate));//change game to pirate if they delete the game.pushRange in the future we are ready(Mahmoud)
+            //     if (asteroidsOrdered.Any())
+            //     {
+            //         // There is an asteroid near us. Push it.
+            //         if (TryPush.TryPushAsteroidTowardsCapsule(pirate, asteroidsOrdered.FirstOrDefault()) || TryPush.TryPushAsteroid(pirate, asteroidsOrdered.FirstOrDefault()))
+            //         {
+            //             usedPirates.Add(pirate);
+            //         }
+            //     }
+            // }
+            // myPirates = myPirates.Except(usedPirates).ToList();
+            foreach(var asteroid in game.GetLivingAsteroids())
             {
-                // Get the asteroids that are near our pirates.
-                var asteroidsOrdered = game.GetLivingAsteroids().OrderBy(asteroid => asteroid.Location.Add(asteroid.Direction).Distance(pirate));//change game to pirate if they delete the game.pushRange in the future we are ready(Mahmoud)
-                if (asteroidsOrdered.Any())
-                {
-                    // There is an asteroid near us. Push it.
-                    if (TryPush.TryPushAsteroidTowardsCapsule(pirate, asteroidsOrdered.FirstOrDefault()) || TryPush.TryPushAsteroid(pirate, asteroidsOrdered.FirstOrDefault()))
-                    {
-                        usedPirates.Add(pirate);
-                    }
-                }
+                var closestPirate = myPirates.OrderBy(p => p.Steps(asteroid)).FirstOrDefault();
+                if(closestPirate!=null && (TryPush.TryPushAsteroidTowardsCapsule(closestPirate, asteroid) ||
+                            TryPush.TryPushAsteroid(closestPirate, asteroid)))
+                    myPirates.Remove(closestPirate);
+                            
             }
-            myPirates = myPirates.Except(usedPirates).ToList();
         }
 
 
@@ -75,18 +83,15 @@ namespace Bot
                     else
                     {
                         // Check if each of the pirates can reach.
-                        bool firstReach = false, secondReach=false;
                         if(CheckIfCapsuleCanReach(first, mothership) && !CheckIfCapsuleCanReach(closestHolder, mothership))
                         {
                             AssignDestination(first, mothership.Location);
                             AssignDestination(closestHolder, SmartSailing.SmartSail(closestHolder, mothership));                            
-                            firstReach = true;
                         }
                         else if(CheckIfCapsuleCanReach(closestHolder, mothership) && !CheckIfCapsuleCanReach(first, mothership))
                         {
                             AssignDestination(closestHolder, mothership.Location);
                             AssignDestination(first, SmartSailing.SmartSail(first, mothership)); 
-                            secondReach = true;
                         }
                         else if(CheckIfCapsuleCanReach(closestHolder, mothership) && CheckIfCapsuleCanReach(first, mothership))
                         {
@@ -118,13 +123,13 @@ namespace Bot
                         {
                             GroupPair(lonelyPirate, closestPirate, bestWormhole.Location);
                         }
-                        else if(CheckIfCapsuleCanReach(lonelyPirate, mothership))
-                        {
-                            AssignDestination(lonelyPirate, mothership.Location);
-                            capsuleHolders.Remove(lonelyPirate);
-                            myPirates.Remove(lonelyPirate);
-                        }
-                        else
+                        // else if(CheckIfCapsuleCanReach(lonelyPirate, mothership))
+                        // {
+                        //     AssignDestination(lonelyPirate, mothership.Location);
+                        //     capsuleHolders.Remove(lonelyPirate);
+                        //     myPirates.Remove(lonelyPirate);
+                        // }
+                        else if(!CheckIfCapsuleCanReach(lonelyPirate, mothership))
                         {
                             GroupPair(lonelyPirate, closestPirate, mothership.Location);
                         }
@@ -140,29 +145,48 @@ namespace Bot
 
         public static void PushAsteroids()
         {
-            var usedPirates = new List<Pirate>();
-            foreach (var asteroid in game.GetLivingAsteroids())
+            // var usedPirates = new List<Pirate>();
+            // foreach (var asteroid in game.GetLivingAsteroids())
+            // {
+            //     // Get the closest pirate that can push. (push turns > steps)
+            //     var asteroidDestination = asteroid.Location.Add(asteroid.Direction);
+            //     var closestAvailablePirate = myPirates.OrderBy(p => p.Steps(asteroidDestination)).Where(p => p.Steps(asteroidDestination) >= p.PushReloadTurns);
+            //     if (closestAvailablePirate.FirstOrDefault() != null)
+            //     {
+            //         var pirate = closestAvailablePirate.FirstOrDefault();
+            //         // Check if the pirate can push it already. If not, sail towards the destination where it is in range.
+            //         if (!TryPush.TryPushAsteroidTowardsCapsule(pirate, asteroid) && !TryPush.TryPushAsteroid(pirate, asteroid))
+            //         {
+            //             // Sail towards the asteroid.
+            //             if (!pirateDestinations.ContainsKey(pirate))
+            //             {
+            //                 pirateDestinations.Add(closestAvailablePirate.First(), asteroidDestination.Towards(pirate, pirate.PushRange));
+            //                 myPirates = myPirates.Where(p => !p.Equals(pirate)).ToList();
+            //             }
+            //         }
+            //         else
+            //         {
+            //             myPirates.Remove(pirate);
+            //         }
+            //     }
+            // }
+
+            foreach(var asteroid in game.GetLivingAsteroids())
             {
-                // Get the closest pirate that can push. (push turns > steps)
                 var asteroidDestination = asteroid.Location.Add(asteroid.Direction);
-                var closestAvailablePirate = myPirates.OrderBy(p => p.Distance(asteroidDestination)).Where(p => p.Steps(asteroidDestination) >= p.PushReloadTurns);
-                if (closestAvailablePirate.FirstOrDefault() != null)
+                var closestPirate = myPirates.OrderBy(p => p.Steps(asteroidDestination)).Where(p => p.Steps(asteroidDestination)>=p.PushReloadTurns).FirstOrDefault();
+                if(closestPirate!=null)
                 {
-                    var pirate = closestAvailablePirate.FirstOrDefault();
-                    // Check if the pirate can push it already. If not, sail towards the destination where it is in range.
-                    if (!TryPush.TryPushAsteroidTowardsCapsule(pirate, asteroid) && !TryPush.TryPushAsteroid(pirate, asteroid))
+                    if(!TryPush.TryPushAsteroidTowardsCapsule(closestPirate, asteroid) && !TryPush.TryPushAsteroid(closestPirate, asteroid))
                     {
-                        // Sail towards the asteroid.
-                        if (!pirateDestinations.ContainsKey(pirate))
+                        if(!pirateDestinations.ContainsKey(closestPirate))
                         {
-                            pirateDestinations.Add(closestAvailablePirate.First(), asteroidDestination.Towards(pirate, pirate.PushRange));
-                            myPirates = myPirates.Where(p => !p.Equals(pirate)).ToList();
+                            AssignDestination(closestPirate, asteroidDestination.Towards(closestPirate, closestPirate.PushRange));
+                            myPirates.Remove(closestPirate);
+                            continue;
                         }
                     }
-                    else
-                    {
-                        myPirates.Remove(pirate);
-                    }
+                    myPirates.Remove(closestPirate);
                 }
             }
         }
@@ -233,28 +257,40 @@ namespace Bot
         public static void AttackEnemies()
         {
             var usedPirates = new List<Pirate>();
-            foreach (var pirate in myPirates)
+            // foreach (var pirate in myPirates)
+            // {
+            //     var orderedEnemies = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).OrderByDescending(enemy => enemy.HasCapsule());
+            //     if (orderedEnemies.Any(enemy => enemy.Distance(pirate) / enemy.MaxSpeed >= pirate.PushReloadTurns))
+            //     {
+            //         var toAttack = orderedEnemies.Where(enemy => enemy.Distance(pirate) / enemy.MaxSpeed >= pirate.PushReloadTurns).First();
+            //         if (!TryPush.TryPushEnemy(pirate, toAttack))
+            //         {
+            //             // Sail towards that pirate.
+            //             pirateDestinations.Add(pirate, toAttack.Location);
+            //             usedPirates.Add(pirate);
+            //         }
+            //     }
+            //     else if (orderedEnemies.Any())
+            //     {
+            //         // Attack first pirate.
+            //         if (!TryPush.TryPushEnemy(pirate, orderedEnemies.First()))
+            //         {
+            //             // Sail towards that pirate.
+            //             pirateDestinations.Add(pirate, orderedEnemies.FirstOrDefault().Location);
+            //             usedPirates.Add(pirate);
+            //         }
+            //     }
+            // }
+            // myPirates = myPirates.Except(usedPirates).ToList();
+
+            foreach(var pirate in myPirates)
             {
-                var orderedEnemies = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).OrderByDescending(enemy => enemy.HasCapsule());
-                if (orderedEnemies.Any(enemy => enemy.Distance(pirate) / enemy.MaxSpeed >= pirate.PushReloadTurns))
+                var closestEnemy = enemyPirates.Where(enemy => pirate.Steps(enemy)>=pirate.PushReloadTurns).FirstOrDefault();
+                if(closestEnemy!=null)
                 {
-                    var toAttack = orderedEnemies.Where(enemy => enemy.Distance(pirate) / enemy.MaxSpeed >= pirate.PushReloadTurns).First();
-                    if (!TryPush.TryPushEnemy(pirate, toAttack))
-                    {
-                        // Sail towards that pirate.
-                        pirateDestinations.Add(pirate, toAttack.Location);
-                        usedPirates.Add(pirate);
-                    }
-                }
-                else if (orderedEnemies.Any())
-                {
-                    // Attack first pirate.
-                    if (!TryPush.TryPushEnemy(pirate, orderedEnemies.First()))
-                    {
-                        // Sail towards that pirate.
-                        pirateDestinations.Add(pirate, orderedEnemies.FirstOrDefault().Location);
-                        usedPirates.Add(pirate);
-                    }
+                    if(!TryPush.TryPushEnemy(pirate, closestEnemy))
+                        AssignDestination(pirate, closestEnemy.Location);
+                    usedPirates.Add(pirate);
                 }
             }
             myPirates = myPirates.Except(usedPirates).ToList();

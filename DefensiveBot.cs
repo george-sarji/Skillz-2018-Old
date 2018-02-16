@@ -48,7 +48,7 @@ namespace Bot
                                 var closestWormhole = game.GetAllWormholes().Where(wormhole => wormhole.InRange(closestMothershipThroughWormhole, wormhole.WormholeRange*2)).FirstOrDefault();
                                 if(closestWormhole!=null)
                                 {
-                                    if(!TryPush.TryPushWormhole(pirate, closestWormhole))
+                                    if(!TryPush.TryPushEnemyCapsule(pirate, capsule.Holder)&&!TryPush.TryPushWormhole(pirate, closestWormhole))
                                         AssignDestination(pirate, closestWormhole.Location.Towards(closestMothershipThroughWormhole, closestWormhole.WormholeRange));
                                     usedPirates.Add(pirate);
                                     continue;
