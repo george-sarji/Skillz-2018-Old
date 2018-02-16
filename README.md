@@ -280,8 +280,8 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
     <td>LargeRocks</td>
     <td>1</td>
     <td>Win</td>
-    <td>8/2</td>
-    <td>176</td>
+    <td>8/3</td>
+    <td>230</td>
     <td>-</td>
 </tr>
 <tr>
@@ -296,17 +296,17 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
     <td>Steroids</td>
     <td>1</td>
     <td>Win</td>
-    <td>8/1</td>
-    <td>355</td>
+    <td>8/0</td>
+    <td>225</td>
     <td>-</td>
 </tr>
 <tr>
     <td>GeorgePushSenior</td>
     <td>2</td>
     <td>Win</td>
-    <td>8/2</td>
-    <td>86</td>
-    <td>-</td>
+    <td>1/0</td>
+    <td>750</td>
+    <td>We have un-used pirates as we removed the AttackEnemies. We need to use them for something else.</td>
 </tr>
 <tr>
     <td>YouShallNotPass</td>
@@ -320,8 +320,8 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
     <td>Meteorite</td>
     <td>3</td>
     <td>Win</td>
-    <td>8/3</td>
-    <td>164</td>
+    <td>8/0</td>
+    <td>155</td>
     <td>-</td>
 </tr>
 
@@ -329,24 +329,24 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
     <td>Leptopn</td>
     <td>3</td>
     <td>Win</td>
-    <td>8/1</td>
-    <td>287</td>
+    <td>8/4</td>
+    <td>286</td>
     <td>-</td>
 </tr>
 <tr>
     <td>Voyager1</td>
     <td>4</td>
     <td>Win</td>
-    <td>8/3</td>
-    <td>243</td>
+    <td>8/4</td>
+    <td>259</td>
     <td>-</td>
 </tr>
 <tr>
     <td>Pullpullon</td>
     <td>4</td>
     <td>Win</td>
-    <td>8/5</td>
-    <td>353</td>
+    <td>8/2</td>
+    <td>218</td>
     <td>-</td>
 </tr>
 <tr>
@@ -386,8 +386,8 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
     <td>GravityWaves</td>
     <td>2</td>
     <td>Win</td>
-    <td>8/3</td>
-    <td>342</td>
+    <td>8/1</td>
+    <td>245</td>
     <td>-</td>
 </tr>
 <tr>
@@ -395,8 +395,8 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
     <td>2</td>
     <td>Win</td>
     <td>3/2</td>
-    <td>240</td>
-    <td>The bot gets lost in the wormholes for some reason. Review the code again.</td>
+    <td>38</td>
+    <td>-</td>
 </tr>
 <tr>
     <td>Spaghettification</td>
@@ -411,36 +411,36 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
     <td>3</td>
     <td>Win</td>
     <td>8/1</td>
-    <td>318</td>
+    <td>362</td>
     <td>-</td>
 </tr>
 <tr>
     <td>Pushti</td>
     <td>3</td>
-    <td><b>Loss</b></td>
-    <td>8/2</td>
-    <td>454</td>
-    <td>The bot keeps smart sailing around the mothership instead of going into the mothership.</td>
+    <td>Win</td>
+    <td>8/4</td>
+    <td>729</td>
+    <td>-</td>
 </tr>
 <tr>
     <td>William</td>
     <td>4</td>
     <td>Win</td>
-    <td>8/5</td>
-    <td>418</td>
+    <td>9/7</td>
+    <td>600</td>
     <td>-</td>
 </tr>
 <tr>
     <td>Pullpushon</td>
     <td>4</td>
     <td><b>Loss</b></td>
-    <td>8/0</td>
-    <td>229</td>
+    <td>8/1</td>
+    <td>218</td>
     <td>-</td>
 </tr>
 <tr>
     <td>Overall results:</td>
-    <td cellspan="2">7/9</td>
+    <td cellspan="2">8/9</td>
     <td cellspan="3">Pass</td>
 </tr>
 </table>
@@ -459,16 +459,16 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
     <td>Deathstar</td>
     <td>1</td>
     <td>Win</td>
-    <td>12/1</td>
-    <td>265</td>
+    <td>12/4</td>
+    <td>246</td>
     <td>-</td>
 </tr>
 <tr>
     <td>StaticVoid</td>
     <td>1</td>
     <td>Win</td>
-    <td>8/6</td>
-    <td>233</td>
+    <td>8/1</td>
+    <td>408</td>
     <td>-</td>
 </tr>
 <tr>
@@ -490,41 +490,41 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
 <tr>
     <td>DarkInvasion</td>
     <td>3</td>
-    <td><b>Loss</b></td>
-    <td>3/2</td>
-    <td>48</td>
-    <td>We need to fix the PerformBunker function.</td>
+    <td>Win</td>
+    <td>2/0</td>
+    <td>400</td>
+    <td>-</td>
 </tr>
 <tr>
     <td>HeavyLifting</td>
     <td>3</td>
     <td>Win</td>
-    <td>8/6</td>
-    <td>494</td>
+    <td>8/4</td>
+    <td>258</td>
     <td>We need to make our capsule holders become heavy pirates upon being in danger and implement the push enemy into it.</td>
 </tr>
 <tr>
     <td>NeutronStar</td>
     <td>3</td>
     <td>Win</td>
-    <td>8/4</td>
-    <td>532</td>
+    <td>8/2</td>
+    <td>396</td>
     <td>We need to utilize heavy pirates and make them more useable with capsule holders and bunkers (add pushes till border)</td>
 </tr>
 <tr>
     <td>Pushiner</td>
     <td>4</td>
-    <td>Win</td>
-    <td>8/6</td>
-    <td>368</td>
-    <td>We need to use the heavy pirates more wisely.</td>
+    <td><b>Loss</b></td>
+    <td>8/4</td>
+    <td>210</td>
+    <td>Make bunker pirates switch to normal if heavy then once in the bunker switch them back to heavy.</td>
 </tr>
 <tr>
     <td>GravitySlingshot</td>
     <td>4</td>
     <td><b>Loss</b></td>
     <td>4/1</td>
-    <td>49</td>
+    <td>47</td>
     <td>This pirate boosts it's capsule holder towards the mothership. We need to counter that.</td>
 </tr>
 <tr>
@@ -536,4 +536,4 @@ This repository contains the code for the bot for the Skill 2018 cyber competiti
 
 
 
-###### Last updated: 16/FEB/2018 00:35
+###### Last updated: 16/FEB/2018 21:04
