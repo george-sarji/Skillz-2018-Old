@@ -312,5 +312,25 @@ namespace Bot
             pirate1.Push(pirate2, destination);
             pirate2.Push(pirate1, destination);
         }
+
+        public static bool TryPushEnemyCapsuleDefensively(Pirate pirate, Pirate capsuleHolder)
+        {
+            var bestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsuleHolder)).FirstOrDefault(); ;
+            if (pirate.CanPush(capsuleHolder))
+            {
+                // Check how much other pirates can push it.
+                var numOfPushers = NumOfPushesAvailable(capsuleHolder);
+                // Check if we can either make the pirate lose his capsule or get pushed outside the border.
+                var pushesToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location)) / pirate.PushDistance;
+                if ((numOfPushers >= pushesToBorder && enemyCapsulesPushes[capsuleHolder.Capsule] < pushesToBorder) || (numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss && enemyCapsulesPushes[capsuleHolder.Capsule] < capsuleHolder.NumPushesForCapsuleLoss))
+                {
+                    // Push the pirate towards the border!
+                    pirate.Push(capsuleHolder, capsuleHolder.Location.Towards(capsuleHolder.Capsule.InitialLocation, -numOfPushers*pirate.PushDistance));
+                    enemyCapsulesPushes[capsuleHolder.Capsule]++;
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
