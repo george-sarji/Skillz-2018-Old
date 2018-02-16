@@ -22,7 +22,7 @@ namespace Bot
         // Pullpullon - Win 8-4 - 209 turns
         // ---------------------------------------- 
         public static PirateGame game;
-        public const bool Debug = false;
+        public const bool Debug = true;
         protected static List<Pirate> myPirates;
         protected static List<Pirate> myPiratesWithCapsule;
         protected static List<Capsule> myCapsules;
@@ -60,7 +60,8 @@ namespace Bot
             Initialize(game);
             if (defence)
             {
-                DefensiveBot.PerformBunker();
+                DefensiveBot.BuildBunkerForDefence();
+                MovePiratesToDestinations();
             }
             else
             {
@@ -76,7 +77,7 @@ namespace Bot
                 MovePiratesToDestinations();
                 // GetWormholesForPirates();
                 // Priorities.GenerateGeneralPriority();
-                PrintDictionary(pirateDestinations);
+                // PrintDictionary(pirateDestinations);
             }
         }
 
