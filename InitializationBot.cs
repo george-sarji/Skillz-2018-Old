@@ -69,15 +69,11 @@ namespace Bot
                 AggressiveBot.PushAsteroidsNearby();
                 AggressiveBot.MoveToIntersection();
                 DefensiveBot.BuildDefensiveBunker();
-                // AggressiveBot.GoHelpAllyWithCapsule();
                 AggressiveBot.SendCapsuleCaptures();
                 TryPush.PushWormholes();
                 AggressiveBot.PushAsteroids();
                 AggressiveBot.AttackEnemies();
                 MovePiratesToDestinations();
-                // GetWormholesForPirates();
-                // Priorities.GenerateGeneralPriority();
-                // PrintDictionary(pirateDestinations);
             }
         }
 
@@ -114,15 +110,6 @@ namespace Bot
                 asteroids.Add(asteroid, false);
             }
             defence = game.GetMyMotherships().Count() == 0 || game.GetMyCapsules().Count() == 0;
-        }
-        private void PrintDictionary(Dictionary<Pirate, Location> dictionary)
-        {
-            string str = "{";
-            foreach (var key in dictionary.Keys)
-            {
-                str += key.Id + ":" + "(" + dictionary[key].Col + "," + dictionary[key].Row + ")" + ",";
-            }
-            (str + "}").Print();
         }
         protected static void PrintWormhole(Dictionary<Wormhole, int> dictionary, Pirate pirate)
         {
@@ -170,16 +157,6 @@ namespace Bot
                 pirateDestinations[pirate] = destination;
             else
                 pirateDestinations.Add(pirate, destination);
-        }
-
-        protected static void GetWormholesForPirates()
-        {
-            foreach (var map in pirateDestinations)
-            {
-                // Debug the wormhole!
-                var bestWormhole = GameExtension.GetBestWormhole(map.Value, map.Key);
-                ("Best wormhole for " + map.Key + " towards " + map.Value + " is " + bestWormhole).Print();
-            }
         }
     }
 }

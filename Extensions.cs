@@ -11,18 +11,6 @@ namespace Bot
         {
             return pirate.Distance(mapObject) / pirate.MaxSpeed + 1;
         }
-        public static int StepsScaled(int Distance, int speed)
-        {
-            return (int)(Sqrt(Power(InitializationBot.game.Rows, 2) + Power(InitializationBot.game.Cols, 2)) * (Distance / speed));
-        }
-        public static int Clamp(this int num, int min, int max)
-        {
-            if (num < min)
-                return min;
-            if (num > max)
-                return max;
-            return num;
-        }
 
         public static double Sqrt(this double num)
         {
