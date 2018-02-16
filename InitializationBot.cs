@@ -153,10 +153,10 @@ namespace Bot
 
         protected static void AssignDestination(Pirate pirate, Location destination)
         {
-            if (pirateDestinations.ContainsKey(pirate))
+            // if (pirateDestinations.ContainsKey(pirate))
                 pirateDestinations[pirate] = destination;
-            else
-                pirateDestinations.Add(pirate, destination);
+            // else
+                // pirateDestinations.Add(pirate, destination);
         }
     }
 }

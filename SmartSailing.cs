@@ -58,7 +58,9 @@ namespace Bot
         public static bool IsInWormholeDanger(Location location, Location destination, Pirate pirate)
         {
             // Get the closest wormhole to the current locatio.
-            var wormholes = InitializationBot.game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate<pirate.Steps(destination)/4).Where(wormhole => wormhole.InRange(location, wormhole.WormholeRange));
+            var wormholes = InitializationBot.game.GetAllWormholes()
+                .Where(wormhole => wormhole.TurnsToReactivate<pirate.Steps(destination)/4 &&
+                                   wormhole.InRange(location, wormhole.WormholeRange));
             var closestWormhole = wormholes.FirstOrDefault();
             if(closestWormhole==null)
                 return false;

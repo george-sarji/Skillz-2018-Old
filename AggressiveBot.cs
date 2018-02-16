@@ -175,7 +175,6 @@ namespace Bot
                 AssignDestination(CapsuleHolder, mothership.Location);
                 myPirates.Remove(CapsuleHolder);
                 return true;
-
             }
             return false;
         }
