@@ -69,7 +69,7 @@ namespace Bot
                 AggressiveBot.MoveToIntersection();
                 DefensiveBot.BuildDefensiveBunker();
                 // AggressiveBot.GoHelpAllyWithCapsule();
-                AggressiveBot.CaptureCapsules();
+                AggressiveBot.SendCapsuleCaptures();
                 TryPush.PushWormholes();
                 AggressiveBot.PushAsteroids();
                 AggressiveBot.AttackEnemies();
