@@ -328,9 +328,9 @@ namespace Bot
             foreach (var pirate in myPirates)
             {
                 var orderedEnemies = enemyPirates.OrderBy(enemy => enemy.Distance(pirate)).OrderByDescending(enemy => enemy.HasCapsule());
-                if (orderedEnemies.Any(enemy => enemy.Distance(pirate) / enemy.MaxSpeed > pirate.PushReloadTurns))
+                if (orderedEnemies.Any(enemy => enemy.Distance(pirate) / enemy.MaxSpeed >= pirate.PushReloadTurns))
                 {
-                    var toAttack = orderedEnemies.Where(enemy => enemy.Distance(pirate) / enemy.MaxSpeed > pirate.PushReloadTurns).First();
+                    var toAttack = orderedEnemies.Where(enemy => enemy.Distance(pirate) / enemy.MaxSpeed >= pirate.PushReloadTurns).First();
                     if (!TryPush.TryPushEnemy(pirate, toAttack))
                     {
                         // Sail towards that pirate.
