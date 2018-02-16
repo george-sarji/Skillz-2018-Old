@@ -87,9 +87,9 @@ namespace Bot
         {
             foreach(var capsule in myCapsules)
             {
-                var piratesOrdered = myPirates.Where(p => !p.HasCapsule()).OrderBy(p => p.Steps(capsule.InitialLocation));
+                var piratesOrdered = myPirates.Where(p => !p.HasCapsule()).OrderBy(p => p.Steps(capsule.InitialLocation)).OrderBy(p => GameExtension.ClosestDistance(p.Location, capsule.InitialLocation, game.GetAllWormholes())/p.MaxSpeed);
                 // Check if we have a close pirate to the capsule.
-                if(myPirates.Any())
+                if(piratesOrdered.Any())
                 {
                     // Send the closest pirate to the spawn.
                     var closestPirate = piratesOrdered.First();
