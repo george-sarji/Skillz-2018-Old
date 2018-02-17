@@ -127,7 +127,21 @@ namespace Bot
             }
             return from.Distance(to);
         }
-
+        public static bool CapsuleHolderInDanger(Pirate pirate)
+        {
+            if(!pirate.HasCapsule()) return false;
+            var bestMothership = InitializationBot.game.GetMyMotherships()
+            .OrderBy(mothership => mothership.Distance(pirate) / mothership.ValueMultiplier)
+            .FirstOrDefault();
+            if(bestMothership != null)
+            {
+                if(InitializationBot.game.GetEnemyLivingPirates()
+                .Where(enemy => enemy.InPushRange(pirate.Location.Towards(bestMothership, InitializationBot.game.PirateMaxSpeed)))
+                .Count() >= InitializationBot.game.NumPushesForCapsuleLoss)
+                    return true;
+            }
+            return false;
+        }
 
         public static Wormhole GetBestWormhole(Location destination, Pirate pirate)
         {
