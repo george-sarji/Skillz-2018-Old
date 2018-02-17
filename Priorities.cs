@@ -40,8 +40,8 @@ namespace Bot
             }
 
             return TrySwitchPirates(wantToBeHeavy, wantToBeNormal) ||
-                   TrySwitchPirates(wantToBeHeavy, willingToBeNormal) ||
-                   TrySwitchPirates(wantToBeNormal, willingToBeHeavy);
+                TrySwitchPirates(wantToBeHeavy, willingToBeNormal) ||
+                TrySwitchPirates(wantToBeNormal, willingToBeHeavy);
         }
 
         public bool TrySwitchPirates(List<Pirate> group1, List<Pirate> group2)
