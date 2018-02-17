@@ -284,17 +284,30 @@ namespace Bot
             // }
             // myPirates = myPirates.Except(usedPirates).ToList();
 
-            foreach(var pirate in myPirates)
+            // foreach(var pirate in myPirates)
+            // {
+            //     var closestEnemy = enemyPirates.Where(enemy => pirate.Steps(enemy)>=pirate.PushReloadTurns).FirstOrDefault();
+            //     if(closestEnemy!=null)
+            //     {
+            //         if(!TryPush.TryPushEnemy(pirate, closestEnemy))
+            //             AssignDestination(pirate, closestEnemy.Location);
+            //         usedPirates.Add(pirate);
+            //     }
+            // }
+            // myPirates = myPirates.Except(usedPirates).ToList();
+
+            foreach(var enemy in enemyPirates.Where(p => p.HasCapsule()))
             {
-                var closestEnemy = enemyPirates.Where(enemy => pirate.Steps(enemy)>=pirate.PushReloadTurns).FirstOrDefault();
-                if(closestEnemy!=null)
+                // Get the closest pirate that can push.
+                var closestPirate = myPirates.Where(p => p.Steps(GameExtension.Interception(enemy.Location, GameExtension.GetBestMothershipThroughWormholes(enemy).Location, p.Location))>p.PushReloadTurns)
+                                    .OrderBy(p => p.Steps(enemy)).FirstOrDefault();
+                if(closestPirate!=null)
                 {
-                    if(!TryPush.TryPushEnemy(pirate, closestEnemy))
-                        AssignDestination(pirate, closestEnemy.Location);
-                    usedPirates.Add(pirate);
+                    if(!TryPush.TryPushInterceptedEnemyCapsule(closestPirate, enemy))
+                        AssignDestination(closestPirate, GameExtension.Interception(enemy.Location, GameExtension.GetBestMothershipThroughWormholes(enemy).Location, closestPirate.Location));
+                    myPirates.Remove(closestPirate);
                 }
             }
-            myPirates = myPirates.Except(usedPirates).ToList();
         }
     }
 }
