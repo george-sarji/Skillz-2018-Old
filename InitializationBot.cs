@@ -72,7 +72,7 @@ namespace Bot
                 AggressiveBot.SendCapsuleCaptures();
                 TryPush.PushWormholes();
                 AggressiveBot.PushAsteroids();
-                // AggressiveBot.AttackEnemies();
+                AggressiveBot.AttackEnemies();
                 MovePiratesToDestinations();
             }
         }
