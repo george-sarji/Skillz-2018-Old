@@ -47,7 +47,7 @@ namespace Bot
                 SendCapsuleCaptures();
                 PushWormholes();
                 PushAsteroids();
-                AttackEnemies();
+                // AttackEnemies();
                 MovePiratesToDestinations();
             }
         }
