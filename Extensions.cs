@@ -177,7 +177,7 @@ namespace Bot
             }
             if(bestMothership==null)
             {
-                bestMothership = InitializationBot.game.GetEnemyMotherships().OrderBy(mothership => mothership.Distance(pirate)/(int)((double)mothership.ValueMultiplier).Sqrt()).FirstOrDefault();
+                bestMothership = InitializationBot.game.GetEnemyMotherships().OrderBy(mothership => pirate.Steps(mothership)/(int)((double)mothership.ValueMultiplier).Sqrt()).FirstOrDefault();
             }
             return bestMothership;
         }
