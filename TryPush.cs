@@ -301,5 +301,34 @@ namespace Bot
             }
             return false;
         }
+
+        public static bool TryPushInterceptedEnemyCapsule(Pirate pirate, Pirate capsuleHolder)
+        {
+            var bestMothership = enemyMotherships.OrderBy(mothership => mothership.Distance(capsuleHolder)).FirstOrDefault();
+            if (pirate.CanPush(capsuleHolder))
+            {
+                // Check how much other pirates can push it.
+                var numOfPushers = NumOfPushesAvailable(capsuleHolder);
+                // Check if we can either make the pirate lose his capsule or get pushed outside the border.
+                var pushesToBorder = capsuleHolder.Distance(GetClosestToBorder(capsuleHolder.Location)) / pirate.PushDistance;
+                if ((numOfPushers >= pushesToBorder && enemyCapsulesPushes[capsuleHolder.Capsule] < pushesToBorder) || (numOfPushers >= capsuleHolder.NumPushesForCapsuleLoss && enemyCapsulesPushes[capsuleHolder.Capsule] < capsuleHolder.NumPushesForCapsuleLoss))
+                {
+                    // Push the pirate towards the border!
+                    pirate.Push(capsuleHolder, GetClosestToBorder(capsuleHolder.Location));
+                    enemyCapsulesPushes[capsuleHolder.Capsule]++;
+                    return true;
+                }
+            }
+            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int)(game.PushDistance * 2)))
+            {
+                // Send the pirate towards the capsule where it can push.
+                if (pirateDestinations.ContainsKey(pirate))
+                    pirateDestinations[pirate] = capsuleHolder.Location.Towards(pirate, (int)(pirate.PushRange * 0.9));
+                else
+                    pirateDestinations.Add(pirate, capsuleHolder.Location.Towards(pirate, (int)(pirate.PushRange * 0.9)));
+                return true;
+            }
+            return false;
+        }
     }
 }
