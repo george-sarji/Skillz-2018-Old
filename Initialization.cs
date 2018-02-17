@@ -1,0 +1,127 @@
+using System.Collections.Generic;
+using System.Linq;
+using Pirates;
+
+namespace Bot
+{
+    partial class SSJS12Bot : IPirateBot
+    {
+
+        // ----------------------------------------
+        // Bot stats:
+        // ----------------------------------------
+        // GeorgePushSenior - Win 8-0 - 88 turns
+        // LargeRocks - Win 8-5 - 223 turns
+        // OneManArmy - Win 1-0 - 400 turns
+        // Meteorite - Win 8-3  - 219 turns
+        // Steroids - Win 8-0 - 467 turns
+        // Lepton - Win 8-4 - 556 turns
+        // Voyager1 - Win 8-3 - 376 turns
+        // YouShallNotPass - Win 8-7 - 366 turns
+        // Pullpullon - Win 8-4 - 209 turns
+        // ----------------------------------------
+        public PirateGame game;
+        public const bool Debug = true;
+        private List<Pirate> myPirates;
+
+        private static double scale;
+
+        private static Dictionary<Wormhole, int> NumOfAssignedPiratesToWormhole;
+
+        private static Dictionary<Asteroid, bool> asteroids;
+
+        private static Dictionary<Pirate, Location> pirateDestinations;
+
+        private static Dictionary<MapObject, int> GeneralPriority;
+
+        private static Dictionary<Capsule, int> enemyCapsulesPushes;
+        private static Dictionary<Wormhole, Location> NewWormholeLocation;
+        private static Dictionary<Pirate, bool> FinishedTurn;
+
+        private const int MinPriorirty = 0;
+        private const int MaxPriority = 10;
+
+        private bool defense = false;
+
+        public void DoTurn(PirateGame game)
+        {
+            Initialize(game);
+            if (defense)
+            {
+                BuildBunkerForDefense();
+                MovePiratesToDestinations();
+            }
+            else
+            {
+                PushEachOther();
+                PushAsteroidsNearby();
+                // HandleSwitchPirates();
+                MoveToIntersection();
+                BuildDefensiveBunker();
+                SendCapsuleCaptures();
+                PushWormholes();
+                PushAsteroids();
+                AttackEnemies();
+                MovePiratesToDestinations();
+            }
+        }
+
+        private void Initialize(PirateGame pirateGame)
+        {
+            game = pirateGame;
+            FinishedTurn = new Dictionary<Pirate, bool>();
+            myPirates = game.GetMyLivingPirates().ToList();
+            scale = (((double) (game.Cols.Power(2) + game.Rows.Power(2))).Sqrt());
+            NumOfAssignedPiratesToWormhole = new Dictionary<Wormhole, int>();
+            NewWormholeLocation = new Dictionary<Wormhole, Location>();
+            foreach (Wormhole wormhole in game.GetAllWormholes())
+            {
+                NewWormholeLocation.Add(wormhole, wormhole.Location);
+                NumOfAssignedPiratesToWormhole.Add(wormhole, 0);
+            }
+            enemyCapsulesPushes = game.GetEnemyCapsules().ToDictionary(key => key, value => 0);
+            pirateDestinations = new Dictionary<Pirate, Location>();
+            asteroids = new Dictionary<Asteroid, bool>();
+            foreach (Pirate pirate in myPirates)
+            {
+                FinishedTurn.Add(pirate, false);
+            }
+            foreach (var asteroid in game.GetLivingAsteroids())
+            {
+                asteroids.Add(asteroid, false);
+            }
+            defense = game.GetMyMotherships().Count() == 0 || game.GetMyCapsules().Count() == 0;
+        }
+
+        private static void PrintWormhole(Dictionary<Wormhole, int> dictionary, Pirate pirate)
+        {
+            string str = "{ " + pirate.Id;
+            foreach (var key in dictionary.Keys)
+            {
+                str += key.Id + ":" + dictionary[key] + ",";
+            }
+            (str + "}").Print();
+        }
+
+        private void MovePiratesToDestinations()
+        {
+            foreach (var map in pirateDestinations)
+            {
+                var pirate = map.Key;
+                var destination = map.Value;
+                if (!FinishedTurn[pirate])
+                {
+                    string message = "";
+                    pirate.Sail(destination);
+                    message = "Pirate " + pirate.ToString() + " sails towards " + destination.ToString();
+                    message.Print();
+                }
+            }
+        }
+
+        private static void AssignDestination(Pirate pirate, Location destination)
+        {
+            pirateDestinations[pirate] = destination;
+        }
+    }
+}
