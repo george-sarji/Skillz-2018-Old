@@ -222,7 +222,7 @@ namespace Bot
                 }
                 else if(Assign)
                 {
-                    AssignDestination(closestPirate,wormhole.GetLocation());
+                    AssignDestination(closestPirate,wormhole.GetLocation().Towards(closestPirate, wormhole.WormholeRange));
                 }
                 wormhole=wormhole.Partner;
             }

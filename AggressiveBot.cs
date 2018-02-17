@@ -138,6 +138,7 @@ namespace Bot
                     }
                     else
                         AssignDestination(lonelyPirate, SmartSailing.SmartSail(lonelyPirate, bestWormhole.Location));
+                    myPirates.Remove(lonelyPirate);
                 }
                 
             }
