@@ -8,20 +8,32 @@ namespace Bot
     {
         public void SendCapsuleCaptures()
         {
-            foreach (var capsule in game.GetMyCapsules())
+
+            if (myPirates.Any())
             {
-                var piratesOrdered = myPirates.Where(p => !p.HasCapsule()).OrderBy(p => p.Steps(capsule.InitialLocation)).OrderBy(p => ClosestDistance(p.Location, capsule.InitialLocation, game.GetAllWormholes()) / p.MaxSpeed);
-                // Check if we have a close pirate to the capsule.
-                if (piratesOrdered.Any())
+                foreach (var capsule in game.GetMyCapsules().OrderBy(
+                        capsule => capsule.Distance(
+                            myPirates.OrderBy(p => ClosestDistance(
+                                p.Location, capsule.Location,
+                                game.GetAllWormholes().Where(wormhole => wormhole.TurnsToReactivate < p.Steps(capsule.InitialLocation))
+                            )).FirstOrDefault()
+                        )
+                    ))
                 {
-                    // Send the closest pirate to the spawn.
-                    var closestPirate = piratesOrdered.First();
-                    var bestWormhole = GetBestWormhole(capsule.InitialLocation, closestPirate);
-                    if (bestWormhole != null)
-                        AssignDestination(closestPirate, SmartSail(closestPirate, bestWormhole));
-                    else
-                        AssignDestination(closestPirate, capsule.InitialLocation);
-                    myPirates.Remove(closestPirate);
+                    var piratesOrdered = myPirates.Where(p => !p.HasCapsule()).OrderBy(p => p.Steps(capsule.InitialLocation)).OrderBy(p => ClosestDistance(p.Location, capsule.InitialLocation, game.GetAllWormholes()
+                        .Where(wormhole => wormhole.TurnsToReactivate < p.Steps(capsule.InitialLocation) / 4)) / p.MaxSpeed);
+                    // Check if we have a close pirate to the capsule.
+                    if (piratesOrdered.Any())
+                    {
+                        // Send the closest pirate to the spawn.
+                        var closestPirate = piratesOrdered.First();
+                        var bestWormhole = GetBestWormhole(capsule.InitialLocation, closestPirate);
+                        if (bestWormhole != null)
+                            AssignDestination(closestPirate, SmartSail(closestPirate, bestWormhole));
+                        else
+                            AssignDestination(closestPirate, capsule.InitialLocation);
+                        myPirates.Remove(closestPirate);
+                    }
                 }
             }
         }
