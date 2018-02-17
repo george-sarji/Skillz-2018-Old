@@ -44,9 +44,9 @@ namespace Bot
         protected static Dictionary<MapObject, int> GeneralPriority;
 
         protected static Dictionary<Capsule, int> enemyCapsulesPushes;
-
+        protected static List<Pirate> wantToBeNormal, wantToBeHeavy, willingToBeHeavy, willingToBeNormal;
         protected static List<Wormhole> activeWormholes;
-
+        protected static List<Pirate> wantToBeNormal = new List<Pirate>(), wantToBeHeavy = new List<Pirate>(), willingToBeHeavy = new List<Pirate>(), willingToBeNormal= new List<Pirate>();
         protected static Dictionary<Wormhole, Location> NewWormholeLocation;
         protected static Dictionary<Pirate, bool> FinishedTurn;
 
@@ -67,6 +67,7 @@ namespace Bot
             {
                 TryPush.PushEachOther();
                 AggressiveBot.PushAsteroidsNearby();
+                Priorities.HandleSwitchPirates();
                 AggressiveBot.MoveToIntersection();
                 DefensiveBot.BuildDefensiveBunker();
                 AggressiveBot.SendCapsuleCaptures();
@@ -96,6 +97,10 @@ namespace Bot
                 NewWormholeLocation.Add(wormhole,wormhole.Location);
                 NumOfAssignedPiratesToWormhole.Add(wormhole, 0);
             }
+            wantToBeNormal = new List<Pirate>();
+            wantToBeHeavy = new List<Pirate>();
+            willingToBeHeavy = new List<Pirate>();
+            willingToBeNormal= new List<Pirate>();
             myPiratesWithCapsule = game.GetMyLivingPirates().Where(pirate => pirate.HasCapsule()).ToList();
             enemyCapsulesPushes = game.GetEnemyCapsules().ToDictionary(key => key, value => 0);
             activeWormholes = game.GetActiveWormholes().ToList();
