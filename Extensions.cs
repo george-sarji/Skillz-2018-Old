@@ -33,6 +33,20 @@ namespace Bot
                 System.Console.WriteLine(s);
             }
         }
-    }
 
+        public static bool IsHeavy(this Pirate pirate)
+        {
+            return pirate.StateName == "heavy";
+        }
+
+        public static bool IsNormal(this Pirate pirate)
+        {
+            return pirate.StateName == "normal";
+        }
+
+        public static bool IsSameState(this Pirate pirate, Pirate second)
+        {
+            return pirate.StateName == second.StateName;
+        }
+    }
 }
