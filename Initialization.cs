@@ -44,6 +44,10 @@ namespace Bot
                 // HandleSwitchPirates();
                 MoveToIntersection();
                 BuildDefensiveBunker();
+                foreach( Pirate pirate in game.GetMyLivingPirates().Where(p => p.HasCapsule()))
+                {
+                    TryPushMyCapsule(pirate);
+                }
                 SendCapsuleCaptures();
                 PushWormholes();
                 PushAsteroids();
