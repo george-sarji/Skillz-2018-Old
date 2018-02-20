@@ -8,7 +8,6 @@ namespace Bot
     {
         public void SendCapsuleCaptures()
         {
-
             if (myPirates.Any())
             {
                 foreach (var capsule in game.GetMyCapsules().OrderBy(
@@ -54,7 +53,7 @@ namespace Bot
         {
             var usedPirates = new List<Pirate>();
             var capsuleHolders = myPirates.Where(p => p.HasCapsule()).ToList();
-            while (capsuleHolders.Count() > 1)
+            while (capsuleHolders.Count() >1)
             {
                 // Get the best mothership
                 var first = capsuleHolders.FirstOrDefault();
@@ -70,7 +69,7 @@ namespace Bot
                     if (bestWormhole != null)
                     {
                         // There is a wormhole. Send them with an intersection.
-                        GroupPair(first, closestHolder, bestWormhole.Location);
+                        MakePair(first, closestHolder, bestWormhole.Location);
                         myPirates.Remove(first);
                         myPirates.Remove(closestHolder);
                     }
@@ -94,7 +93,7 @@ namespace Bot
                         }
                         else if (!CheckIfCapsuleCanReach(closestHolder, mothership) && !CheckIfCapsuleCanReach(first, mothership))
                         {
-                            GroupPair(first, closestHolder, mothership.Location);
+                            MakePair(first, closestHolder, mothership.Location);
                         }
 
                         myPirates.Remove(first);
@@ -115,11 +114,11 @@ namespace Bot
                     {
                         if (bestWormhole != null)
                         {
-                            GroupPair(lonelyPirate, closestPirate, bestWormhole.Location);
+                            MakePair(lonelyPirate, closestPirate, bestWormhole.Location);
                         }
                         else if (!CheckIfCapsuleCanReach(lonelyPirate, mothership))
                         {
-                            GroupPair(lonelyPirate, closestPirate, mothership.Location);
+                            MakePair(lonelyPirate, closestPirate, mothership.Location);
                         }
                         myPirates.Remove(lonelyPirate);
                         myPirates.Remove(closestPirate);
@@ -166,56 +165,31 @@ namespace Bot
             return false;
         }
 
-        public void GroupPair(Pirate first, Pirate second, Location destination)
+        public void MakePair(Pirate first, Pirate second, Location destination)
         {
-            var firstIntersection = Interception(first.Location, destination, second.Location);
-            var secondIntersection = Interception(second.Location, destination, first.Location);
-            Location bestIntersection = null;
-            if (firstIntersection != null && secondIntersection != null)
+            if(second==null)
             {
-                // Get the closest to the destination.
-                if (firstIntersection.Distance(destination) > secondIntersection.Distance(destination))
-                {
-                    bestIntersection = secondIntersection;
-                }
-                else
-                    bestIntersection = firstIntersection;
+                AssignDestination(first, SmartSail(first, destination));
+                return;
             }
-            else if (firstIntersection != null)
+            var intersections = new List<Location>();
+            intersections.Add(Interception(first.Location, destination, second.Location));
+            intersections.Add(Interception(second.Location, destination, first.Location));
+            // intersections.Add(MidPoint(first, second));
+            var bestIntersection = intersections.Where(location => location!=null).OrderBy(location => location.Distance(destination)).FirstOrDefault();
+            Location finalDest = null;
+            if(first.InPushRange(second))
             {
-                bestIntersection = firstIntersection;
-            }
-            else if (secondIntersection != null)
-                bestIntersection = secondIntersection;
-            else
-                bestIntersection = MidPoint(first, second);
-            // Move the pirates now.
-            var capsuleHolders = game.GetMyLivingPirates().Where(p => p.HasCapsule());
-            var mothershipInLocation = game.GetMyMotherships().Where(mothership => mothership.Location.Equals(destination)).FirstOrDefault();
-            if (first.Distance(second) < destination.Distance(first) && !first.InPushRange(second))
-            {
-                var FirstDestination = bestIntersection;
-                if (first.HasCapsule())
-                    FirstDestination = SmartSail(first, bestIntersection);
-                var SecondDestination = bestIntersection;
-                if (second.HasCapsule())
-                    SecondDestination = SmartSail(second, bestIntersection);
-                AssignDestination(first, FirstDestination);
-                AssignDestination(second, SecondDestination);
+                finalDest = destination;
             }
             else
             {
-                var FirstDestination = destination;
-                if (first.HasCapsule())
-                    FirstDestination = SmartSail(first, destination);
-                var SecondDestination = destination;
-                if (second.HasCapsule())
-                    SecondDestination = SmartSail(second, destination);
-                AssignDestination(first, FirstDestination);
-                AssignDestination(second, SecondDestination);
+                finalDest = bestIntersection;
             }
-            myPirates.Remove(first);
-            myPirates.Remove(second);
+            if(first.HasCapsule())
+                AssignDestination(first, SmartSail(first, finalDest));
+            if(second.HasCapsule())
+                AssignDestination(second, SmartSail(second, finalDest));
         }
 
         public void AttackEnemies()
