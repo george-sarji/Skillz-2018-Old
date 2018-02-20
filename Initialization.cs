@@ -24,6 +24,8 @@ namespace Bot
         private static Dictionary<Wormhole, Location> NewWormholeLocation;
         private static Dictionary<Pirate, bool> FinishedTurn;
 
+        private static Dictionary<Pirate, Pirate> piratePairs;
+
         private const int MinPriorirty = 0;
         private const int MaxPriority = 10;
 
@@ -40,14 +42,13 @@ namespace Bot
             else
             {
                 PushEachOther();
+                PairMyPirates();
                 PushAsteroidsNearby();
                 // HandleSwitchPirates();
                 MoveToIntersection();
                 BuildDefensiveBunker();
-                foreach( Pirate pirate in game.GetMyLivingPirates().Where(p => p.HasCapsule()))
-                {
+                foreach(var pirate in game.GetMyLivingPirates().Where(p => p.HasCapsule()))
                     TryPushMyCapsule(pirate);
-                }
                 SendCapsuleCaptures();
                 PushWormholes();
                 PushAsteroids();
@@ -81,6 +82,7 @@ namespace Bot
                 asteroids.Add(asteroid, false);
             }
             defense = game.GetMyMotherships().Count() == 0 || game.GetMyCapsules().Count() == 0;
+            piratePairs = new Dictionary<Pirate, Pirate>();
         }
 
         private static void PrintWormhole(Dictionary<Wormhole, int> dictionary, Pirate pirate)
