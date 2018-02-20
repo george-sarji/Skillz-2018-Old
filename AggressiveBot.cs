@@ -66,13 +66,13 @@ namespace Bot
                     // Get the best wormhole
                     var bestWormhole = GetBestWormhole(mothership.Location, first);
                     Pirate closestHolder = null;
-                    if(piratePairs.ContainsKey(first))
+                    if (piratePairs.ContainsKey(first))
                         closestHolder = piratePairs[first];
-                    else if(piratePairs.Values.Contains(first))
-                        closestHolder = piratePairs.Where(p => p.Value!= null && p.Value.Equals(first)).FirstOrDefault().Key;
-                    else if(capsuleHolders.Any())
+                    else if (piratePairs.Values.Contains(first))
+                        closestHolder = piratePairs.Where(p => p.Value != null && p.Value.Equals(first)).FirstOrDefault().Key;
+                    else if (capsuleHolders.Any())
                         closestHolder = capsuleHolders.OrderBy(p => p.Distance(mothership)).FirstOrDefault();
-                    else if(myPirates.Any())
+                    else if (myPirates.Any())
                         closestHolder = myPirates.OrderBy(p => p.Steps(first)).FirstOrDefault();
                     // var closestHolder = capsuleHolders.OrderBy(p => p.Distance(mothership)).FirstOrDefault();
                     capsuleHolders.Remove(closestHolder);
@@ -83,13 +83,13 @@ namespace Bot
                         myPirates.Remove(first);
                         myPirates.Remove(closestHolder);
                     }
-                    else if(closestHolder!=null)
+                    else if (closestHolder != null)
                     {
-                        if(!CheckIfCapsuleCanReach(first, mothership) && CheckIfCapsuleCanReach(closestHolder, mothership))
+                        if (!CheckIfCapsuleCanReach(first, mothership) && CheckIfCapsuleCanReach(closestHolder, mothership))
                         {
                             AssignDestination(first, SmartSail(first, mothership.Location));
                         }
-                        else if(CheckIfCapsuleCanReach(first, mothership) && !CheckIfCapsuleCanReach(closestHolder, mothership))
+                        else if (CheckIfCapsuleCanReach(first, mothership) && !CheckIfCapsuleCanReach(closestHolder, mothership))
                             AssignDestination(closestHolder, SmartSail(closestHolder, mothership.Location));
                         else
                             MakePair(first, closestHolder, mothership.Location);
@@ -167,7 +167,7 @@ namespace Bot
 
         public void MakePair(Pirate first, Pirate second, Location destination)
         {
-            if(second==null)
+            if (second == null)
             {
                 AssignDestination(first, SmartSail(first, destination));
                 return;
@@ -176,9 +176,9 @@ namespace Bot
             intersections.Add(Interception(first.Location, destination, second.Location));
             intersections.Add(Interception(second.Location, destination, first.Location));
             // intersections.Add(MidPoint(first, second));
-            var bestIntersection = intersections.Where(location => location!=null).OrderBy(location => location.Distance(destination)).FirstOrDefault();
+            var bestIntersection = intersections.Where(location => location != null).OrderBy(location => location.Distance(destination)).FirstOrDefault();
             Location finalDest = null;
-            if(first.InPushRange(second))
+            if (first.InPushRange(second))
             {
                 finalDest = destination;
             }
@@ -186,11 +186,11 @@ namespace Bot
             {
                 finalDest = bestIntersection;
             }
-            if(first.HasCapsule())
+            if (first.HasCapsule())
                 AssignDestination(first, SmartSail(first, finalDest));
             else
                 AssignDestination(first, finalDest);
-            if(second.HasCapsule())
+            if (second.HasCapsule())
                 AssignDestination(second, SmartSail(second, finalDest));
             else
                 AssignDestination(second, finalDest);
