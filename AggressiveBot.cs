@@ -233,5 +233,32 @@ namespace Bot
                 }
             }
         }
+
+        public void PairMyPirates()
+        {
+            foreach (var pirate in game.GetMyLivingPirates())
+            {
+                if (!piratePairs.ContainsKey(pirate) && !piratePairs.ContainsValue(pirate))
+                {
+                    // This pirate is not used.
+                    // Attempt to pair the pirate with the closest pirate that is in the same state and not used.
+                    var closestPirate = game.GetMyLivingPirates().Where(p => !p.Equals(pirate) && p.IsSameState(pirate) &&
+                            !piratePairs.ContainsKey(p) && !piratePairs.ContainsValue(p))
+                        .OrderBy(p => p.Steps(pirate)).FirstOrDefault();
+                    if (closestPirate != null)
+                    {
+                        // Pair the pirates.
+                        piratePairs[pirate] = closestPirate;
+                        ("Paired " + pirate.ToString() + " with " + closestPirate).Print();
+                    }
+                    else
+                    {
+                        // There is no good closest pirate. Solo pair.
+                        piratePairs[pirate] = null;
+                        (pirate + " is a solo pair.").Print();
+                    }
+                }
+            }
+        }
     }
 }
