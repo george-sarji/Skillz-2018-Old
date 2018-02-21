@@ -39,13 +39,13 @@ namespace Bot
                     return true;
                 }
             }
-            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int) (game.PushDistance * 2)))
+            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int)(game.PushDistance * 2)))
             {
                 // Send the pirate towards the capsule where it can push.
                 if (pirateDestinations.ContainsKey(pirate))
-                    pirateDestinations[pirate] = capsuleHolder.Location.Towards(pirate, (int) (pirate.PushRange * 0.9));
+                    pirateDestinations[pirate] = capsuleHolder.Location.Towards(pirate, (int)(pirate.PushRange * 0.9));
                 else
-                    pirateDestinations.Add(pirate, capsuleHolder.Location.Towards(pirate, (int) (pirate.PushRange * 0.9)));
+                    pirateDestinations.Add(pirate, capsuleHolder.Location.Towards(pirate, (int)(pirate.PushRange * 0.9)));
                 return true;
             }
             return false;
@@ -145,6 +145,7 @@ namespace Bot
             var usedPirates = new List<Pirate>();
             PushAlliesToEnemy(myPirateWithCapsule);
             Location locationOfPush = null;
+
             int count = myPirates.Where(pirate => pirate.CanPush(myPirateWithCapsule)).Count(); // Number of my living pirate who can push enemy pirates
             int numberOfPushesNeeded = myPirateWithCapsule.NumPushesForCapsuleLoss;
             int numberOfEnemiesAroundMyCapsule = game.GetEnemyLivingPirates().Where(enemy => enemy.CanPush(myPirateWithCapsule)).Count();
@@ -153,7 +154,10 @@ namespace Bot
                 var destination = game.GetMyMotherships().OrderBy(mothership => mothership.Distance(myPirateWithCapsule))
                     .FirstOrDefault();
                 locationOfPush = myPirateWithCapsule.Location.Towards(destination, myPirate.PushDistance);
-
+                if (!IsWorthPushing(myPirateWithCapsule, locationOfPush, destination.Location))
+                {
+                    continue;
+                }
                 if ((IsInDanger(myPirate.GetLocation(), locationOfPush, myPirate) || ((numberOfPushesNeeded - numberOfEnemiesAroundMyCapsule == 1) || !myPirates.Contains(myPirate))))
                 {
                     ("Breaking for loop, not enough pushes.").Print();
@@ -179,6 +183,20 @@ namespace Bot
             }
             myPirates = myPirates.Except(usedPirates).ToList();
             return locationOfPush;
+        }
+
+        public bool IsWorthPushing(Pirate pirate, Location locationOfPush, Location destination)
+        {
+            int count = game.GetEnemyLivingPirates()
+                        .Where(enemy => enemy.HasCapsule() && pirate.Distance(destination) < enemy.Distance(
+                        game.GetEnemyMotherships().OrderBy(mothership => mothership.Distance(enemy)).FirstOrDefault())).ToList().Count;
+            if (count < (game.GetEnemyLivingPirates()
+                        .Where(enemy => enemy.HasCapsule() && locationOfPush.Distance(destination) < enemy.Distance(
+                        game.GetEnemyMotherships().OrderBy(mothership => mothership.Distance(enemy)).FirstOrDefault())).ToList().Count))
+            {
+                return true;
+            }
+            return false;
         }
 
         public bool PushAlliesToEnemy(Pirate target) //will document soon
@@ -250,7 +268,7 @@ namespace Bot
                     .Where(pirate => pirate.CanPush(pirateWithCapsule) //All pirate who can push the current pirate with capsule
                         &&
                         pirateWithCapsule != pirate &&
-                        pirate.Distance(heading) - ((Mothership) heading).UnloadRange < pirate.PushDistance).ToList();
+                        pirate.Distance(heading) - ((Mothership)heading).UnloadRange < pirate.PushDistance).ToList();
                 if (PiratesWhoCanPush.Count == 0)
                 {
                     continue;
@@ -282,7 +300,7 @@ namespace Bot
 
         public bool TryPushEnemyCapsuleDefensively(Pirate pirate, Pirate capsuleHolder)
         {
-            var bestMothership = game.GetEnemyMotherships().OrderBy(mothership => mothership.Distance(capsuleHolder)).FirstOrDefault();;
+            var bestMothership = game.GetEnemyMotherships().OrderBy(mothership => mothership.Distance(capsuleHolder)).FirstOrDefault(); ;
             if (pirate.CanPush(capsuleHolder))
             {
                 // Check how much other pirates can push it.
@@ -317,13 +335,13 @@ namespace Bot
                     return true;
                 }
             }
-            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int) (game.PushDistance * 2)))
+            else if (capsuleHolder.InRange(pirate, pirate.PushRange * 2) && pirate.InRange(bestMothership, (int)(game.PushDistance * 2)))
             {
                 // Send the pirate towards the capsule where it can push.
                 if (pirateDestinations.ContainsKey(pirate))
-                    pirateDestinations[pirate] = capsuleHolder.Location.Towards(pirate, (int) (pirate.PushRange * 0.9));
+                    pirateDestinations[pirate] = capsuleHolder.Location.Towards(pirate, (int)(pirate.PushRange * 0.9));
                 else
-                    pirateDestinations.Add(pirate, capsuleHolder.Location.Towards(pirate, (int) (pirate.PushRange * 0.9)));
+                    pirateDestinations.Add(pirate, capsuleHolder.Location.Towards(pirate, (int)(pirate.PushRange * 0.9)));
                 return true;
             }
             return false;
