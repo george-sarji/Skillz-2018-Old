@@ -50,6 +50,7 @@ namespace Bot
                                     if (!TryPushEnemyCapsule(pirate, capsule.Holder) && !TryPushWormhole(pirate, closestWormhole))
                                         AssignDestination(pirate, closestWormhole.Location.Towards(closestMothershipThroughWormhole, closestWormhole.WormholeRange));
                                     usedPirates.Add(pirate);
+                                    //bunkeringPirates.Add(pirate);
                                     continue;
                                 }
                                 else
@@ -61,6 +62,7 @@ namespace Bot
                             else if (!TryPushEnemyCapsule(pirate, capsule.Holder))
                                 AssignDestination(pirate, closestMothership.Location.Towards(capsule, rangeNeeded));
                             usedPirates.Add(pirate);
+                            //bunkeringPirates.Add(pirate);
                         }
                         myPirates = myPirates.Except(usedPirates).ToList();
                     }
@@ -99,6 +101,7 @@ namespace Bot
                             }
                             // Add to the destination.
                             usedPirates.Add(pirate);
+                            //bunkeringPirates.Add(pirate);
                         }
                         myPirates = myPirates.Except(usedPirates).ToList();
                     }

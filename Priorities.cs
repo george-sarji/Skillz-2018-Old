@@ -21,22 +21,28 @@ namespace Bot
             var willingToBeHeavy = new List<Pirate>();
             var willingToBeNormal = new List<Pirate>();
 
+
             foreach (Pirate pirate in game.GetMyLivingPirates())
             {
                 if (pirate.HasCapsule())
                 {
-                    if (CapsuleHolderInDanger(pirate) && pirate.StateName == "normal")
+                    if (CapsuleHolderInDanger(pirate) && pirate.StateName == "normal") {
                         wantToBeHeavy.Add(pirate);
-                    if (!CapsuleHolderInDanger(pirate) && pirate.StateName == "heavy")
+                        game.Debug("capsule holder wants to be heavy");
+                    }
+                    if (!CapsuleHolderInDanger(pirate) && pirate.StateName == "heavy"){
                         wantToBeNormal.Add(pirate);
+                        game.Debug("capsule holder wants to be normal");
+                    }
                 }
                 else
                 {
                     if (pirate.StateName == "normal")
                     {
-                        if(game.GetAllMotherships().Where(mothership => mothership.Distance(pirate) < game.PushRange).Any())
-                            wantToBeHeavy.Add(pirate);
-                        else willingToBeHeavy.Add(pirate);
+                        // if(bunkeringPirates.Contains(pirate))
+                        //     wantToBeHeavy.Add(pirate);
+                        // else willingToBeHeavy.Add(pirate);
+                        willingToBeHeavy.Add(pirate);
                     }
                     if (pirate.StateName == "heavy")
                     willingToBeNormal.Add(pirate);

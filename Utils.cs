@@ -107,25 +107,27 @@ namespace Bot
         }
         public bool CapsuleHolderInDanger (Pirate pirate)
         {
-            var bestMothership = game.GetMyMotherships()
-                .OrderBy(mothership => mothership.Distance(pirate) / mothership.ValueMultiplier)
-                .FirstOrDefault();
-            int steps = 24;
-            for (int i = 0; i < steps; i++)
-            {
-                double angle = System.Math.PI * 2 * i / steps;
-                double deltaX = pirate.MaxSpeed * System.Math.Cos(angle);
-                double deltaY = pirate.MaxSpeed * System.Math.Sin(angle);
-                Location option = new Location((int) (pirate.Location.Row - deltaY), (int) (pirate.Location.Col + deltaX));
-                if (IsInDanger(option, bestMothership.GetLocation(), pirate))
-                {
-                    if(!option.InMap()) continue;
-                    return true;
-                }
-
-            }
+            // need to change IsInRangeOfEnemy - mypirate -> game
+            if(game.GetEnemyLivingPirates().Where(enemy => enemy.Distance(pirate) < game.PushRange * 3).Count() > game.NumPushesForCapsuleLoss)
+                return true;
+            // var bestMothership = game.GetMyMotherships()
+            //     .OrderBy(mothership => mothership.Distance(pirate) / mothership.ValueMultiplier)
+            //     .FirstOrDefault();
+            // int steps = 24;
+            // for (int i = 0; i < steps; i++)
+            // {
+            //     double angle = System.Math.PI * 2 * i / steps;
+            //     double deltaX = pirate.MaxSpeed * System.Math.Cos(angle);
+            //     double deltaY = pirate.MaxSpeed * System.Math.Sin(angle);
+            //     Location option1 = new Location((int) (pirate.Location.Row - deltaY), (int) (pirate.Location.Col + deltaX));
+            //     Location option2 = new Location((int) (pirate.Location.Row - (2 * deltaY)), (int) (pirate.Location.Col + (2 * deltaX)));
+            //     if(!option1.InMap() || !option2.InMap()) continue;
+            //     if (IsInRangeOfEnemy(option1, pirate) || IsInRangeOfEnemy(option2, pirate))
+            //     {
+            //         return true;
+            //     }
+            // }
             return false;
-            
         }
         // public bool CapsuleHolderInDanger(Pirate pirate)
         // {
