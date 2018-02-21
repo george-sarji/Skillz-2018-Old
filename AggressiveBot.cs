@@ -71,6 +71,13 @@ namespace Bot
             }
         }
 
+
+        public void PushInterferingEnemy(Pirate pirate)
+        {
+            Pirate closestEnemy = game.GetEnemyLivingPirates().Where(enemy => enemy.CanPush(pirate) && pirate.CanPush(enemy)).OrderBy(enemy => enemy.Distance(pirate)).FirstOrDefault();
+            pirate.Push(closestEnemy, GetClosestToBorder(closestEnemy.Location));
+            pirateDestinations.Remove(pirate);
+        }
         public void PushAsteroidsNearby()
         {
             foreach (var asteroid in game.GetLivingAsteroids())
@@ -128,7 +135,6 @@ namespace Bot
                             AssignDestination(closestHolder, SmartSail(closestHolder, mothership.Location));
                         else
                             MakePair(first, closestHolder, mothership.Location);
-
                         myPirates.Remove(first);
                         myPirates.Remove(closestHolder);
                     }
@@ -162,11 +168,11 @@ namespace Bot
                         {
                             if (bestWormhole != null)
                             {
-                                MakeSpecialPair(lonelyPirate, closestPirate, bestWormhole.Location);
+                                MakePair(lonelyPirate, closestPirate, bestWormhole.Location);
                             }
                             else if (!CheckIfCapsuleCanReach(lonelyPirate, mothership))
                             {
-                                MakeSpecialPair(lonelyPirate, closestPirate, mothership.Location);
+                                MakePair(lonelyPirate, closestPirate, mothership.Location);
                             }
                         }
                         myPirates.Remove(lonelyPirate);
@@ -185,8 +191,8 @@ namespace Bot
             if (first.CanPush(second) && second.CanPush(first))
             {
                 if (IsInDanger(second.Location, second.Location.Towards(destination, second.MaxSpeed), second)
-                    || IsInDanger(first.Location, first.Location.Towards(destination, first.MaxSpeed), first) 
-                    || IsInDanger(second.Location, second.Location, second) 
+                    || IsInDanger(first.Location, first.Location.Towards(destination, first.MaxSpeed), first)
+                    || IsInDanger(second.Location, second.Location, second)
                     || IsInDanger(first.Location, first.Location, first))
                 {
                     return true;
@@ -223,7 +229,7 @@ namespace Bot
             if (mothership == null) return false;
             if (CapsuleHolder.InRange(mothership, mothership.UnloadRange * 3)
                 && NumberOfAvailableEnemyPushers(CapsuleHolder) < CapsuleHolder.NumPushesForCapsuleLoss
-                && NumberOfEnemiesOnTheWay(CapsuleHolder.Location, mothership.Location) < CapsuleHolder.NumPushesForCapsuleLoss)
+                && NumberOfEnemiesOnTheWay(CapsuleHolder, mothership.Location) < CapsuleHolder.NumPushesForCapsuleLoss)
             {
                 AssignDestination(CapsuleHolder, mothership.Location);
                 myPirates.Remove(CapsuleHolder);
@@ -237,16 +243,11 @@ namespace Bot
             if (destination == null) return false;
             if (CapsuleCapturer.InRange(destination, CapsuleCapturer.MaxSpeed)
                 && NumberOfAvailableEnemyPushers(CapsuleCapturer) < CapsuleCapturer.NumPushesForCapsuleLoss
-                && NumberOfEnemiesOnTheWay(CapsuleCapturer.Location, destination) < CapsuleCapturer.NumPushesForCapsuleLoss)
+                && NumberOfEnemiesOnTheWay(CapsuleCapturer, destination) < CapsuleCapturer.NumPushesForCapsuleLoss)
             {
                 return true;
             }
             return false;
-        }
-
-        public void MakeSpecialPair(Pirate first, Pirate second, Location destination)
-        {
-
         }
 
         public void MakePair(Pirate first, Pirate second, Location destination)
@@ -268,15 +269,29 @@ namespace Bot
             var speeds = new List<int>();
             var slowestSpeed = Min(first.MaxSpeed, second.MaxSpeed);
             // intersections.Add(MidPoint(first, second));
-            var bestIntersection = intersections.Where(location => location != null).OrderBy(location => location.Distance(destination)).FirstOrDefault();
+            var bestIntersection = intersections.Where(location => location != null).OrderBy(location => location.Distance(destination))
+                                    .Where(location => IsOnTheWay(first.Location, destination, location, 1)
+                                    && IsOnTheWay(second.Location, destination, location, 1))
+                                    .FirstOrDefault();
             Location finalDest = null;
-            if (first.InPushRange(second))
+            if (first.Location.Equals(second.Location))
             {
                 finalDest = destination;
             }
             else
             {
                 finalDest = bestIntersection;
+            }
+            if (finalDest == null)
+            {
+                intersections.RemoveAt(0);
+                intersections.RemoveAt(0);
+                intersections.Add(first.Location);
+                intersections.Add(second.Location);
+                finalDest = intersections.OrderBy(location => location.Distance(destination)).FirstOrDefault();
+                {
+
+                }
             }
             if (first.HasCapsule())
                 AssignDestination(first, SmartSail(first, finalDest));
@@ -286,6 +301,11 @@ namespace Bot
                 AssignDestination(second, SmartSail(second, finalDest));
             else
                 AssignDestination(second, second.Location.Towards(finalDest, slowestSpeed));
+        }
+
+        public bool IsMostOptimalPath(Location location, Pirate pirate, Location destination)
+        {
+            return pirate.Distance(location) > pirate.Distance(destination);
         }
 
         public void AttackEnemies()
