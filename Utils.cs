@@ -61,9 +61,9 @@ namespace Bot
             return denominator == 0 ? 0 : (int) System.Math.Round(numerator / denominator);
         }
 
-        public int NumberOfEnemiesOnTheWay(Location a, Location b)
+        public int NumberOfEnemiesOnTheWay(Pirate myPirate, Location b)
         {
-            return game.GetEnemyLivingPirates().Where(p => IsOnTheWay(a,b,p.Location,p.MaxSpeed)).ToList().Count;
+            return game.GetEnemyLivingPirates().Where(p => IsOnTheWay(myPirate.Location,b,p.Location,p.MaxSpeed) && myPirate.Steps(p)<p.PushReloadTurns ).ToList().Count;
         }
 
         public int NumberOfAvailableEnemyPushers(Pirate pirate)
