@@ -49,16 +49,21 @@ namespace Bot
             return d;
         }
         // Returns true if the point c is within buffer distance to the line from a and b.
-        private static bool IsOnTheWay(Location a, Location b, Location c, int buffer)
+        private bool IsOnTheWay(Location a, Location b, Location c, int buffer)
         {
             return b.Distance(c) <= a.Distance(c) && DistanceLP(a, b, c) <= buffer;
         }
 
-        private static int DistanceLP(Location a, Location b, Location c)
+        private int DistanceLP(Location a, Location b, Location c)
         {
             int numerator = System.Math.Abs((b.Col - a.Col) * c.Row - (b.Row - a.Row) * c.Col + b.Row * a.Col - b.Col * a.Row);
             double denominator = a.Distance(b);
             return denominator == 0 ? 0 : (int) System.Math.Round(numerator / denominator);
+        }
+
+        public int NumberOfEnemiesOnTheWay(Location a, Location b)
+        {
+            return game.GetEnemyLivingPirates().Where(p => IsOnTheWay(a,b,p.Location,p.MaxSpeed)).ToList().Count;
         }
 
         public int NumberOfAvailableEnemyPushers(Pirate pirate)
