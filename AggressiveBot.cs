@@ -176,6 +176,8 @@ namespace Bot
             var intersections = new List<Location>();
             intersections.Add(Interception(first.Location, destination, second.Location));
             intersections.Add(Interception(second.Location, destination, first.Location));
+            var speeds = new List<int>();
+            var slowestSpeed = Min(first.MaxSpeed, second.MaxSpeed);
             // intersections.Add(MidPoint(first, second));
             var bestIntersection = intersections.Where(location => location != null).OrderBy(location => location.Distance(destination)).FirstOrDefault();
             Location finalDest = null;
@@ -190,11 +192,11 @@ namespace Bot
             if (first.HasCapsule())
                 AssignDestination(first, SmartSail(first, finalDest));
             else
-                AssignDestination(first, finalDest);
+                AssignDestination(first, first.Location.Towards(finalDest, slowestSpeed));
             if (second.HasCapsule())
                 AssignDestination(second, SmartSail(second, finalDest));
             else
-                AssignDestination(second, finalDest);
+                AssignDestination(second, second.Location.Towards(finalDest, slowestSpeed));
         }
 
         public void AttackEnemies()
