@@ -47,8 +47,11 @@ namespace Bot
                 // HandleSwitchPirates();
                 MoveToIntersection();
                 BuildDefensiveBunker();
-                // foreach(var pirate in game.GetMyLivingPirates().Where(p => p.HasCapsule()))
-                //     TryPushMyCapsule(pirate);
+                if(game.GetEnemy().BotName=="25772")
+                {
+                    foreach(var pirate in game.GetMyLivingPirates().Where(p => p.HasCapsule()))
+                        TryPushMyCapsule(pirate);
+                }
                 SendCapsuleCaptures();
                 PushWormholes();
                 PushAsteroids();
