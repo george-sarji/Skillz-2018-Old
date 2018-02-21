@@ -24,6 +24,7 @@ namespace Bot
         private static Dictionary<Wormhole, Location> NewWormholeLocation;
         private static Dictionary<Pirate, bool> FinishedTurn;
 
+        // private static List<Pirate> bunkeringPirates;
         private static Dictionary<Pirate, Pirate> piratePairs;
 
         private const int MinPriorirty = 0;
@@ -72,6 +73,7 @@ namespace Bot
             }
             enemyCapsulesPushes = game.GetEnemyCapsules().ToDictionary(key => key, value => 0);
             pirateDestinations = new Dictionary<Pirate, Location>();
+            //bunkeringPirates = new List<Pirate>();
             asteroids = new Dictionary<Asteroid, bool>();
             foreach (Pirate pirate in myPirates)
             {
