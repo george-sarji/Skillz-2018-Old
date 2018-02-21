@@ -33,9 +33,13 @@ namespace Bot
                 else
                 {
                     if (pirate.StateName == "normal")
-                        willingToBeHeavy.Add(pirate);
+                    {
+                        if(game.GetAllMotherships().Where(mothership => mothership.Distance(pirate) < game.PushRange).Any())
+                            wantToBeHeavy.Add(pirate);
+                        else willingToBeHeavy.Add(pirate);
+                    }
                     if (pirate.StateName == "heavy")
-                        willingToBeNormal.Add(pirate);
+                    willingToBeNormal.Add(pirate);
                 }
             }
 
