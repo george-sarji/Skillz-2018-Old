@@ -49,21 +49,16 @@ namespace Bot
             return d;
         }
         // Returns true if the point c is within buffer distance to the line from a and b.
-        private bool IsOnTheWay(Location a, Location b, Location c, int buffer)
+        private static bool IsOnTheWay(Location a, Location b, Location c, int buffer)
         {
             return b.Distance(c) <= a.Distance(c) && DistanceLP(a, b, c) <= buffer;
         }
 
-        private int DistanceLP(Location a, Location b, Location c)
+        private static int DistanceLP(Location a, Location b, Location c)
         {
             int numerator = System.Math.Abs((b.Col - a.Col) * c.Row - (b.Row - a.Row) * c.Col + b.Row * a.Col - b.Col * a.Row);
             double denominator = a.Distance(b);
             return denominator == 0 ? 0 : (int) System.Math.Round(numerator / denominator);
-        }
-
-        public int NumberOfEnemiesOnTheWay(Pirate myPirate, Location b)
-        {
-            return game.GetEnemyLivingPirates().Where(p => IsOnTheWay(myPirate.Location,b,p.Location,p.MaxSpeed) && myPirate.Steps(p)<p.PushReloadTurns ).ToList().Count;
         }
 
         public int NumberOfAvailableEnemyPushers(Pirate pirate)
@@ -105,45 +100,22 @@ namespace Bot
             }
             return from.Distance(to);
         }
-        public bool CapsuleHolderInDanger (Pirate pirate)
+        public bool CapsuleHolderInDanger(Pirate pirate)
         {
-            // need to change IsInRangeOfEnemy - mypirate -> game
-            if(game.GetEnemyLivingPirates().Where(enemy => enemy.Distance(pirate) < game.PushRange * 3).Count() > game.NumPushesForCapsuleLoss)
-                return true;
-            // var bestMothership = game.GetMyMotherships()
-            //     .OrderBy(mothership => mothership.Distance(pirate) / mothership.ValueMultiplier)
-            //     .FirstOrDefault();
-            // int steps = 24;
-            // for (int i = 0; i < steps; i++)
-            // {
-            //     double angle = System.Math.PI * 2 * i / steps;
-            //     double deltaX = pirate.MaxSpeed * System.Math.Cos(angle);
-            //     double deltaY = pirate.MaxSpeed * System.Math.Sin(angle);
-            //     Location option1 = new Location((int) (pirate.Location.Row - deltaY), (int) (pirate.Location.Col + deltaX));
-            //     Location option2 = new Location((int) (pirate.Location.Row - (2 * deltaY)), (int) (pirate.Location.Col + (2 * deltaX)));
-            //     if(!option1.InMap() || !option2.InMap()) continue;
-            //     if (IsInRangeOfEnemy(option1, pirate) || IsInRangeOfEnemy(option2, pirate))
-            //     {
-            //         return true;
-            //     }
-            // }
+            if (!pirate.HasCapsule()) return false;
+            var bestMothership = game.GetMyMotherships()
+                .OrderBy(mothership => mothership.Distance(pirate) / mothership.ValueMultiplier)
+                .FirstOrDefault();
+            if (bestMothership != null)
+            {
+                if (game.GetEnemyLivingPirates()
+                    .Where(enemy => enemy.InPushRange(pirate.Location.Towards(bestMothership, game.PirateMaxSpeed)))
+                    .Count() >= game.NumPushesForCapsuleLoss)
+                    return true;
+            }
             return false;
         }
-        // public bool CapsuleHolderInDanger(Pirate pirate)
-        // {
-        //     if (!pirate.HasCapsule()) return false;
-        //     var bestMothership = game.GetMyMotherships()
-        //         .OrderBy(mothership => mothership.Distance(pirate) / mothership.ValueMultiplier)
-        //         .FirstOrDefault();
-        //     if (bestMothership != null)
-        //     {
-        //         if (game.GetEnemyLivingPirates()
-        //             .Where(enemy => enemy.InPushRange(pirate.Location.Towards(bestMothership, game.PirateMaxSpeed)) || enemy.InPushRange(pirate.Location.Towards(bestMothership, game.PirateMaxSpeed * 2)))
-        //             .Count() >= game.NumPushesForCapsuleLoss)
-        //             return true;
-        //     }
-        //     return false;
-        // }
+
         public Wormhole GetBestWormhole(Location destination, Pirate pirate)
         {
             var wormholeDistances = new Dictionary<Wormhole, int>();
