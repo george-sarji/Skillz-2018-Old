@@ -100,22 +100,43 @@ namespace Bot
             }
             return from.Distance(to);
         }
-        public bool CapsuleHolderInDanger(Pirate pirate)
+        public bool CapsuleHolderInDanger (Pirate pirate)
         {
-            if (!pirate.HasCapsule()) return false;
             var bestMothership = game.GetMyMotherships()
                 .OrderBy(mothership => mothership.Distance(pirate) / mothership.ValueMultiplier)
                 .FirstOrDefault();
-            if (bestMothership != null)
+            int steps = 24;
+            for (int i = 0; i < steps; i++)
             {
-                if (game.GetEnemyLivingPirates()
-                    .Where(enemy => enemy.InPushRange(pirate.Location.Towards(bestMothership, game.PirateMaxSpeed)))
-                    .Count() >= game.NumPushesForCapsuleLoss)
+                double angle = System.Math.PI * 2 * i / steps;
+                double deltaX = pirate.MaxSpeed * System.Math.Cos(angle);
+                double deltaY = pirate.MaxSpeed * System.Math.Sin(angle);
+                Location option = new Location((int) (pirate.Location.Row - deltaY), (int) (pirate.Location.Col + deltaX));
+                if (IsInDanger(option, bestMothership.GetLocation(), pirate))
+                {
+                    if(!option.InMap()) continue;
                     return true;
+                }
+
             }
             return false;
+            
         }
-
+        // public bool CapsuleHolderInDanger(Pirate pirate)
+        // {
+        //     if (!pirate.HasCapsule()) return false;
+        //     var bestMothership = game.GetMyMotherships()
+        //         .OrderBy(mothership => mothership.Distance(pirate) / mothership.ValueMultiplier)
+        //         .FirstOrDefault();
+        //     if (bestMothership != null)
+        //     {
+        //         if (game.GetEnemyLivingPirates()
+        //             .Where(enemy => enemy.InPushRange(pirate.Location.Towards(bestMothership, game.PirateMaxSpeed)) || enemy.InPushRange(pirate.Location.Towards(bestMothership, game.PirateMaxSpeed * 2)))
+        //             .Count() >= game.NumPushesForCapsuleLoss)
+        //             return true;
+        //     }
+        //     return false;
+        // }
         public Wormhole GetBestWormhole(Location destination, Pirate pirate)
         {
             var wormholeDistances = new Dictionary<Wormhole, int>();
